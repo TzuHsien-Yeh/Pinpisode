@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.tzuhsien.immediat">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -16,6 +16,9 @@
         android:theme="@style/Theme.ImMediAt"
         tools:targetApi="31">
         <activity
+            android:name=".YoutubePlayerActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -26,8 +29,8 @@
         </activity>
 
         <meta-data
-            android:name = "youtubeApiKey"
-            android:value = "${YOUTUBE_API_KEY}"/>
+            android:name="youtubeApiKey"
+            android:value="${YOUTUBE_API_KEY}" />
     </application>
 
 </manifest>

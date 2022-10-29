@@ -49,7 +49,7 @@ class SearchFragment : Fragment() {
 
         viewModel.navigateToTakeNote.observe(viewLifecycleOwner, Observer {
             it?.let {
-                findNavController().navigate(TakeNoteFragmentDirections.actionGlobalTakeNoteFragment())
+                findNavController().navigate(TakeNoteFragmentDirections.actionGlobalTakeNoteFragment(it))
                 viewModel.doneNavigateToTakeNote()
             }
         })

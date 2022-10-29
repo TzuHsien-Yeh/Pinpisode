@@ -25,8 +25,8 @@ class SearchViewModel : ViewModel() {
     val toastMsg: LiveData<String?>
         get() = _toastMsg
 
-    private val _navigateToTakeNote = MutableLiveData<Boolean?>()
-    val navigateToTakeNote: LiveData<Boolean?>
+    private val _navigateToTakeNote = MutableLiveData<String?>()
+    val navigateToTakeNote: LiveData<String?>
         get() = _navigateToTakeNote
 
     fun getYouTubeVideoInfoById(query: String) {
@@ -57,7 +57,7 @@ class SearchViewModel : ViewModel() {
                     _toastMsg.value = "Invalid link: Video not found"
                 } else {
                     addYouTubeNoteData(result)
-                    _navigateToTakeNote.value = true
+                    _navigateToTakeNote.value = result.items[0].id
                 }
             }
         }
@@ -70,5 +70,10 @@ class SearchViewModel : ViewModel() {
 
     fun doneNavigateToTakeNote(){
         _navigateToTakeNote.value = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
     }
 }

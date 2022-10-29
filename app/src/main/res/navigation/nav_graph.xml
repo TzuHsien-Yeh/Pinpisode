@@ -19,7 +19,12 @@
         android:id="@+id/takeNoteFragment"
         android:name="com.tzuhsien.immediat.takenote.TakeNoteFragment"
         android:label="fragment_take_note"
-        tools:layout="@layout/fragment_take_note"/>
+        tools:layout="@layout/fragment_take_note">
+        <argument android:name="video_id_key"
+            app:argType="string"
+            app:nullable="false"/>
+    </fragment>
+
     <action android:id="@+id/action_global_takeNoteFragment"
         app:destination="@id/takeNoteFragment" />
 </navigation>
