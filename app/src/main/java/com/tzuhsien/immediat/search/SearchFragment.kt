@@ -9,9 +9,9 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.tzuhsien.immediat.ImMediAtApplication
+import androidx.navigation.fragment.findNavController
 import com.tzuhsien.immediat.databinding.FragmentSearchBinding
-import com.tzuhsien.immediat.network.YouTubeApi
+import com.tzuhsien.immediat.takenote.TakeNoteFragmentDirections
 
 class SearchFragment : Fragment() {
 
@@ -31,14 +31,12 @@ class SearchFragment : Fragment() {
                     query?.let {
                         viewModel.getYouTubeVideoInfoById(query)
                     }
-
                     return false
                 }
 
                 override fun onQueryTextChange(query: String?): Boolean {
                     return false
                 }
-
             }
         )
 
@@ -46,6 +44,13 @@ class SearchFragment : Fragment() {
             it?.let {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
                 viewModel.showToastCompleted()
+            }
+        })
+
+        viewModel.navigateToTakeNote.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                findNavController().navigate(TakeNoteFragmentDirections.actionGlobalTakeNoteFragment())
+                viewModel.doneNavigateToTakeNote()
             }
         })
 

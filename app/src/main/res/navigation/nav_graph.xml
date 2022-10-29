@@ -15,4 +15,11 @@
         android:name="com.tzuhsien.immediat.search.SearchFragment"
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" />
+    <fragment
+        android:id="@+id/takeNoteFragment"
+        android:name="com.tzuhsien.immediat.takenote.TakeNoteFragment"
+        android:label="fragment_take_note"
+        tools:layout="@layout/fragment_take_note"/>
+    <action android:id="@+id/action_global_takeNoteFragment"
+        app:destination="@id/takeNoteFragment" />
 </navigation>
