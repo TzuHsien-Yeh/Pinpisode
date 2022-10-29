@@ -1,10 +1,28 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-plugins {
-    id 'com.android.application' version '7.2.1' apply false
-    id 'com.android.library' version '7.2.1' apply false
-    id 'org.jetbrains.kotlin.android' version '1.7.10' apply false
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
+buildscript {
+    ext {
+        version_android_gradle_plugin = '7.2.1'
+        version_core = '1.8.0'
+        version_constraint_layout = '2.1.4'
+        version_glide = '4.14.2'
+        version_kotlin = '1.7.2'
+        version_kotlin_gradle_plugin = '1.7.10'
+        version_kotlin_coroutines = '1.6.4'
+        version_navigation = '2.5.2'
+        version_retrofit = '2.9.0'
+        version_ktlint = '10.2.0'
+    }
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:$version_android_gradle_plugin"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin_gradle_plugin"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$version_navigation"
+        classpath("org.jlleitschuh.gradle:ktlint-gradle:$version_ktlint")
+    }
 }
