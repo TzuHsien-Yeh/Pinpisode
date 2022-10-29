@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_note_list"
+        android:title=""/>
+
+    <item
+        android:id="@+id/navigation_explore"
+        android:title=""/>
+
+    <item
+        android:id="@+id/navigation_paste_url"
+        android:title=""/>
+
+    <item
+        android:id="@+id/navigation_coauthoring"
+        android:title=""/>
+
+    <item
+        android:id="@+id/navigation_share"
+        android:title=""/>
+</menu>
