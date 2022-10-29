@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.tzuhsien.immediat.ImMediAtApplication
 import com.tzuhsien.immediat.data.model.YouTubeResult
+import com.tzuhsien.immediat.ext.addYouTubeNoteData
 import com.tzuhsien.immediat.network.YouTubeApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +14,10 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class SearchViewModel : ViewModel() {
+    private val _youtubeResult = MutableLiveData<YouTubeResult>()
+    val youTubeResult: LiveData<YouTubeResult>
+        get() = _youtubeResult
+
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
@@ -51,7 +56,7 @@ class SearchViewModel : ViewModel() {
                 if (result.pageInfo.totalResults == 0) {
                     _toastMsg.value = "Invalid link: Video not found"
                 } else {
-                    // TODO: Save data to firebase
+                    addYouTubeNoteData(result)
                     _navigateToTakeNote.value = true
                 }
             }

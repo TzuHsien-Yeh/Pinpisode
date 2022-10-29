@@ -1,6 +1,9 @@
 package com.tzuhsien.immediat.network
 
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import com.tzuhsien.immediat.BuildConfig
+import com.tzuhsien.immediat.ImMediAtApplication
 import com.tzuhsien.immediat.data.model.YouTubeResult
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -17,6 +20,11 @@ val loggingInterceptor =
         else HttpLoggingInterceptor.Level.NONE
     )
 
+val appContext = ImMediAtApplication.applicationContext()
+val ai: ApplicationInfo = appContext.packageManager
+    .getApplicationInfo(appContext.packageName, PackageManager.GET_META_DATA)
+val ytApiKey = ai.metaData["youtubeApiKey"].toString()
+
 val client = OkHttpClient.Builder()
     .addInterceptor(loggingInterceptor)
     .addInterceptor { chain ->
@@ -24,7 +32,7 @@ val client = OkHttpClient.Builder()
             .request()
             .url
             .newBuilder()
-            .addQueryParameter("key", BuildConfig.YOUTUBE_API_KEY)
+            .addQueryParameter("key", ytApiKey)
             .build()
         chain.proceed(chain.request().newBuilder().url(url).build())
     }
