@@ -5,11 +5,8 @@
         android:title=""/>
 
     <item
-        android:id="@+id/navigation_explore"
-        android:title=""/>
-
-    <item
-        android:id="@+id/navigation_paste_url"
+        android:id="@+id/navigation_search"
+        android:icon="@drawable/ic_search"
         android:title=""/>
 
     <item

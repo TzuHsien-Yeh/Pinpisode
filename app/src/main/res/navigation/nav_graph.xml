@@ -10,4 +10,9 @@
         android:name="com.tzuhsien.immediat.notelist.NoteListFragment"
         android:label="fragment_note_list"
         tools:layout="@layout/fragment_note_list" />
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.tzuhsien.immediat.search.SearchFragment"
+        android:label="fragment_search"
+        tools:layout="@layout/fragment_search" />
 </navigation>
