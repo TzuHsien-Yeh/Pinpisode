@@ -15,9 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ImMediAt"
         tools:targetApi="31">
-        <activity
-            android:name=".YoutubePlayerActivity"
-            android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
