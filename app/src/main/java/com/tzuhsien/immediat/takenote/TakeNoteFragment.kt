@@ -11,7 +11,6 @@ import androidx.fragment.app.viewModels
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.views.YouTubePlayerSeekBarListener
 import com.tzuhsien.immediat.databinding.FragmentTakeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 
@@ -64,9 +63,9 @@ class TakeNoteFragment : Fragment() {
         super.onConfigurationChanged(newConfig)
 
         // Checks the orientation of the screen
-        if (newConfig.orientation === Configuration.ORIENTATION_LANDSCAPE) {
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             binding.youtubePlayerView.enterFullScreen()
-        } else if (newConfig.orientation === Configuration.ORIENTATION_PORTRAIT) {
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             binding.youtubePlayerView.exitFullScreen()
         }
     }

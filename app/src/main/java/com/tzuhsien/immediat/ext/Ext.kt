@@ -1,12 +1,17 @@
 package com.tzuhsien.immediat.ext
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import com.tzuhsien.immediat.data.model.ClipNote
+import com.tzuhsien.immediat.data.model.TimestampNote
 import com.tzuhsien.immediat.data.model.YouTubeResult
+import timber.log.Timber
 import java.util.*
 
+private val youtubeNotes = FirebaseFirestore.getInstance()
+    .collection("youtubeNotes")
+
 fun addYouTubeNoteData(result: YouTubeResult) {
-    val youtubeNotes = FirebaseFirestore.getInstance()
-        .collection("youtubeNotes")
 
     val document = youtubeNotes.document()
 
@@ -23,10 +28,27 @@ fun addYouTubeNoteData(result: YouTubeResult) {
         "videoTitle" to result.items[0].snippet.title,
         "publishAt" to result.items[0].snippet.publishedAt,
         "liveBroadcastContent" to result.items[0].snippet.liveBroadcastContent,
-        "duration" to result.items[0].contentDetails.duration
-
-        // Add live stream info +　condition
+        "duration" to result.items[0].contentDetails.duration,
+        "lastEditTime" to Calendar.getInstance().timeInMillis,
 
     )
     document.set(data)
+}
+
+fun updateYouTubeNote(videoId: String, timestampNote: List<TimestampNote?>, clipNote: List<ClipNote?>){
+    val videoRef = youtubeNotes.document(videoId)
+
+    // Set the fields of the videoId
+    videoRef
+        .update(
+            "timestampNote", timestampNote,
+            "clipNote", clipNote,
+            "lastEditTime", Calendar.getInstance().timeInMillis
+        )
+        .addOnSuccessListener {
+            Timber.d ( "DocumentSnapshot successfully updated.")
+            //TODO: snapshot the firebase db to realtime update list to submit to recyclerview
+        }
+        .addOnFailureListener { e -> Timber.w("Error updating document", e) }
+
 }

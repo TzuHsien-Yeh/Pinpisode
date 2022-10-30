@@ -4,5 +4,5 @@ data class VideoNote (
     val id: String,
     val youTubeResult: YouTubeResult,
     val timestampNote: List<TimestampNote>,
-    val clipNote: List<Clip>
+    val clipNote: List<ClipNote>
 )

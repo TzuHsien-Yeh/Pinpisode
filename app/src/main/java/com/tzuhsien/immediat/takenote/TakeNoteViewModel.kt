@@ -34,5 +34,7 @@ class TakeNoteViewModel(val videoId: String) : ViewModel() {
 
         Timber.d("timestamp: $sec")
         //TODO: add time data to the note of the videoId
+
+        coroutineScope
     }
 }
