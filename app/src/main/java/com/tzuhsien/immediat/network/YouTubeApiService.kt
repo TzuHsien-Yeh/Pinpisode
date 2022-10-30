@@ -1,7 +1,6 @@
 package com.tzuhsien.immediat.network
 
 import com.tzuhsien.immediat.BuildConfig
-import com.tzuhsien.immediat.ImMediAtApplication.Companion.YT_API_KEY
 import com.tzuhsien.immediat.data.model.YouTubeResult
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -25,7 +24,7 @@ val client = OkHttpClient.Builder()
             .request()
             .url
             .newBuilder()
-            .addQueryParameter("key", YT_API_KEY)
+            .addQueryParameter("key", BuildConfig.YOUTUBE_API_KEY)
             .build()
         chain.proceed(chain.request().newBuilder().url(url).build())
     }

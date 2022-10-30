@@ -33,7 +33,6 @@ class SearchViewModel : ViewModel() {
         val youtubeWatchUrl = "youtube.com/watch?v="
         val youtubeShareLink = "youtu.be/"
         var videoId = ""
-        val testId = "H9aDOOU8gcQ"
 
         if (youtubeWatchUrl in query) {
             videoId = query
@@ -55,14 +54,12 @@ class SearchViewModel : ViewModel() {
 
                 if (result.pageInfo.totalResults == 0) {
                     _toastMsg.value = "Invalid link: Video not found"
-                } else {
+                } else
                     addYouTubeNoteData(result)
                     _navigateToTakeNote.value = result.items[0].id
                 }
             }
         }
-
-    }
 
     fun showToastCompleted() {
         _toastMsg.value = null
