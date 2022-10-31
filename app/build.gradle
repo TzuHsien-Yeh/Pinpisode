@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId "com.tzuhsien.immediat"
-        minSdk 21
+        minSdk 24
         targetSdk 32
         versionCode 1
         versionName "1.0"
@@ -88,4 +88,7 @@ dependencies {
 
     // YouTube Player
     implementation 'com.pierfrancescosoffritti.androidyoutubeplayer:core:11.1.0'
+
+    // Glide
+    implementation "com.github.bumptech.glide:glide:$version_glide"
 }

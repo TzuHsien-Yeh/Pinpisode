@@ -2,6 +2,7 @@ package com.tzuhsien.immediat.data.source
 
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.ClipNote
+import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimestampNote
 import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource
@@ -21,6 +22,10 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
 
     override suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult> {
         return noteRemoteDataSource.getYouTubeVideoInfoById(id)
+    }
+
+    override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note) {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getTimestampNotes(id: String) {

@@ -3,6 +3,7 @@ package com.tzuhsien.immediat.data.source.remote
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.ClipNote
+import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimestampNote
 import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.DataSource
@@ -41,6 +42,10 @@ object NoteRemoteDataSource: DataSource {
             Timber.w("[${this::class.simpleName}: getYouTubeVideoInfoById] exception=${e.message}")
             Result.Error(e)
         }
+    }
+
+    override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note) {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getTimestampNotes(id: String) {

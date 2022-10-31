@@ -3,13 +3,12 @@ package com.tzuhsien.immediat.search
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.tzuhsien.immediat.MyApplication.Companion.applicationContext
 import com.tzuhsien.immediat.R
-import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.Result
+import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.Repository
-import com.tzuhsien.immediat.ext.addYouTubeNoteData
 import com.tzuhsien.immediat.network.LoadApiStatus
-import com.tzuhsien.immediat.network.YouTubeApi
 import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,8 +18,8 @@ import timber.log.Timber
 
 class SearchViewModel(private val repository: Repository) : ViewModel() {
 
-    private val _ytVideoData = MutableLiveData<YouTubeResult>()
-    val ytVideoData: LiveData<YouTubeResult>
+    private val _ytVideoData = MutableLiveData<YouTubeResult?>()
+    val ytVideoData: LiveData<YouTubeResult?>
         get() = _ytVideoData
 
     // status: The internal MutableLiveData that stores the status of the most recent request
@@ -36,14 +35,18 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
-    private val _toastMsg = MutableLiveData<String?>()
-    val toastMsg: LiveData<String?>
-        get() = _toastMsg
+    private val _showMsg = MutableLiveData<String?>()
+    val showMsg: LiveData<String?>
+        get() = _showMsg
 
     private val _navigateToTakeNote = MutableLiveData<String?>()
     val navigateToTakeNote: LiveData<String?>
         get() = _navigateToTakeNote
 
+    init {
+        _ytVideoData.value = null
+        _showMsg.value = null
+    }
 
     val youtubeWatchUrl = "youtube.com/watch?v="
     val youtubeShareLink = "youtu.be/"
@@ -92,7 +95,12 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
 
-                    Timber.d("post returned data: ${result.data}")
+                    Timber.d("video data: ${result.data}")
+
+                    if (result.data.items.isEmpty()) {
+                        _showMsg.value = Util.getString(R.string.video_not_available)
+                    }
+
                     result.data
                 }
                 is Result.Fail -> {
@@ -124,8 +132,8 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun showToastCompleted() {
-        _toastMsg.value = null
+    fun showMsgCompleted() {
+        _showMsg.value = null
     }
 
     fun doneNavigateToTakeNote() {

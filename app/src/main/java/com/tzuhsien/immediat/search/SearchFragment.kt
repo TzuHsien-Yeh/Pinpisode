@@ -9,15 +9,16 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.tzuhsien.immediat.MyApplication
-import com.tzuhsien.immediat.MyApplication.Companion.applicationContext
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.databinding.FragmentSearchBinding
+import com.tzuhsien.immediat.ext.formatTo
 import com.tzuhsien.immediat.ext.getVmFactory
-import com.tzuhsien.immediat.factory.ViewModelFactory
-import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragment
+import com.tzuhsien.immediat.ext.toDate
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
+import timber.log.Timber
 
 class SearchFragment : Fragment() {
 
@@ -46,17 +47,44 @@ class SearchFragment : Fragment() {
             }
         )
 
-        viewModel.toastMsg.observe(viewLifecycleOwner, Observer {
-            it?.let {
-                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                viewModel.showToastCompleted()
+        viewModel.showMsg.observe(viewLifecycleOwner, Observer {
+            if (null != it) {
+                binding.textResourceNotFound.text = it
+                binding.textResourceNotFound.visibility = View.VISIBLE
+
+                Timber.d("not available")
+            } else {
+                binding.textResourceNotFound.visibility = View.GONE
             }
+        })
+
+        viewModel.ytVideoData.observe(viewLifecycleOwner, Observer {
+           it?.let {
+               if (it.items.isNotEmpty()) {
+                   binding.textTitle.text = it.items[0].snippet.title
+
+                   Glide.with(this)
+                       .load(it.items[0].snippet.thumbnails.default.url)
+                       .into(binding.imgThumbnail)
+
+                   binding.cardSingleVideoResult.visibility = View.VISIBLE
+//                   binding.textPublishedTime.text = it.items[0].snippet.publishedAt.toDate().formatTo( "yyyy-MM-dd HH:mm:ss")
+               }
+           }
+
+
         })
 
         viewModel.navigateToTakeNote.observe(viewLifecycleOwner, Observer {
             it?.let {
                 findNavController().navigate(YouTubeNoteFragmentDirections.actionGlobalTakeNoteFragment(it))
                 viewModel.doneNavigateToTakeNote()
+            }
+        })
+
+        viewModel.ytVideoData.observe(viewLifecycleOwner, Observer {
+            it?.let {
+
             }
         })
 

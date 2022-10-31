@@ -2,6 +2,7 @@ package com.tzuhsien.immediat.data.source
 
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.ClipNote
+import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimestampNote
 import com.tzuhsien.immediat.data.model.YouTubeResult
 
@@ -22,6 +23,8 @@ interface DataSource {
      *  For the note (single source)
      */
     suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult>
+
+    suspend fun updateYouTubeVideoInfo(videoId: String, note: Note)
 
 //    suspend fun getSpotifyInfoById(id: String)
 
