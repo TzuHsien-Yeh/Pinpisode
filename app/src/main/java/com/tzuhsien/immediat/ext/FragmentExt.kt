@@ -1,11 +1,17 @@
 package com.tzuhsien.immediat.ext
 
 import androidx.fragment.app.Fragment
-import com.tzuhsien.immediat.ImMediAtApplication.Companion.applicationContext
-import com.tzuhsien.immediat.factory.YoutubeVideoViewModelFactory
+import com.tzuhsien.immediat.MyApplication
+import com.tzuhsien.immediat.factory.ViewModelFactory
+import com.tzuhsien.immediat.factory.YoutubeNoteViewModelFactory
 
 
-fun Fragment.getVmFactory(videoId: String): YoutubeVideoViewModelFactory {
-//    val repository = applicationContext().repository
-    return YoutubeVideoViewModelFactory(videoId)
+fun Fragment.getVmFactory(): ViewModelFactory {
+    val repository = (requireContext().applicationContext as MyApplication).repository
+    return ViewModelFactory(repository)
+}
+
+fun Fragment.getVmFactory(videoId: String): YoutubeNoteViewModelFactory {
+    val repository = (requireContext().applicationContext as MyApplication).repository
+    return YoutubeNoteViewModelFactory(repository, videoId)
 }

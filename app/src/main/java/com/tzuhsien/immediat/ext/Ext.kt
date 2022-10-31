@@ -28,7 +28,6 @@ fun addYouTubeNoteData(result: YouTubeResult) {
         "videoTitle" to result.items[0].snippet.title,
         "publishAt" to result.items[0].snippet.publishedAt,
         "liveBroadcastContent" to result.items[0].snippet.liveBroadcastContent,
-        "duration" to result.items[0].contentDetails.duration,
         "lastEditTime" to Calendar.getInstance().timeInMillis,
 
     )

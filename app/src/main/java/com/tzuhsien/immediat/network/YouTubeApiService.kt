@@ -25,6 +25,7 @@ val client = OkHttpClient.Builder()
             .url
             .newBuilder()
             .addQueryParameter("key", BuildConfig.YOUTUBE_API_KEY)
+            .addQueryParameter("part", "snippet")
             .build()
         chain.proceed(chain.request().newBuilder().url(url).build())
     }
@@ -42,7 +43,6 @@ private val retrofit = Retrofit.Builder()
 interface YouTubeApiService {
     @GET("videos")
     suspend fun getVideoInfo(
-        @Query("part") part: String,
         @Query("id") id: String
     ): YouTubeResult
 }

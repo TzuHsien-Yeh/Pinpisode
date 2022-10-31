@@ -1,4 +1,4 @@
-package com.tzuhsien.immediat.takenote
+package com.tzuhsien.immediat.youtubenote
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -8,26 +8,27 @@ import android.view.ViewGroup
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-import com.tzuhsien.immediat.databinding.FragmentTakeNoteBinding
+import com.tzuhsien.immediat.MyApplication
+import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
+import com.tzuhsien.immediat.factory.YoutubeNoteViewModelFactory
 
 
-class TakeNoteFragment : Fragment() {
+class YouTubeNoteFragment : Fragment() {
 
-    private val viewModel by viewModels<TakeNoteViewModel> {
-        getVmFactory(TakeNoteFragmentArgs.fromBundle(requireArguments()).videoIdKey)
-    }
-    private lateinit var binding: FragmentTakeNoteBinding
+    private val viewModel by viewModels<YouTubeNoteViewModel> { getVmFactory() }
+    private lateinit var binding: FragmentYoutubeNoteBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
 
-        binding = FragmentTakeNoteBinding.inflate(layoutInflater)
+        binding = FragmentYoutubeNoteBinding.inflate(layoutInflater)
 
         val youTubePlayerView: YouTubePlayerView = binding.youtubePlayerView
         lifecycle.addObserver(youTubePlayerView)

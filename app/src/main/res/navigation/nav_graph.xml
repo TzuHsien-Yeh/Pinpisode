@@ -16,15 +16,15 @@
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" />
     <fragment
-        android:id="@+id/takeNoteFragment"
-        android:name="com.tzuhsien.immediat.takenote.TakeNoteFragment"
+        android:id="@+id/youTubeNoteFragment"
+        android:name="com.tzuhsien.immediat.youtubenote.YouTubeNoteFragment"
         android:label="fragment_take_note"
-        tools:layout="@layout/fragment_take_note">
+        tools:layout="@layout/fragment_youtube_note">
         <argument android:name="video_id_key"
             app:argType="string"
             app:nullable="false"/>
     </fragment>
 
     <action android:id="@+id/action_global_takeNoteFragment"
-        app:destination="@id/takeNoteFragment" />
+        app:destination="@id/youTubeNoteFragment" />
 </navigation>

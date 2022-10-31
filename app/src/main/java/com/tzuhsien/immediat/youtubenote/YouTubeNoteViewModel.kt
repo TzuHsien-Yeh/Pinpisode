@@ -1,18 +1,19 @@
-package com.tzuhsien.immediat.takenote
+package com.tzuhsien.immediat.youtubenote
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.tzuhsien.immediat.data.model.VideoNote
+import com.tzuhsien.immediat.data.model.Note
+import com.tzuhsien.immediat.data.source.Repository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import timber.log.Timber
 
-class TakeNoteViewModel(val videoId: String) : ViewModel() {
+class YouTubeNoteViewModel(private val repository: Repository, val videoId: String) : ViewModel() {
 
-    private val _timeNoteList = MutableLiveData<List<VideoNote>>()
-    val timeNoteList: LiveData<List<VideoNote>>
+    private val _timeNoteList = MutableLiveData<List<Note>>()
+    val timeNoteList: LiveData<List<Note>>
         get() = _timeNoteList
 
     val testTime = 10.3
@@ -35,6 +36,5 @@ class TakeNoteViewModel(val videoId: String) : ViewModel() {
         Timber.d("timestamp: $sec")
         //TODO: add time data to the note of the videoId
 
-        coroutineScope
     }
 }

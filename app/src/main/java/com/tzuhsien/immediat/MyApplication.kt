@@ -2,18 +2,24 @@ package com.tzuhsien.immediat
 
 import android.app.Application
 import android.content.Context
+import com.tzuhsien.immediat.data.source.Repository
+import com.tzuhsien.immediat.network.YouTubeApiService
+import com.tzuhsien.immediat.util.ServiceLocator
 import kotlin.properties.Delegates
 
-class ImMediAtApplication: Application() {
+class MyApplication: Application() {
+
+    val repository: Repository
+        get() = ServiceLocator.provideTasksRepository(this)
 
     companion object {
-        var instance: ImMediAtApplication by Delegates.notNull()
+        var instance: MyApplication by Delegates.notNull()
 
         fun applicationContext() : Context {
             return instance.applicationContext
         }
 
-        const val YOUTUBE_PARAM_PART = "contentDetails, id, liveStreamingDetails, snippet, status"
+
     }
 
     override fun onCreate() {

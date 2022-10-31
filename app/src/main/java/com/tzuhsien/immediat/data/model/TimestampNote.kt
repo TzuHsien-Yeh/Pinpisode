@@ -2,6 +2,7 @@ package com.tzuhsien.immediat.data.model
 
 class TimestampNote (
     val timestamp: Float,
-    val timestampTitle: String?,
-    val textContent: String?
+    val title: String?,
+    val text: String?,
+    val img: String
 )

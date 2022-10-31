@@ -7,29 +7,35 @@ import android.view.ViewGroup
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.tzuhsien.immediat.MyApplication
+import com.tzuhsien.immediat.MyApplication.Companion.applicationContext
 import com.tzuhsien.immediat.databinding.FragmentSearchBinding
-import com.tzuhsien.immediat.takenote.TakeNoteFragmentDirections
+import com.tzuhsien.immediat.ext.getVmFactory
+import com.tzuhsien.immediat.factory.ViewModelFactory
+import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragment
+import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
 
 class SearchFragment : Fragment() {
 
     private lateinit var binding: FragmentSearchBinding
-    private lateinit var viewModel: SearchViewModel
+    private val viewModel by viewModels<SearchViewModel> { getVmFactory() }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        viewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
+
         binding = FragmentSearchBinding.inflate(layoutInflater)
 
         binding.searchviewSearch.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     query?.let {
-                        viewModel.getYouTubeVideoInfoById(query)
+                        viewModel.findMediaSource(query)
                     }
                     return false
                 }
@@ -49,7 +55,7 @@ class SearchFragment : Fragment() {
 
         viewModel.navigateToTakeNote.observe(viewLifecycleOwner, Observer {
             it?.let {
-                findNavController().navigate(TakeNoteFragmentDirections.actionGlobalTakeNoteFragment(it))
+                findNavController().navigate(YouTubeNoteFragmentDirections.actionGlobalTakeNoteFragment(it))
                 viewModel.doneNavigateToTakeNote()
             }
         })
