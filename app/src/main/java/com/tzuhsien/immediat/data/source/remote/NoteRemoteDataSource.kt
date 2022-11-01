@@ -2,12 +2,10 @@ package com.tzuhsien.immediat.data.source.remote
 
 import android.icu.util.Calendar
 import com.google.firebase.firestore.FirebaseFirestore
+import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.TimeItem
-import com.tzuhsien.immediat.data.model.Note
-import com.tzuhsien.immediat.data.model.TimestampNote
-import com.tzuhsien.immediat.data.model.YouTubeResult
+import com.tzuhsien.immediat.data.model.*
 import com.tzuhsien.immediat.data.source.DataSource
 import com.tzuhsien.immediat.network.YouTubeApi
 import com.tzuhsien.immediat.util.Util.getString
@@ -20,7 +18,9 @@ object NoteRemoteDataSource: DataSource {
 
     private const val PATH_NOTES = "notes"
     private const val PATH_USERS = "users"
-    private const val KEY_LAST_EDIT_TIME = "lastEditTime"
+    private const val PATH_TIME_ITEMS = "timeItems"
+    private const val KEY_START_AT = "startAt" // for orderBy()
+    private const val KEY_LAST_EDIT_TIME = "lastEditTime" // for orderby()
 
     override suspend fun getAllNotes() {
         TODO("Not yet implemented")
@@ -55,7 +55,7 @@ object NoteRemoteDataSource: DataSource {
 
     override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String> = suspendCoroutine { continuation ->
         val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
-        val doc = notes.document()
+        val doc = notes.document(videoId)
 
         note.lastEditTime = Calendar.getInstance().timeInMillis
 
@@ -69,7 +69,10 @@ object NoteRemoteDataSource: DataSource {
             } else {
                 task.exception?.let {
                     Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                    continuation.resume(Result.Error(it))
+                    return@addOnCompleteListener
                 }
+                continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
             }
         }
 
@@ -79,8 +82,29 @@ object NoteRemoteDataSource: DataSource {
         TODO("Not yet implemented")
     }
 
-    override suspend fun addNewTimeItem(timeItem: TimeItem) {
-        TODO("Not yet implemented")
+    override suspend fun addNewTimeItem(videoId: String, timeItem: TimeItem): Result<*> = suspendCoroutine { continuation ->
+        val doc = FirebaseFirestore.getInstance()
+            .collection(PATH_NOTES)
+            .document(videoId)
+            .collection(PATH_TIME_ITEMS)
+            .document()
+
+        doc
+            .set(timeItem)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Timber.i("[${this::class.simpleName}] time items: $timeItem ")
+                    continuation.resume(Result.Success(1))
+                } else {
+                    task.exception?.let {
+                        Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                        continuation.resume(Result.Error(it))
+                        return@addOnCompleteListener
+                    }
+                    continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                }
+            }
+
     }
 
     override suspend fun deleteTimeItem(timeItem: TimeItem) {

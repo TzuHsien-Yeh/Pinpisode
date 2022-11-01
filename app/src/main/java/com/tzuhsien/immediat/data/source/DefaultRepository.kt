@@ -30,8 +30,8 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         TODO("Not yet implemented")
     }
 
-    override suspend fun addNewTimeItem(timeItem: TimeItem) {
-        TODO("Not yet implemented")
+    override suspend fun addNewTimeItem(videoId: String, timeItem: TimeItem): Result<*> {
+        return noteRemoteDataSource.addNewTimeItem(videoId, timeItem)
     }
 
     override suspend fun deleteTimeItem(timeItem: TimeItem) {

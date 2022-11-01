@@ -29,7 +29,7 @@ interface Repository {
 
     suspend fun getTimeItems(id: String)
 
-    suspend fun addNewTimeItem(timeItem: TimeItem)
+    suspend fun addNewTimeItem(videoId: String, timeItem: TimeItem): Result<*>
 
     suspend fun deleteTimeItem(timeItem: TimeItem)
 

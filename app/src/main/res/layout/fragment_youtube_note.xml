@@ -14,7 +14,7 @@
         app:autoPlay="false" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_time_notes"
+        android:id="@+id/recycler_view_time_items"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/youtube_player_view"
@@ -40,14 +40,5 @@
         app:fabCustomSize="60dp"
         app:layout_constraintBottom_toTopOf="@id/btn_take_timestamp"
         app:layout_constraintEnd_toEndOf="parent"/>
-
-    <TextView
-        android:id="@+id/text_testing_timestamp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/youtube_player_view"
-        android:textSize="24sp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

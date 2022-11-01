@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
@@ -35,17 +36,13 @@ class YouTubeNoteFragment : Fragment() {
         val youTubePlayerView: YouTubePlayerView = binding.youtubePlayerView
         lifecycle.addObserver(youTubePlayerView)
 
-        binding.textTestingTimestamp.text = "${viewModel.testTime.toInt().toString()}: 時間戳標題"
-
-
         youTubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(@NonNull youTubePlayer: YouTubePlayer) {
                 val videoId = viewModel.videoId
                 youTubePlayer.loadVideo(videoId, 0f)
 
-                binding.textTestingTimestamp.setOnClickListener {
-                    youTubePlayer.seekTo(viewModel.testTime.toFloat())
-                }
+                youTubePlayer.seekTo(viewModel.testTime.toFloat())
+
                 // TODO: recyclerview item onclick > play at the second / clip
             }
 
@@ -57,6 +54,14 @@ class YouTubeNoteFragment : Fragment() {
                 }
             }
 
+        })
+
+        val adapter = TimeItemAdapter(TimeItemAdapter.OnClickListener {
+            viewModel.playTimeItem(it)
+        })
+        binding.recyclerViewTimeItems.adapter = adapter
+        viewModel.timeItemList.observe(viewLifecycleOwner, Observer {
+            adapter.submitList(it)
         })
 
         return binding.root
