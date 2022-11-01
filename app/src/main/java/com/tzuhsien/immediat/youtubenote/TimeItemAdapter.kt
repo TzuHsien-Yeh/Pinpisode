@@ -3,6 +3,7 @@ package com.tzuhsien.immediat.youtubenote
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -10,6 +11,7 @@ import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.databinding.ItemTimeCardBinding
 import com.tzuhsien.immediat.ext.convertDurationToDisplay
+import com.tzuhsien.immediat.ext.customNoteEditView
 
 class TimeItemAdapter(private val onClickListener: OnClickListener) :
     ListAdapter<TimeItem, TimeItemAdapter.TimeItemViewHolder>(DiffCallback) {
@@ -18,7 +20,7 @@ class TimeItemAdapter(private val onClickListener: OnClickListener) :
         fun onClick(timeItem: TimeItem) = clickListener(timeItem)
     }
 
-    class TimeItemViewHolder(private var binding: ItemTimeCardBinding):
+    class TimeItemViewHolder(private var binding: ItemTimeCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         val context = binding.root.context
@@ -32,7 +34,8 @@ class TimeItemAdapter(private val onClickListener: OnClickListener) :
             } else {
                 binding.textTimeEnd.visibility = View.GONE
             }
-            binding.editTextInputText.visibility = View.VISIBLE
+
+            customNoteEditView(binding.editTextInputText, binding.textContent, timeItem.text)
         }
     }
 
@@ -40,6 +43,7 @@ class TimeItemAdapter(private val onClickListener: OnClickListener) :
         override fun areItemsTheSame(oldItem: TimeItem, newItem: TimeItem): Boolean {
             return oldItem === newItem
         }
+
         override fun areContentsTheSame(oldItem: TimeItem, newItem: TimeItem): Boolean {
             return oldItem.title == newItem.title &&
                     oldItem.startAt == newItem.startAt &&
@@ -47,10 +51,13 @@ class TimeItemAdapter(private val onClickListener: OnClickListener) :
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TimeItemViewHolder {
-        return TimeItemViewHolder(ItemTimeCardBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false))
-        }
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): TimeItemAdapter.TimeItemViewHolder {
+        return TimeItemAdapter.TimeItemViewHolder(ItemTimeCardBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false))
+    }
 
     override fun onBindViewHolder(holder: TimeItemViewHolder, position: Int) {
         val item = getItem(position) as TimeItem

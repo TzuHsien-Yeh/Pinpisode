@@ -1,5 +1,13 @@
 package com.tzuhsien.immediat.ext
 
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
+import android.widget.EditText
+import android.widget.TextView
+import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doAfterTextChanged
+import org.w3c.dom.Text
 import java.text.SimpleDateFormat
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
@@ -15,7 +23,6 @@ fun String.utcToLocalTime(): String {
     return consultationDate
 }
 
-@OptIn(ExperimentalTime::class)
 fun Float.convertDurationToDisplay(): String {
     val millis = this.toLong()
     val duration = millis.toDuration(DurationUnit.MILLISECONDS)
@@ -26,20 +33,13 @@ fun Float.convertDurationToDisplay(): String {
     return timeString
 }
 
-//fun updateYouTubeNote(videoId: String, timestampNote: List<TimestampNote?>, clipNote: List<ClipNote?>){
-//    val videoRef = youtubeNotes.document(videoId)
-//
-//    // Set the fields of the videoId
-//    videoRef
-//        .update(
-//            "timestampNote", timestampNote,
-//            "clipNote", clipNote,
-//            "lastEditTime", Calendar.getInstance().timeInMillis
-//        )
-//        .addOnSuccessListener {
-//            Timber.d ( "DocumentSnapshot successfully updated.")
-//            //TODO: snapshot the firebase db to realtime update list to submit to recyclerview
-//        }
-//        .addOnFailureListener { e -> Timber.w("Error updating document", e) }
-//
-//}
+fun customNoteEditView(editText: EditText, text: TextView, value: String){
+    text.setOnClickListener { view ->
+        view.visibility = View.GONE
+        editText.visibility = View.VISIBLE
+        editText.setText(value)
+        editText.doAfterTextChanged{
+            text.text = it.toString()
+        }
+    }
+}
