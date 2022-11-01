@@ -23,7 +23,7 @@ interface Repository {
      */
     suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult>
 
-    suspend fun updateYouTubeVideoInfo(videoId: String, note: Note)
+    suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String>
 
 //    suspend fun getSpotifyInfoById(id: String)
 

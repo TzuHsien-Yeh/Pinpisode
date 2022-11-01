@@ -20,7 +20,9 @@ import com.tzuhsien.immediat.factory.YoutubeNoteViewModelFactory
 
 class YouTubeNoteFragment : Fragment() {
 
-    private val viewModel by viewModels<YouTubeNoteViewModel> { getVmFactory() }
+    private val viewModel by viewModels<YouTubeNoteViewModel> {
+        getVmFactory(YouTubeNoteFragmentArgs.fromBundle(requireArguments()).videoIdKey)
+    }
     private lateinit var binding: FragmentYoutubeNoteBinding
 
     override fun onCreateView(

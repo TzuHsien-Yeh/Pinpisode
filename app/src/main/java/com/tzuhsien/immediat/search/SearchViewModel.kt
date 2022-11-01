@@ -2,19 +2,28 @@ package com.tzuhsien.immediat.search
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import com.tzuhsien.immediat.MyApplication.Companion.applicationContext
+import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
+import com.tzuhsien.immediat.data.model.Item
+import com.tzuhsien.immediat.data.model.Note
+import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.Repository
+import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.network.LoadApiStatus
+import com.tzuhsien.immediat.util.ServiceLocator.repository
 import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.*
+
+private lateinit var ytNote: Note
 
 class SearchViewModel(private val repository: Repository) : ViewModel() {
 
@@ -39,9 +48,9 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     val showMsg: LiveData<String?>
         get() = _showMsg
 
-    private val _navigateToTakeNote = MutableLiveData<String?>()
-    val navigateToTakeNote: LiveData<String?>
-        get() = _navigateToTakeNote
+    private val _navigateToYoutubeNote = MutableLiveData<String?>()
+    val navigateToYoutubeNote: LiveData<String?>
+        get() = _navigateToYoutubeNote
 
     init {
         _ytVideoData.value = null
@@ -65,21 +74,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             // TODO: if (query is a spotify url) { get spotify resource id } else
 
         }
-
-//        if (!videoId.isNullOrEmpty()) {
-//
-//            coroutineScope.launch {
-//                val result = YouTubeApi.retrofitService.getVideoInfo(
-//
-//                )
-//
-//                if (result.pageInfo.totalResults == 0) {
-//                    _toastMsg.value = "Invalid link: Video not found"
-//                } else
-//                    addYouTubeNoteData(result)
-//                _navigateToTakeNote.value = result.items[0].id
-//            }
-//        }
 
     }
 
@@ -132,16 +126,58 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun showMsgCompleted() {
-        _showMsg.value = null
+    fun updateYouTubeVideoInfo() {
+
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            val result = repository.updateYouTubeVideoInfo(ytNote.id, ytNote)
+
+            _navigateToYoutubeNote.value = when (result) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                    result.data
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+            }
+        }
+        // TODO: coroutine repo.update > result.success { get the id }
     }
 
     fun doneNavigateToTakeNote() {
-        _navigateToTakeNote.value = null
+        _navigateToYoutubeNote.value = null
     }
 
     override fun onCleared() {
         super.onCleared()
         viewModelJob.cancel()
+    }
+
+    fun setYoutubeNoteData(videoItem: Item) {
+        ytNote = Note(
+            id = videoItem.id,
+            source = Source.YOUTUBE.source,
+            ownerId = UserManager.userId,
+            authors = listOf(UserManager.userId),
+            tags = listOf(Source.YOUTUBE.source),
+            thumbnails = videoItem.snippet.thumbnails.high.url,
+            title = videoItem.snippet.title
+        )
     }
 }

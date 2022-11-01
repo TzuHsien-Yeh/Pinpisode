@@ -24,8 +24,8 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.getYouTubeVideoInfoById(id)
     }
 
-    override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note) {
-        TODO("Not yet implemented")
+    override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String> {
+        return noteRemoteDataSource.updateYouTubeVideoInfo(videoId, note)
     }
 
     override suspend fun getTimestampNotes(id: String) {

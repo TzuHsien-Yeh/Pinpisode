@@ -1,5 +1,8 @@
 package com.tzuhsien.immediat.data.source.remote
 
+import android.icu.util.Calendar
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.ClipNote
@@ -11,8 +14,15 @@ import com.tzuhsien.immediat.network.YouTubeApi
 import com.tzuhsien.immediat.util.Util.getString
 import com.tzuhsien.immediat.util.Util.isInternetConnected
 import timber.log.Timber
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 object NoteRemoteDataSource: DataSource {
+
+    private const val PATH_NOTES = "notes"
+    private const val PATH_USERS = "users"
+    private const val KEY_LAST_EDIT_TIME = "lastEditTime"
+
     override suspend fun getAllNotes() {
         TODO("Not yet implemented")
     }
@@ -44,8 +54,26 @@ object NoteRemoteDataSource: DataSource {
         }
     }
 
-    override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note) {
-        TODO("Not yet implemented")
+    override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String> = suspendCoroutine { continuation ->
+        val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
+        val doc = notes.document()
+
+        note.lastEditTime = Calendar.getInstance().timeInMillis
+
+        doc
+            .set(note)
+            .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Timber.i("[${this::class.simpleName}] note: $note ")
+
+                continuation.resume(Result.Success(note.id))
+            } else {
+                task.exception?.let {
+                    Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                }
+            }
+        }
+
     }
 
     override suspend fun getTimestampNotes(id: String) {
