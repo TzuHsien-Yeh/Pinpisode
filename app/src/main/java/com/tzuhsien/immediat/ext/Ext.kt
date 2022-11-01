@@ -1,6 +1,9 @@
 package com.tzuhsien.immediat.ext
 
 import java.text.SimpleDateFormat
+import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
+import kotlin.time.toDuration
 
 
 // Convert UTC to local time
@@ -10,6 +13,17 @@ fun String.utcToLocalTime(): String {
     val consultationDate = sdf.parse(this)?.toString() ?: ""
 
     return consultationDate
+}
+
+@OptIn(ExperimentalTime::class)
+fun Float.convertDurationToDisplay(): String {
+    val millis = this.toLong()
+    val duration = millis.toDuration(DurationUnit.MILLISECONDS)
+    val timeString =
+        duration.toComponents { HH, MM, SS ->
+            String.format("%02d:%02d:%02d", HH, MM, SS)
+        }
+    return timeString
 }
 
 //fun updateYouTubeNote(videoId: String, timestampNote: List<TimestampNote?>, clipNote: List<ClipNote?>){

@@ -12,5 +12,6 @@
     <color name="translucent">#80000000</color>
     <color name="translucent_40">#66000000</color>
     <color name="translucent_80">#cc000000</color>
+    <color name="card_color">#FFFFFF</color>
 
 </resources>
