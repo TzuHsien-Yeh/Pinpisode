@@ -33,7 +33,7 @@ class YouTubeNoteViewModel(private val repository: Repository, val videoId: Stri
     fun takeTimeStamp(second: Float) {
         val sec = second.toLong()
 
-        Timber.d("timestamp: $sec")
+        Timber.d("timestamp: $second")
         //TODO: add time data to the note of the videoId
 
     }

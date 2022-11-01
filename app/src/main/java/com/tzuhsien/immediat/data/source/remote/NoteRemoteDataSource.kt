@@ -2,10 +2,9 @@ package com.tzuhsien.immediat.data.source.remote
 
 import android.icu.util.Calendar
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.ClipNote
+import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimestampNote
 import com.tzuhsien.immediat.data.model.YouTubeResult
@@ -76,27 +75,15 @@ object NoteRemoteDataSource: DataSource {
 
     }
 
-    override suspend fun getTimestampNotes(id: String) {
+    override suspend fun getTimeItems(id: String) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getClipNotes(id: String) {
+    override suspend fun addNewTimeItem(timeItem: TimeItem) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun addNewTimestampNote(timestampNote: TimestampNote) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun addNewClipNote(clipNote: ClipNote) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteTimestampNote(timestampNote: TimestampNote) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteClipNote(clipNote: ClipNote) {
+    override suspend fun deleteTimeItem(timeItem: TimeItem) {
         TODO("Not yet implemented")
     }
 

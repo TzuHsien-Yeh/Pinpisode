@@ -1,11 +1,10 @@
 package com.tzuhsien.immediat.data.source
 
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.ClipNote
+import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimestampNote
 import com.tzuhsien.immediat.data.model.YouTubeResult
-import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource
 
 class DefaultRepository(private val noteRemoteDataSource: DataSource): Repository {
     override suspend fun getAllNotes() {
@@ -27,28 +26,15 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
     override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String> {
         return noteRemoteDataSource.updateYouTubeVideoInfo(videoId, note)
     }
-
-    override suspend fun getTimestampNotes(id: String) {
+    override suspend fun getTimeItems(id: String) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getClipNotes(id: String) {
+    override suspend fun addNewTimeItem(timeItem: TimeItem) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun addNewTimestampNote(timestampNote: TimestampNote) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun addNewClipNote(clipNote: ClipNote) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteTimestampNote(timestampNote: TimestampNote) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteClipNote(clipNote: ClipNote) {
+    override suspend fun deleteTimeItem(timeItem: TimeItem) {
         TODO("Not yet implemented")
     }
 

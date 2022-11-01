@@ -1,7 +1,7 @@
 package com.tzuhsien.immediat.data.source
 
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.ClipNote
+import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimestampNote
 import com.tzuhsien.immediat.data.model.YouTubeResult
@@ -27,17 +27,11 @@ interface Repository {
 
 //    suspend fun getSpotifyInfoById(id: String)
 
-    suspend fun getTimestampNotes(id: String)
+    suspend fun getTimeItems(id: String)
 
-    suspend fun getClipNotes(id: String)
+    suspend fun addNewTimeItem(timeItem: TimeItem)
 
-    suspend fun addNewTimestampNote(timestampNote: TimestampNote)
-
-    suspend fun addNewClipNote(clipNote: ClipNote)
-
-    suspend fun deleteTimestampNote(timestampNote: TimestampNote)
-
-    suspend fun deleteClipNote(clipNote: ClipNote)
+    suspend fun deleteTimeItem(timeItem: TimeItem)
 
     /**
      *  User info (Login and Profile page method)

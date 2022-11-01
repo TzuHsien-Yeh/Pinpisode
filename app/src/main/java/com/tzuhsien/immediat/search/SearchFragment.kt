@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.tzuhsien.immediat.databinding.FragmentSearchBinding
 import com.tzuhsien.immediat.ext.getVmFactory
+import com.tzuhsien.immediat.ext.utcToLocalTime
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
 
@@ -54,6 +55,7 @@ class SearchFragment : Fragment() {
         })
 
         binding.cardSingleVideoResult.visibility = View.GONE
+        binding.textSearchResult.visibility = View.GONE
 
         viewModel.ytVideoData.observe(viewLifecycleOwner, Observer {
            it?.let {
@@ -61,12 +63,14 @@ class SearchFragment : Fragment() {
 
                    val item = it.items[0]
 
+                   binding.textSearchResult.visibility = View.VISIBLE
+                   binding.cardSingleVideoResult.visibility = View.VISIBLE
                    binding.textTitle.text = item.snippet.title
                    Glide.with(this)
                        .load(item.snippet.thumbnails.high.url)
                        .into(binding.imgThumbnail)
-                   binding.cardSingleVideoResult.visibility = View.VISIBLE
-//                   binding.textPublishedTime.text = item.snippet.publishedAt.toDate().formatTo( "yyyy-MM-dd HH:mm:ss")
+                   binding.textChannelName.text = item.snippet.channelTitle
+                   binding.textPublishedTime.text = item.snippet.publishedAt.utcToLocalTime()
 
                    viewModel.setYoutubeNoteData(item)
                } else {

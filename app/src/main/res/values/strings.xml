@@ -3,4 +3,5 @@
     <string name="internet_not_connected">您尚未連接 Internet</string>
     <string name="unknown_error">Unknown error</string>
     <string name="video_not_available">This video is not available anymore.</string>
+    <string name="click_to_take_notes">Click on the video to start taking notes!</string>
 </resources>
