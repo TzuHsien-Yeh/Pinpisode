@@ -41,7 +41,7 @@ class YouTubeNoteFragment : Fragment() {
                 val videoId = viewModel.videoId
                 youTubePlayer.loadVideo(videoId, 0f)
 
-                youTubePlayer.seekTo(viewModel.testTime.toFloat())
+//                youTubePlayer.seekTo(viewModel.)
 
                 // TODO: recyclerview item onclick > play at the second / clip
             }
@@ -60,8 +60,9 @@ class YouTubeNoteFragment : Fragment() {
             viewModel.playTimeItem(it)
         })
         binding.recyclerViewTimeItems.adapter = adapter
-        viewModel.timeItemList.observe(viewLifecycleOwner, Observer {
+        viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer {
             adapter.submitList(it)
+            adapter.notifyDataSetChanged()
         })
 
         return binding.root

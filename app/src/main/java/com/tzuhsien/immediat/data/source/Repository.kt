@@ -1,5 +1,6 @@
 package com.tzuhsien.immediat.data.source
 
+import androidx.lifecycle.MutableLiveData
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.Note
@@ -27,7 +28,7 @@ interface Repository {
 
 //    suspend fun getSpotifyInfoById(id: String)
 
-    suspend fun getTimeItems(id: String)
+    fun getLiveTimeItems(videoId: String): MutableLiveData<List<TimeItem>>
 
     suspend fun addNewTimeItem(videoId: String, timeItem: TimeItem): Result<*>
 

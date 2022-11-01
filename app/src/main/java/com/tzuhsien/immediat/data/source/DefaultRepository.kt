@@ -1,5 +1,6 @@
 package com.tzuhsien.immediat.data.source
 
+import androidx.lifecycle.MutableLiveData
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.Note
@@ -26,8 +27,8 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
     override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String> {
         return noteRemoteDataSource.updateYouTubeVideoInfo(videoId, note)
     }
-    override suspend fun getTimeItems(id: String) {
-        TODO("Not yet implemented")
+    override fun getLiveTimeItems(videoId: String): MutableLiveData<List<TimeItem>> {
+        return noteRemoteDataSource.getLiveTimeItems(videoId)
     }
 
     override suspend fun addNewTimeItem(videoId: String, timeItem: TimeItem): Result<*> {

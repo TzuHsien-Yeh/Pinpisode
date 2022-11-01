@@ -17,9 +17,7 @@ import timber.log.Timber
 
 class YouTubeNoteViewModel(private val repository: Repository, val videoId: String) : ViewModel() {
 
-    private val _timeItemList = MutableLiveData<List<TimeItem>>()
-    val timeItemList: LiveData<List<TimeItem>>
-        get() = _timeItemList
+    var liveTimeItemList = MutableLiveData<List<TimeItem>>()
 
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
@@ -29,13 +27,18 @@ class YouTubeNoteViewModel(private val repository: Repository, val videoId: Stri
     val error: LiveData<String?>
         get() = _error
 
-    val testTime = 10.3
-
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
     init {
         Timber.d("videoId Passed in TakeNote: $videoId")
+
+        getLiveTimeItemsResult()
+    }
+
+    private fun getLiveTimeItemsResult() {
+        liveTimeItemList = repository.getLiveTimeItems(videoId)
+        _status.value = LoadApiStatus.DONE
     }
 
     override fun onCleared() {

@@ -1,7 +1,9 @@
 package com.tzuhsien.immediat.data.source.remote
 
 import android.icu.util.Calendar
+import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
@@ -78,8 +80,32 @@ object NoteRemoteDataSource: DataSource {
 
     }
 
-    override suspend fun getTimeItems(id: String) {
-        TODO("Not yet implemented")
+    override fun getLiveTimeItems(videoId: String): MutableLiveData<List<TimeItem>> {
+        val liveData = MutableLiveData<List<TimeItem>>()
+
+        FirebaseFirestore.getInstance()
+            .collection(PATH_NOTES)
+            .document(videoId)
+            .collection(PATH_TIME_ITEMS)
+            .orderBy(KEY_START_AT, Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, error ->
+                Timber.i("addSnapshotListener detect")
+
+                error?.let {
+                    Timber.w("[${this::class.simpleName}] Error getting documents. ${it.message}")
+                }
+
+                val list = mutableListOf<TimeItem>()
+                for (doc in snapshot!!) {
+                    Timber.d(doc.id + " => " + doc.data)
+
+                    val timeItem = doc.toObject(TimeItem::class.java)
+                    list.add(timeItem)
+                }
+
+                liveData.value = list
+            }
+        return liveData
     }
 
     override suspend fun addNewTimeItem(videoId: String, timeItem: TimeItem): Result<*> = suspendCoroutine { continuation ->
