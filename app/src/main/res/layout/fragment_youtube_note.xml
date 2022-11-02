@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="false"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".youtubenote.YouTubeNoteFragment">
 
@@ -13,12 +14,26 @@
         app:layout_constraintTop_toTopOf="parent"
         app:autoPlay="false" />
 
+    <EditText
+        android:id="@+id/edit_digest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="16dp"
+        android:maxLength="60"
+        android:hint="Video summary"
+        android:background="@color/transparent"
+        app:layout_constraintTop_toBottomOf="@+id/youtube_player_view"
+        app:layout_constraintBottom_toTopOf="@+id/recycler_view_time_items"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_time_items"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/youtube_player_view"
+        app:layout_constraintTop_toBottomOf="@+id/edit_digest"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
