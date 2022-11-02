@@ -38,8 +38,8 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.updateTimeItem(noteId, timeItem)
     }
 
-    override suspend fun deleteTimeItem(timeItem: TimeItem) {
-        TODO("Not yet implemented")
+    override suspend fun deleteTimeItem(noteId: String, timeItem: TimeItem): Result<*> {
+        return noteRemoteDataSource.deleteTimeItem(noteId, timeItem)
     }
 
     override suspend fun updateNote(noteId: String, note: Note): Result<String> {

@@ -1,5 +1,6 @@
 package com.tzuhsien.immediat.youtubenote
 
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,6 +56,21 @@ class TimeItemAdapter(
                 if (!hasFocus) {
                     timeItem.text = contentView.text.toString()
                     uiState.onItemContentChanged(timeItem)
+                }
+            }
+
+            var deleteViewState = 0
+            binding.deleteTimeItem.setOnClickListener {
+                when(deleteViewState) {
+                    0 -> {
+                        binding.deleteTimeItem.text = "Confirm on delete"
+                        binding.deleteTimeItem.typeface = Typeface.DEFAULT_BOLD
+                        deleteViewState = 1
+                    }
+                    1-> {
+                        uiState.onItemToDelete(timeItem)
+                        deleteViewState = 0
+                    }
                 }
             }
 

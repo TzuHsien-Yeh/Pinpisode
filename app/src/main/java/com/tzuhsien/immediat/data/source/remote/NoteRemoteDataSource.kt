@@ -217,12 +217,35 @@ object NoteRemoteDataSource : DataSource {
                         continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
                     }
                 }
-
         }
 
-    override suspend fun deleteTimeItem(timeItem: TimeItem) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun deleteTimeItem(noteId: String, timeItem: TimeItem): Result<*> =
+        suspendCoroutine { continuation ->
+            val noteRef = FirebaseFirestore.getInstance()
+                .collection(PATH_NOTES)
+                .document(noteId)
+
+            noteRef.update("lastEditTime", Calendar.getInstance().timeInMillis)
+
+            val doc = noteRef
+                .collection(PATH_TIME_ITEMS)
+                .document(timeItem.id)
+
+            doc
+                .delete()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success(0))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+        }
 
     override suspend fun updateNote(noteId: String, note: Note): Result<String> =
         suspendCoroutine { continuation ->

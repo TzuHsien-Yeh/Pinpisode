@@ -9,6 +9,7 @@ import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.source.Repository
+import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.deleteTimeItem
 import com.tzuhsien.immediat.network.LoadApiStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,9 @@ class YouTubeNoteViewModel(
         },
         onItemContentChanged = { item ->
             updateTimeItem(item)
+        },
+        onItemToDelete = { item ->
+            deleteTimeItem(item)
         }
     )
 
@@ -59,9 +63,9 @@ class YouTubeNoteViewModel(
         _status.value = LoadApiStatus.DONE
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
+    private fun getLiveNoteById() {
+        liveNoteData = repository.getLiveNoteById(noteId)
+        _status.value = LoadApiStatus.DONE
     }
 
     fun takeTimeStamp(second: Float) {
@@ -121,14 +125,36 @@ class YouTubeNoteViewModel(
 
     }
 
+    private fun deleteTimeItem(timeItem: TimeItem) {
+
+        coroutineScope.launch {
+
+            when (val result = repository.deleteTimeItem(noteId, timeItem)) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
+
+    }
+
     fun playTimeItem(timeItem: TimeItem) {
 
     }
 
-    private fun getLiveNoteById() {
-        liveNoteData = repository.getLiveNoteById(noteId)
-        _status.value = LoadApiStatus.DONE
-    }
 
     fun updateNote() {
         coroutineScope.launch {
@@ -153,10 +179,16 @@ class YouTubeNoteViewModel(
             }
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
 }
 
 data class YouTubeNoteUiState(
     var onItemTitleChanged: (TimeItem) -> Unit,
-    var onItemContentChanged: (TimeItem) -> Unit
+    var onItemContentChanged: (TimeItem) -> Unit,
+    var onItemToDelete: (TimeItem) -> Unit
 )
 

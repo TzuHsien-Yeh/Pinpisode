@@ -32,7 +32,7 @@ interface DataSource {
 
     suspend fun updateTimeItem(noteId: String, timeItem: TimeItem): Result<*>
 
-    suspend fun deleteTimeItem(timeItem: TimeItem)
+    suspend fun deleteTimeItem(noteId: String, timeItem: TimeItem): Result<*>
 
     suspend fun updateNote(noteId: String, note: Note): Result<String>
 
