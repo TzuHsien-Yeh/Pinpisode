@@ -4,5 +4,5 @@
     <string name="unknown_error">Unknown error</string>
     <string name="video_not_available">This video is not available anymore.</string>
     <string name="click_to_take_notes">Click on the video to start taking notes!</string>
-    <string name="end_time_format">/u0020-/u0020%s</string>
+    <string name="end_time_format">&#x20;-&#x20;%s</string>
 </resources>

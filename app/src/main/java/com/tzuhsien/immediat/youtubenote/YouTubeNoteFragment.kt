@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import timber.log.Timber
@@ -26,6 +27,8 @@ class YouTubeNoteFragment : Fragment() {
         )
     }
     private lateinit var binding: FragmentYoutubeNoteBinding
+
+    var startOrStopToggle = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,7 +54,27 @@ class YouTubeNoteFragment : Fragment() {
                 super.onCurrentSecond(youTubePlayer, second)
 
                 binding.btnTakeTimestamp.setOnClickListener {
-                    viewModel.takeTimeStamp(second)
+                    viewModel.createTimeItem(second, null)
+                }
+
+                binding.btnClip.setOnClickListener {
+                    when(startOrStopToggle) {
+                        0 -> {
+                            viewModel.startAt = second
+                            startOrStopToggle = 1
+                            binding.btnClip.setImageResource(R.drawable.ic_square)
+                            Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
+                        }
+                        1 -> {
+                            viewModel.endAt = second
+                            Timber.d("btnClip second time clicked, viewModel.endAt = ${viewModel.endAt}")
+
+                            binding.btnClip.setImageResource(R.drawable.ic_youtube_black)
+//                            binding.btnClip.setImageResource(R.drawable.ic_end_clipping)
+                            viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
+                            startOrStopToggle = 0
+                        }
+                    }
                 }
             }
 

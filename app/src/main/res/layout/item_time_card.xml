@@ -42,6 +42,7 @@
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
                 android:textSize="18sp"
+                android:layout_marginStart="4dp"
                 app:layout_constraintStart_toEndOf="@id/text_time_start"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text=" - 02:00"/>

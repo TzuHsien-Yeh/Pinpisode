@@ -23,6 +23,9 @@ class YouTubeNoteViewModel(
     val videoId: String
     ) : ViewModel() {
 
+    var startAt: Float = 0f
+    var endAt: Float = 0f
+
     val uiState = YouTubeNoteUiState(
         onItemTitleChanged = { item ->
             updateTimeItem(item)
@@ -68,7 +71,7 @@ class YouTubeNoteViewModel(
         _status.value = LoadApiStatus.DONE
     }
 
-    fun takeTimeStamp(second: Float) {
+    fun createTimeItem(startAt: Float, endAt: Float?) {
 
         coroutineScope.launch {
 
@@ -76,7 +79,7 @@ class YouTubeNoteViewModel(
 
             when (val result = repository.addNewTimeItem(
                 noteId = noteId,
-                timeItem = TimeItem(startAt = second, endAt = null)
+                timeItem = TimeItem(startAt = startAt, endAt = endAt)
             )) {
                 is Result.Success -> {
                     _error.value = null
