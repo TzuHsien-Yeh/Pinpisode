@@ -20,7 +20,10 @@ import timber.log.Timber
 class YouTubeNoteFragment : Fragment() {
 
     private val viewModel by viewModels<YouTubeNoteViewModel> {
-        getVmFactory(YouTubeNoteFragmentArgs.fromBundle(requireArguments()).noteIdKey)
+        getVmFactory(
+            YouTubeNoteFragmentArgs.fromBundle(requireArguments()).noteIdKey,
+            YouTubeNoteFragmentArgs.fromBundle(requireArguments()).videoIdKey
+        )
     }
     private lateinit var binding: FragmentYoutubeNoteBinding
 
@@ -39,12 +42,10 @@ class YouTubeNoteFragment : Fragment() {
                 val videoId = viewModel.videoId
 
                 Timber.d("[${this::class.simpleName}] videoId: ${viewModel.videoId} ")
-                videoId?.let {
-                    youTubePlayer.loadVideo(videoId, 0f)
-                }
+
+                youTubePlayer.loadVideo(videoId, 0f)
 
 //                youTubePlayer.seekTo(viewModel.)
-
                 // TODO: recyclerview item onclick > play at the second / clip
             }
 

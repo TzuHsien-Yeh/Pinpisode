@@ -63,6 +63,7 @@
                 android:layout_marginStart="8dp"
                 android:textStyle="bold"
                 android:textSize="18sp"
+                android:background="@color/transparent"
                 app:layout_constraintStart_toEndOf="@+id/text_time_end"
                 app:layout_constraintTop_toTopOf="parent"/>
 
@@ -72,6 +73,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textSize="16sp"
+                android:backgroundTintMode="@color/transparent"
                 tools:text="wiuevguqrqovegvt/n/u2022livugukqigfviluqggiuanvhlfivogeivaehgvaiihkwagavoihkvdihv"
                 app:layout_constraintTop_toBottomOf="@id/text_time_start"
                 app:layout_constraintStart_toStartOf="parent"/>

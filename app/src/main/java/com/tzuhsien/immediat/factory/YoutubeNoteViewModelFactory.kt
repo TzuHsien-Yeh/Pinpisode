@@ -8,6 +8,7 @@ import com.tzuhsien.immediat.youtubenote.YouTubeNoteViewModel
 @Suppress("UNCHECKED_CAST")
 class YoutubeNoteViewModelFactory(
     private val repository: Repository,
+    private val noteId: String,
     private val videoId: String
 ) : ViewModelProvider.Factory {
 
@@ -15,7 +16,7 @@ class YoutubeNoteViewModelFactory(
         with(modelClass) {
             when {
                 isAssignableFrom(YouTubeNoteViewModel::class.java) ->
-                    YouTubeNoteViewModel(repository, videoId)
+                    YouTubeNoteViewModel(repository, noteId, videoId)
                 else ->
                     throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
             }

@@ -12,6 +12,7 @@ import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.databinding.ItemTimeCardBinding
 import com.tzuhsien.immediat.ext.convertDurationToDisplay
 import com.tzuhsien.immediat.ext.customNoteEditView
+import com.tzuhsien.immediat.ext.formatDuration
 
 class TimeItemAdapter(
     private val onClickListener: OnClickListener,
@@ -29,11 +30,11 @@ class TimeItemAdapter(
         val context = binding.root.context
 
         fun bind(timeItem: TimeItem) {
-            binding.textTimeStart.text = timeItem.startAt.convertDurationToDisplay()
+            binding.textTimeStart.text = timeItem.startAt.formatDuration()
             if (null != timeItem.endAt) {
                 binding.textTimeEnd.visibility = View.VISIBLE
                 binding.textTimeEnd.text = context.getString(R.string.end_time_format,
-                    timeItem.endAt.convertDurationToDisplay())
+                    timeItem.endAt.formatDuration())
             } else {
                 binding.textTimeEnd.visibility = View.GONE
             }

@@ -23,6 +23,9 @@
         <argument android:name="note_id_key"
             app:argType="string"
             app:nullable="false"/>
+        <argument android:name="video_id_key"
+            app:argType="string"
+            app:nullable="false"/>
     </fragment>
 
     <action android:id="@+id/action_global_takeNoteFragment"

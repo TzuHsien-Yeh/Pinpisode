@@ -24,6 +24,8 @@ private lateinit var ytNote: Note
 
 class SearchViewModel(private val repository: Repository) : ViewModel() {
 
+    var videoId: String = ""
+
     private val _ytVideoData = MutableLiveData<YouTubeResult?>()
     val ytVideoData: LiveData<YouTubeResult?>
         get() = _ytVideoData
@@ -154,7 +156,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                 }
             }
         }
-        // TODO: coroutine repo.update > result.success { get the id }
     }
 
     fun doneNavigateToTakeNote() {

@@ -2,6 +2,7 @@ package com.tzuhsien.immediat.ext
 
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.format.DateUtils
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
@@ -32,6 +33,8 @@ fun Float.convertDurationToDisplay(): String {
         }
     return timeString
 }
+
+fun Float.formatDuration(): String = DateUtils.formatElapsedTime(this.toLong())
 
 fun customNoteEditView(editText: EditText, text: TextView, value: String){
     text.setOnClickListener { view ->

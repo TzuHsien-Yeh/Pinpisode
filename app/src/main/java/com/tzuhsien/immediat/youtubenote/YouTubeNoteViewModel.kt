@@ -16,11 +16,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class YouTubeNoteViewModel(private val repository: Repository, private val noteId: String) : ViewModel() {
+class YouTubeNoteViewModel(
+    private val repository: Repository,
+    private val noteId: String,
+    val videoId: String
+    ) : ViewModel() {
 
     var liveTimeItemList = MutableLiveData<List<TimeItem>>()
 
-    var videoId: String? = null
 
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
@@ -35,42 +38,42 @@ class YouTubeNoteViewModel(private val repository: Repository, private val noteI
 
     init {
         Timber.d("[${this::class.simpleName}] noteId Passed in: $noteId")
-        getVideoId()
+//        getVideoId()
         getLiveTimeItemsResult()
     }
 
-    private fun getVideoId() {
-        coroutineScope.launch {
-
-            _status.value = LoadApiStatus.LOADING
-
-            val result = repository.getNoteById(noteId)
-
-            videoId = when (result) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
-                    Timber.d("[${this::class.simpleName}] sourceId: ${result.data?.sourceId} ")
-                    result.data?.sourceId
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-            }
-        }
-    }
+//    private fun getVideoId() {
+//        coroutineScope.launch {
+//
+//            _status.value = LoadApiStatus.LOADING
+//
+//            val result = repository.getNoteById(noteId)
+//
+//            videoId = when (result) {
+//                is Result.Success -> {
+//                    _error.value = null
+//                    _status.value = LoadApiStatus.DONE
+//                    Timber.d("[${this::class.simpleName}] sourceId: ${result.data?.sourceId} ")
+//                    result.data?.sourceId
+//                }
+//                is Result.Fail -> {
+//                    _error.value = result.error
+//                    _status.value = LoadApiStatus.ERROR
+//                    null
+//                }
+//                is Result.Error -> {
+//                    _error.value = result.exception.toString()
+//                    _status.value = LoadApiStatus.ERROR
+//                    null
+//                }
+//                else -> {
+//                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+//                    _status.value = LoadApiStatus.ERROR
+//                    null
+//                }
+//            }
+//        }
+//    }
 
     private fun getLiveTimeItemsResult() {
         liveTimeItemList = repository.getLiveTimeItems(noteId)

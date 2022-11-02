@@ -73,6 +73,7 @@ class SearchFragment : Fragment() {
                    binding.textPublishedTime.text = item.snippet.publishedAt.utcToLocalTime()
 
                    viewModel.setYoutubeNoteData(item)
+                   viewModel.videoId = item.id
                } else {
                    binding.cardSingleVideoResult.visibility = View.GONE
                }
@@ -85,11 +86,15 @@ class SearchFragment : Fragment() {
 
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
             it?.let {
-                findNavController().navigate(YouTubeNoteFragmentDirections.actionGlobalTakeNoteFragment(it))
+                findNavController().navigate(
+                    YouTubeNoteFragmentDirections.actionGlobalTakeNoteFragment(
+                        noteIdKey = it,
+                        videoIdKey = viewModel.videoId
+                    )
+                )
                 viewModel.doneNavigateToTakeNote()
             }
         })
-
 
         return binding.root
     }
