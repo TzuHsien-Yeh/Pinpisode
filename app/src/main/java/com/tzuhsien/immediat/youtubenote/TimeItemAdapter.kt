@@ -28,6 +28,7 @@ class TimeItemAdapter(
         val context = binding.root.context
 
         fun bind(timeItem: TimeItem, uiState: YouTubeNoteUiState) {
+
             binding.textTimeStart.text = timeItem.startAt.formatDuration()
             if (null != timeItem.endAt) {
                 binding.textTimeEnd.visibility = View.VISIBLE
@@ -72,6 +73,15 @@ class TimeItemAdapter(
                         deleteViewState = 0
                     }
                 }
+            }
+
+            // Play the timeTime when onClicked
+            binding.textTimeStart.setOnClickListener {
+                uiState.onTimeClick(timeItem)
+            }
+
+            binding.textTimeEnd.setOnClickListener {
+                uiState.onTimeClick(timeItem)
             }
 
             // TODO:　SET content/title.inputType = TYPE_NULL if (!authorList.contains(UserManager.userId))

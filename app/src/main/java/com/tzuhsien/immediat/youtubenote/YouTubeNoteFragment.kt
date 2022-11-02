@@ -2,6 +2,8 @@ package com.tzuhsien.immediat.youtubenote
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +18,7 @@ import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import timber.log.Timber
+import kotlin.concurrent.timerTask
 
 
 class YouTubeNoteFragment : Fragment() {
@@ -46,7 +49,20 @@ class YouTubeNoteFragment : Fragment() {
 
                 youTubePlayer.loadVideo(videoId, 0f)
 
-//                youTubePlayer.seekTo(viewModel.)
+                viewModel.playMoment.observe(viewLifecycleOwner, Observer { moments ->
+                    moments[0]?.let { startAt ->
+                        youTubePlayer.seekTo(startAt)
+
+                        moments[1]?.let { endAt ->
+
+                            val timeLength = (endAt - startAt).toLong()
+
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                youTubePlayer.pause()
+                            }, timeLength)
+                        }
+                    }
+                })
                 // TODO: recyclerview item onclick > play at the second / clip
             }
 

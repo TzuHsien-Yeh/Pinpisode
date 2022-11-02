@@ -9,7 +9,6 @@ import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.source.Repository
-import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.deleteTimeItem
 import com.tzuhsien.immediat.network.LoadApiStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +25,10 @@ class YouTubeNoteViewModel(
     var startAt: Float = 0f
     var endAt: Float = 0f
 
+    private val _playMoment = MutableLiveData<List<Float?>>(listOf(null, null))
+    val playMoment: LiveData<List<Float?>>
+        get() = _playMoment
+
     val uiState = YouTubeNoteUiState(
         onItemTitleChanged = { item ->
             updateTimeItem(item)
@@ -35,6 +38,9 @@ class YouTubeNoteViewModel(
         },
         onItemToDelete = { item ->
             deleteTimeItem(item)
+        },
+        onTimeClick = { item ->
+            playTimeItem(item)
         }
     )
 
@@ -155,7 +161,8 @@ class YouTubeNoteViewModel(
     }
 
     fun playTimeItem(timeItem: TimeItem) {
-
+        val moments = listOf(timeItem.startAt, timeItem.endAt)
+        _playMoment.value = moments
     }
 
 
@@ -192,6 +199,7 @@ class YouTubeNoteViewModel(
 data class YouTubeNoteUiState(
     var onItemTitleChanged: (TimeItem) -> Unit,
     var onItemContentChanged: (TimeItem) -> Unit,
-    var onItemToDelete: (TimeItem) -> Unit
+    var onItemToDelete: (TimeItem) -> Unit,
+    val onTimeClick: (TimeItem) -> Unit
 )
 
