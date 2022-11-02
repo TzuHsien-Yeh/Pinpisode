@@ -14,23 +14,21 @@ interface Repository {
     // notes of which the user is the owner (home page)
     suspend fun getAllNotes()
 
-    suspend fun getNoteById()
-
     // notes of which the user is not the owner
     suspend fun getCoauthoringNotes()
 
     /**
      *  For the note (single source)
      */
+    suspend fun getNoteById(noteId: String): Result<Note?>
+
     suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult>
 
     suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String>
 
-//    suspend fun getSpotifyInfoById(id: String)
+    fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>>
 
-    fun getLiveTimeItems(videoId: String): MutableLiveData<List<TimeItem>>
-
-    suspend fun addNewTimeItem(videoId: String, timeItem: TimeItem): Result<*>
+    suspend fun addNewTimeItem(noteId: String, timeItem: TimeItem): Result<*>
 
     suspend fun deleteTimeItem(timeItem: TimeItem)
 

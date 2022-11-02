@@ -2,7 +2,6 @@ package com.tzuhsien.immediat.search
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
@@ -14,14 +13,12 @@ import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.network.LoadApiStatus
-import com.tzuhsien.immediat.util.ServiceLocator.repository
 import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.*
 
 private lateinit var ytNote: Note
 
@@ -132,7 +129,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.updateYouTubeVideoInfo(ytNote.id, ytNote)
+            val result = repository.updateYouTubeVideoInfo(ytNote.sourceId, ytNote)
 
             _navigateToYoutubeNote.value = when (result) {
                 is Result.Success -> {
@@ -171,7 +168,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
     fun setYoutubeNoteData(videoItem: Item) {
         ytNote = Note(
-            id = videoItem.id,
+            sourceId = videoItem.id,
             source = Source.YOUTUBE.source,
             ownerId = UserManager.userId,
             authors = listOf(UserManager.userId),

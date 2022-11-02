@@ -14,7 +14,7 @@
         app:cardElevation="10dp"
         app:cardCornerRadius="20dp"
         android:layout_margin="16dp"
-        app:cardBackgroundColor="@color/purple_200"
+        app:cardBackgroundColor="@color/white"
         app:cardMaxElevation="12dp"
         app:cardPreventCornerOverlap="true"
         app:cardUseCompatPadding="false">
@@ -53,6 +53,16 @@
                 android:textStyle="bold"
                 android:textSize="18sp"
                 tools:text="a time card"
+                app:layout_constraintStart_toEndOf="@+id/text_time_end"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <EditText
+                android:id="@+id/edit_text_item_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textStyle="bold"
+                android:textSize="18sp"
                 app:layout_constraintStart_toEndOf="@+id/text_time_end"
                 app:layout_constraintTop_toTopOf="parent"/>
 

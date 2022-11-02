@@ -1,16 +1,17 @@
 package com.tzuhsien.immediat.data.model
 
-import android.icu.text.CaseMap
+import com.tzuhsien.immediat.data.source.local.UserManager
 
 data class Note (
-    val id: String, // YouTube or Spotify source id
-    val source: String,
-    val ownerId: String,
-    val authors: List<String>,
-    val tags: List<String>,
+    var id: String = "",
+    val sourceId: String = "",
+    val source: String = "",
+    val ownerId: String = UserManager.userId,
+    val authors: List<String> = listOf(UserManager.userId),
+    val tags: List<String>  = listOf(),
     var lastEditTime: Long = -1,
     val digest: String = "",
     val isPublic: Boolean = false,
-    val thumbnails: String,
-    val title: String
+    val thumbnails: String = "",
+    val title: String = ""
 )

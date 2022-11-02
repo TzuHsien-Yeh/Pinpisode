@@ -40,6 +40,7 @@ fun customNoteEditView(editText: EditText, text: TextView, value: String){
         editText.setText(value)
         editText.doAfterTextChanged{
             text.text = it.toString()
+            val update = text.text
         }
     }
 }

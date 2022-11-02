@@ -13,7 +13,10 @@ import com.tzuhsien.immediat.databinding.ItemTimeCardBinding
 import com.tzuhsien.immediat.ext.convertDurationToDisplay
 import com.tzuhsien.immediat.ext.customNoteEditView
 
-class TimeItemAdapter(private val onClickListener: OnClickListener) :
+class TimeItemAdapter(
+    private val onClickListener: OnClickListener,
+//    private val uiState: YouTubeNoteUiState
+    ) :
     ListAdapter<TimeItem, TimeItemAdapter.TimeItemViewHolder>(DiffCallback) {
 
     class OnClickListener(val clickListener: (timeItem: TimeItem) -> Unit) {
@@ -34,8 +37,8 @@ class TimeItemAdapter(private val onClickListener: OnClickListener) :
             } else {
                 binding.textTimeEnd.visibility = View.GONE
             }
-
             customNoteEditView(binding.editTextInputText, binding.textContent, timeItem.text)
+            customNoteEditView(binding.editTextItemTitle, binding.textTimeItemTitle, timeItem.title)
         }
     }
 

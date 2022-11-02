@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.Note
-import com.tzuhsien.immediat.data.model.TimestampNote
 import com.tzuhsien.immediat.data.model.YouTubeResult
 
 class DefaultRepository(private val noteRemoteDataSource: DataSource): Repository {
@@ -12,8 +11,8 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         TODO("Not yet implemented")
     }
 
-    override suspend fun getNoteById() {
-        TODO("Not yet implemented")
+    override suspend fun getNoteById(noteId: String): Result<Note?> {
+        return noteRemoteDataSource.getNoteById(noteId)
     }
 
     override suspend fun getCoauthoringNotes() {
@@ -27,12 +26,12 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
     override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String> {
         return noteRemoteDataSource.updateYouTubeVideoInfo(videoId, note)
     }
-    override fun getLiveTimeItems(videoId: String): MutableLiveData<List<TimeItem>> {
-        return noteRemoteDataSource.getLiveTimeItems(videoId)
+    override fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>> {
+        return noteRemoteDataSource.getLiveTimeItems(noteId)
     }
 
-    override suspend fun addNewTimeItem(videoId: String, timeItem: TimeItem): Result<*> {
-        return noteRemoteDataSource.addNewTimeItem(videoId, timeItem)
+    override suspend fun addNewTimeItem(noteId: String, timeItem: TimeItem): Result<*> {
+        return noteRemoteDataSource.addNewTimeItem(noteId, timeItem)
     }
 
     override suspend fun deleteTimeItem(timeItem: TimeItem) {

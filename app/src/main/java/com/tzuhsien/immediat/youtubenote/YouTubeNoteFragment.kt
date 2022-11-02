@@ -9,20 +9,18 @@ import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
-import com.tzuhsien.immediat.factory.YoutubeNoteViewModelFactory
+import timber.log.Timber
 
 
 class YouTubeNoteFragment : Fragment() {
 
     private val viewModel by viewModels<YouTubeNoteViewModel> {
-        getVmFactory(YouTubeNoteFragmentArgs.fromBundle(requireArguments()).videoIdKey)
+        getVmFactory(YouTubeNoteFragmentArgs.fromBundle(requireArguments()).noteIdKey)
     }
     private lateinit var binding: FragmentYoutubeNoteBinding
 
@@ -39,7 +37,11 @@ class YouTubeNoteFragment : Fragment() {
         youTubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(@NonNull youTubePlayer: YouTubePlayer) {
                 val videoId = viewModel.videoId
-                youTubePlayer.loadVideo(videoId, 0f)
+
+                Timber.d("[${this::class.simpleName}] videoId: ${viewModel.videoId} ")
+                videoId?.let {
+                    youTubePlayer.loadVideo(videoId, 0f)
+                }
 
 //                youTubePlayer.seekTo(viewModel.)
 

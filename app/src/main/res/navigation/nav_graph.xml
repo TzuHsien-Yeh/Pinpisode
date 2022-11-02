@@ -20,7 +20,7 @@
         android:name="com.tzuhsien.immediat.youtubenote.YouTubeNoteFragment"
         android:label="fragment_take_note"
         tools:layout="@layout/fragment_youtube_note">
-        <argument android:name="video_id_key"
+        <argument android:name="note_id_key"
             app:argType="string"
             app:nullable="false"/>
     </fragment>
