@@ -14,4 +14,7 @@
     <color name="translucent_80">#cc000000</color>
     <color name="card_color">#FFFFFF</color>
 
+<!--    theme colors-->
+
+    <color name="colorPrimaryVariant">#c6a2a7</color>
 </resources>

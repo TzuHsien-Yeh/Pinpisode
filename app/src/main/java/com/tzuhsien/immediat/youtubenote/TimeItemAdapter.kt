@@ -3,15 +3,12 @@ package com.tzuhsien.immediat.youtubenote
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.databinding.ItemTimeCardBinding
-import com.tzuhsien.immediat.ext.convertDurationToDisplay
-import com.tzuhsien.immediat.ext.customNoteEditView
 import com.tzuhsien.immediat.ext.formatDuration
 
 class TimeItemAdapter(
@@ -33,13 +30,38 @@ class TimeItemAdapter(
             binding.textTimeStart.text = timeItem.startAt.formatDuration()
             if (null != timeItem.endAt) {
                 binding.textTimeEnd.visibility = View.VISIBLE
-                binding.textTimeEnd.text = context.getString(R.string.end_time_format,
-                    timeItem.endAt.formatDuration())
+                binding.textTimeEnd.text =
+                    context.getString(R.string.end_time_format, timeItem.endAt.formatDuration())
             } else {
                 binding.textTimeEnd.visibility = View.GONE
             }
-            customNoteEditView(binding.editTextInputText, binding.textContent, timeItem.text)
-            customNoteEditView(binding.editTextItemTitle, binding.textTimeItemTitle, timeItem.title)
+
+            val title = binding.editTextItemTitle
+            val content = binding.editTextInputText
+            // TODO:　SET content/title.inputType = TYPE_NULL if (!authorList.contains(UserManager.userId))
+
+            content.setText(timeItem.text)
+            title.setText(timeItem.text)
+            content.setBackgroundColor(context.getColor(R.color.transparent))
+            title.setBackgroundColor(context.getColor(R.color.transparent))
+
+//            var editTextState = 0
+//            content.setOnClickListener {
+//                when (editTextState) {
+//                    0 -> {
+//                        content.setBackgroundColor(context.getColor(R.color.colorPrimaryVariant))
+//                        editTextState = 1
+//                    }
+//                    1 -> {
+//                        binding.editTextInputText.inputType = InputType.TYPE_CLASS_TEXT
+//                        editTextState = 1
+//                    }
+//                    2 -> {
+//                        binding.editTextInputText.inputType = TYPE_NULL
+//                        editTextState = 0
+//                    }
+//                }
+//            }
         }
     }
 
@@ -63,7 +85,7 @@ class TimeItemAdapter(
             LayoutInflater.from(parent.context), parent, false))
     }
 
-    override fun onBindViewHolder(holder: TimeItemViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: TimeItemAdapter.TimeItemViewHolder, position: Int) {
         val item = getItem(position) as TimeItem
         holder.itemView.setOnClickListener {
             onClickListener.onClick(item)

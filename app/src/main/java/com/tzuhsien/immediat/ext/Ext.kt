@@ -36,14 +36,13 @@ fun Float.convertDurationToDisplay(): String {
 
 fun Float.formatDuration(): String = DateUtils.formatElapsedTime(this.toLong())
 
-fun customNoteEditView(editText: EditText, text: TextView, value: String){
-    text.setOnClickListener { view ->
-        view.visibility = View.GONE
-        editText.visibility = View.VISIBLE
-        editText.setText(value)
-        editText.doAfterTextChanged{
-            text.text = it.toString()
-            val update = text.text
-        }
-    }
-}
+//fun customNoteEditView(editText: EditText, text: TextView, value: String){
+//    text.setOnClickListener { view ->
+//        view.visibility = View.GONE
+//        editText.visibility = View.VISIBLE
+//        editText.setText(value)
+//        editText.doAfterTextChanged{
+//            text.text = it.toString()
+//        }
+//    }
+//}
