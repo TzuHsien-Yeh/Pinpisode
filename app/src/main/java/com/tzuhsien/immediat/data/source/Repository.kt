@@ -28,7 +28,9 @@ interface Repository {
 
     fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>>
 
-    suspend fun addNewTimeItem(noteId: String, timeItem: TimeItem): Result<*>
+    suspend fun addNewTimeItem(noteId: String, timeItem: TimeItem): Result<String>
+
+    suspend fun updateTimeItem(noteId: String, timeItem: TimeItem): Result<*>
 
     suspend fun deleteTimeItem(timeItem: TimeItem)
 

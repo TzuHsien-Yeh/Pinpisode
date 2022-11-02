@@ -30,8 +30,12 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.getLiveTimeItems(noteId)
     }
 
-    override suspend fun addNewTimeItem(noteId: String, timeItem: TimeItem): Result<*> {
+    override suspend fun addNewTimeItem(noteId: String, timeItem: TimeItem): Result<String> {
         return noteRemoteDataSource.addNewTimeItem(noteId, timeItem)
+    }
+
+    override suspend fun updateTimeItem(noteId: String, timeItem: TimeItem): Result<*> {
+        return noteRemoteDataSource.updateTimeItem(noteId, timeItem)
     }
 
     override suspend fun deleteTimeItem(timeItem: TimeItem) {

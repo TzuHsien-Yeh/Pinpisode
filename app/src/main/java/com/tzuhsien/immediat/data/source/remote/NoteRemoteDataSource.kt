@@ -146,7 +146,6 @@ object NoteRemoteDataSource : DataSource {
                 val list = mutableListOf<TimeItem>()
                 for (doc in snapshot!!) {
                     Timber.d(doc.id + " => " + doc.data)
-
                     val timeItem = doc.toObject(TimeItem::class.java)
                     list.add(timeItem)
                 }
@@ -156,7 +155,7 @@ object NoteRemoteDataSource : DataSource {
         return liveData
     }
 
-    override suspend fun addNewTimeItem(noteId: String, timeItem: TimeItem): Result<*> =
+    override suspend fun addNewTimeItem(noteId: String, timeItem: TimeItem): Result<String> =
         suspendCoroutine { continuation ->
             val doc = FirebaseFirestore.getInstance()
                 .collection(PATH_NOTES)
@@ -164,12 +163,14 @@ object NoteRemoteDataSource : DataSource {
                 .collection(PATH_TIME_ITEMS)
                 .document()
 
+            timeItem.id = doc.id
+
             doc
                 .set(timeItem)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Timber.i("[${this::class.simpleName}] time items: $timeItem ")
-                        continuation.resume(Result.Success(1))
+                        continuation.resume(Result.Success(doc.id))
                     } else {
                         task.exception?.let {
                             Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
@@ -181,6 +182,31 @@ object NoteRemoteDataSource : DataSource {
                 }
 
         }
+
+    override suspend fun updateTimeItem(noteId: String, timeItem: TimeItem): Result<*> =
+        suspendCoroutine{ continuation ->
+            val doc = FirebaseFirestore.getInstance()
+                .collection(PATH_NOTES)
+                .document(noteId)
+                .collection(PATH_TIME_ITEMS)
+                .document(timeItem.id)
+
+            doc
+                .update("title", timeItem.title, "text", timeItem.text)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success(0))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+
+    }
 
     override suspend fun deleteTimeItem(timeItem: TimeItem) {
         TODO("Not yet implemented")

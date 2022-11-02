@@ -13,8 +13,8 @@ import com.tzuhsien.immediat.ext.formatDuration
 
 class TimeItemAdapter(
     private val onClickListener: OnClickListener,
-//    private val uiState: YouTubeNoteUiState
-    ) :
+    private val uiState: YouTubeNoteUiState,
+) :
     ListAdapter<TimeItem, TimeItemAdapter.TimeItemViewHolder>(DiffCallback) {
 
     class OnClickListener(val clickListener: (timeItem: TimeItem) -> Unit) {
@@ -26,7 +26,7 @@ class TimeItemAdapter(
 
         val context = binding.root.context
 
-        fun bind(timeItem: TimeItem) {
+        fun bind(timeItem: TimeItem, uiState: YouTubeNoteUiState) {
             binding.textTimeStart.text = timeItem.startAt.formatDuration()
             if (null != timeItem.endAt) {
                 binding.textTimeEnd.visibility = View.VISIBLE
@@ -36,14 +36,29 @@ class TimeItemAdapter(
                 binding.textTimeEnd.visibility = View.GONE
             }
 
-            val title = binding.editTextItemTitle
-            val content = binding.editTextInputText
-            // TODO:　SET content/title.inputType = TYPE_NULL if (!authorList.contains(UserManager.userId))
+            val titleView = binding.editTextItemTitle
+            val contentView = binding.editTextInputText
 
-            content.setText(timeItem.text)
-            title.setText(timeItem.text)
-            content.setBackgroundColor(context.getColor(R.color.transparent))
-            title.setBackgroundColor(context.getColor(R.color.transparent))
+            titleView.setBackgroundColor(context.getColor(R.color.transparent))
+            contentView.setBackgroundColor(context.getColor(R.color.transparent))
+
+            titleView.setText(timeItem.title)
+            contentView.setText(timeItem.text)
+
+            titleView.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    timeItem.title = titleView.text.toString()
+                    uiState.onItemTitleChanged(timeItem)
+                }
+            }
+            contentView.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    timeItem.text = contentView.text.toString()
+                    uiState.onItemContentChanged(timeItem)
+                }
+            }
+
+            // TODO:　SET content/title.inputType = TYPE_NULL if (!authorList.contains(UserManager.userId))
 
 //            var editTextState = 0
 //            content.setOnClickListener {
@@ -62,34 +77,34 @@ class TimeItemAdapter(
 //                    }
 //                }
 //            }
-        }
-    }
-
-    companion object DiffCallback : DiffUtil.ItemCallback<TimeItem>() {
-        override fun areItemsTheSame(oldItem: TimeItem, newItem: TimeItem): Boolean {
-            return oldItem === newItem
+            }
         }
 
-        override fun areContentsTheSame(oldItem: TimeItem, newItem: TimeItem): Boolean {
-            return oldItem.title == newItem.title &&
-                    oldItem.startAt == newItem.startAt &&
-                    oldItem.endAt == newItem.endAt
+        companion object DiffCallback : DiffUtil.ItemCallback<TimeItem>() {
+            override fun areItemsTheSame(oldItem: TimeItem, newItem: TimeItem): Boolean {
+                return oldItem === newItem
+            }
+
+            override fun areContentsTheSame(oldItem: TimeItem, newItem: TimeItem): Boolean {
+                return oldItem.title == newItem.title &&
+                        oldItem.startAt == newItem.startAt &&
+                        oldItem.endAt == newItem.endAt
+            }
+        }
+
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int,
+        ): TimeItemViewHolder {
+            return TimeItemViewHolder(ItemTimeCardBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false))
+        }
+
+        override fun onBindViewHolder(holder: TimeItemViewHolder, position: Int) {
+            val item = getItem(position) as TimeItem
+            holder.itemView.setOnClickListener {
+                onClickListener.onClick(item)
+            }
+            return holder.bind(item, uiState)
         }
     }
-
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int,
-    ): TimeItemAdapter.TimeItemViewHolder {
-        return TimeItemAdapter.TimeItemViewHolder(ItemTimeCardBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false))
-    }
-
-    override fun onBindViewHolder(holder: TimeItemAdapter.TimeItemViewHolder, position: Int) {
-        val item = getItem(position) as TimeItem
-        holder.itemView.setOnClickListener {
-            onClickListener.onClick(item)
-        }
-        return holder.bind(item)
-    }
-}

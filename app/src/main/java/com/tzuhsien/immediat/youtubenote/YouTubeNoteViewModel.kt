@@ -22,8 +22,16 @@ class YouTubeNoteViewModel(
     val videoId: String
     ) : ViewModel() {
 
-    var liveTimeItemList = MutableLiveData<List<TimeItem>>()
+    val uiState = YouTubeNoteUiState(
+        onItemTitleChanged = { item ->
+            updateTimeItem(item)
+        },
+        onItemContentChanged = { item ->
+            updateTimeItem(item)
+        }
+    )
 
+    var liveTimeItemList = MutableLiveData<List<TimeItem>>()
 
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
@@ -38,8 +46,78 @@ class YouTubeNoteViewModel(
 
     init {
         Timber.d("[${this::class.simpleName}] noteId Passed in: $noteId")
-//        getVideoId()
         getLiveTimeItemsResult()
+    }
+
+    private fun getLiveTimeItemsResult() {
+        liveTimeItemList = repository.getLiveTimeItems(noteId)
+        _status.value = LoadApiStatus.DONE
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
+
+    fun takeTimeStamp(second: Float) {
+
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            when (val result = repository.addNewTimeItem(
+                noteId = noteId,
+                timeItem = TimeItem(startAt = second, endAt = null)
+            )) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                    result.data
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
+    }
+
+    private fun updateTimeItem(timeItem: TimeItem) {
+
+        coroutineScope.launch {
+
+            when (val result = repository.updateTimeItem(noteId, timeItem)) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
+
+    }
+
+    fun playTimeItem(timeItem: TimeItem) {
+
     }
 
 //    private fun getVideoId() {
@@ -74,52 +152,10 @@ class YouTubeNoteViewModel(
 //            }
 //        }
 //    }
-
-    private fun getLiveTimeItemsResult() {
-        liveTimeItemList = repository.getLiveTimeItems(noteId)
-        _status.value = LoadApiStatus.DONE
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
-    }
-
-    fun takeTimeStamp(second: Float) {
-
-        coroutineScope.launch {
-
-            _status.value = LoadApiStatus.LOADING
-
-            when (val result = repository.addNewTimeItem(
-                noteId = noteId,
-                timeItem = TimeItem(startAt = second, endAt = null)
-            )) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                }
-                else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
-                }
-            }
-        }
-    }
-
-    fun playTimeItem(timeItem: TimeItem) {
-
-    }
 }
 
 data class YouTubeNoteUiState(
-    val onTimeItemTitleChanged: String
+    var onItemTitleChanged: (TimeItem) -> Unit,
+    var onItemContentChanged: (TimeItem) -> Unit
 )
+

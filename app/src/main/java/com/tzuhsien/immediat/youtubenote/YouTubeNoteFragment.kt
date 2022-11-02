@@ -41,8 +41,6 @@ class YouTubeNoteFragment : Fragment() {
             override fun onReady(@NonNull youTubePlayer: YouTubePlayer) {
                 val videoId = viewModel.videoId
 
-                Timber.d("[${this::class.simpleName}] videoId: ${viewModel.videoId} ")
-
                 youTubePlayer.loadVideo(videoId, 0f)
 
 //                youTubePlayer.seekTo(viewModel.)
@@ -59,11 +57,13 @@ class YouTubeNoteFragment : Fragment() {
 
         })
 
-        val adapter = TimeItemAdapter(TimeItemAdapter.OnClickListener {
-            viewModel.playTimeItem(it)
-        })
+        val adapter = TimeItemAdapter(
+            TimeItemAdapter.OnClickListener { viewModel.playTimeItem(it) },
+            uiState = viewModel.uiState
+        )
         binding.recyclerViewTimeItems.adapter = adapter
         viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer {
+            Timber.d("viewModel.liveTimeItemList.observe: $it")
             adapter.submitList(it)
             adapter.notifyDataSetChanged()
         })
