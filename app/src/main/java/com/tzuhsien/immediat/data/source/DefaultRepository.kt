@@ -11,8 +11,8 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         TODO("Not yet implemented")
     }
 
-    override suspend fun getNoteById(noteId: String): Result<Note?> {
-        return noteRemoteDataSource.getNoteById(noteId)
+    override fun getLiveNoteById(noteId: String):  MutableLiveData<Note?>  {
+        return noteRemoteDataSource.getLiveNoteById(noteId)
     }
 
     override suspend fun getCoauthoringNotes() {
@@ -40,6 +40,10 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
 
     override suspend fun deleteTimeItem(timeItem: TimeItem) {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun updateNote(noteId: String, note: Note): Result<String> {
+        return noteRemoteDataSource.updateNote(noteId, note)
     }
 
     override suspend fun addUser(token: String) {

@@ -33,20 +33,24 @@ object NoteRemoteDataSource : DataSource {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getNoteById(noteId: String): Result<Note?> =
-        suspendCoroutine { continuation ->
+    override fun getLiveNoteById(noteId: String): MutableLiveData<Note?> {
+
+        val liveData = MutableLiveData<Note?>()
+
         FirebaseFirestore.getInstance()
             .collection(PATH_NOTES)
             .document(noteId)
-            .get()
-            .addOnCompleteListener { task ->
-                val note = task.result.toObject(Note::class.java)
-                continuation.resume(Result.Success(note))
+            .addSnapshotListener { snapshot, error ->
+                Timber.i("addSnapshotListener detect")
+
+                error?.let {
+                    Timber.w("[${this::class.simpleName}] Error getting documents. ${it.message}")
+                }
+
+                val note = snapshot!!.toObject(Note::class.java)
+                liveData.value = note
             }
-            .addOnFailureListener {
-                Timber.w("[${this::class.simpleName}] Error getting documents. ${it.message}")
-                continuation.resume(Result.Error(it))
-            }
+        return liveData
     }
 
     override suspend fun getCoauthoringNotes() {
@@ -90,31 +94,31 @@ object NoteRemoteDataSource : DataSource {
 
 //                            continuation.resume(Result.Success(document.id))
 //                        } else {
-                            val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
-                            val doc = notes.document()
+            val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
+            val doc = notes.document()
 
-                            note.id = doc.id
+            note.id = doc.id
 
-                            note.lastEditTime = Calendar.getInstance().timeInMillis
+            note.lastEditTime = Calendar.getInstance().timeInMillis
 
-                            doc
-                                .set(note)
-                                .addOnCompleteListener { task2 ->
-                                    if (task2.isSuccessful) {
-                                        Timber.i("[${this::class.simpleName}] note: $note ")
+            doc
+                .set(note)
+                .addOnCompleteListener { task2 ->
+                    if (task2.isSuccessful) {
+                        Timber.i("[${this::class.simpleName}] note: $note ")
 
-                                        continuation.resume(Result.Success(doc.id))
-                                    } else {
-                                        task2.exception?.let {
-                                            Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
-                                            continuation.resume(Result.Error(it))
-                                        }
-                                        continuation.resume(Result.Fail(MyApplication.instance.getString(
-                                            R.string.unknown_error)))
-                                    }
-
-                                }
+                        continuation.resume(Result.Success(doc.id))
+                    } else {
+                        task2.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
                         }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(
+                            R.string.unknown_error)))
+                    }
+
+                }
+        }
 //                    }
 //
 //                } else {
@@ -157,9 +161,13 @@ object NoteRemoteDataSource : DataSource {
 
     override suspend fun addNewTimeItem(noteId: String, timeItem: TimeItem): Result<String> =
         suspendCoroutine { continuation ->
-            val doc = FirebaseFirestore.getInstance()
+            val noteRef = FirebaseFirestore.getInstance()
                 .collection(PATH_NOTES)
                 .document(noteId)
+
+            noteRef.update("lastEditTime", Calendar.getInstance().timeInMillis)
+
+            val doc = noteRef
                 .collection(PATH_TIME_ITEMS)
                 .document()
 
@@ -184,10 +192,14 @@ object NoteRemoteDataSource : DataSource {
         }
 
     override suspend fun updateTimeItem(noteId: String, timeItem: TimeItem): Result<*> =
-        suspendCoroutine{ continuation ->
-            val doc = FirebaseFirestore.getInstance()
+        suspendCoroutine { continuation ->
+            val noteRef = FirebaseFirestore.getInstance()
                 .collection(PATH_NOTES)
                 .document(noteId)
+
+            noteRef.update("lastEditTime", Calendar.getInstance().timeInMillis)
+
+            val doc = noteRef
                 .collection(PATH_TIME_ITEMS)
                 .document(timeItem.id)
 
@@ -206,11 +218,35 @@ object NoteRemoteDataSource : DataSource {
                     }
                 }
 
-    }
+        }
 
     override suspend fun deleteTimeItem(timeItem: TimeItem) {
         TODO("Not yet implemented")
     }
+
+    override suspend fun updateNote(noteId: String, note: Note): Result<String> =
+        suspendCoroutine { continuation ->
+            val doc = FirebaseFirestore.getInstance()
+                .collection(PATH_NOTES)
+                .document(noteId)
+
+            note.lastEditTime = Calendar.getInstance().timeInMillis
+
+            doc
+                .set(note)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success(""))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+        }
 
     override suspend fun addUser(token: String) {
         TODO("Not yet implemented")

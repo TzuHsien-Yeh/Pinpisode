@@ -10,7 +10,7 @@ data class Note (
     val authors: List<String> = listOf(UserManager.userId),
     val tags: List<String>  = listOf(),
     var lastEditTime: Long = -1,
-    val digest: String = "",
+    var digest: String = "",
     val isPublic: Boolean = false,
     val thumbnails: String = "",
     val title: String = ""

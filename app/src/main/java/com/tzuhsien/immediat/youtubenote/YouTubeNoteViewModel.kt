@@ -6,9 +6,9 @@ import androidx.lifecycle.ViewModel
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
+import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.source.Repository
-import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.getNoteById
 import com.tzuhsien.immediat.network.LoadApiStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +33,10 @@ class YouTubeNoteViewModel(
 
     var liveTimeItemList = MutableLiveData<List<TimeItem>>()
 
+    var liveNoteData = MutableLiveData<Note?>()
+
+    var newNote: Note = Note()
+
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
         get() = _status
@@ -47,6 +51,7 @@ class YouTubeNoteViewModel(
     init {
         Timber.d("[${this::class.simpleName}] noteId Passed in: $noteId")
         getLiveTimeItemsResult()
+        getLiveNoteById()
     }
 
     private fun getLiveTimeItemsResult() {
@@ -120,38 +125,34 @@ class YouTubeNoteViewModel(
 
     }
 
-//    private fun getVideoId() {
-//        coroutineScope.launch {
-//
-//            _status.value = LoadApiStatus.LOADING
-//
-//            val result = repository.getNoteById(noteId)
-//
-//            videoId = when (result) {
-//                is Result.Success -> {
-//                    _error.value = null
-//                    _status.value = LoadApiStatus.DONE
-//                    Timber.d("[${this::class.simpleName}] sourceId: ${result.data?.sourceId} ")
-//                    result.data?.sourceId
-//                }
-//                is Result.Fail -> {
-//                    _error.value = result.error
-//                    _status.value = LoadApiStatus.ERROR
-//                    null
-//                }
-//                is Result.Error -> {
-//                    _error.value = result.exception.toString()
-//                    _status.value = LoadApiStatus.ERROR
-//                    null
-//                }
-//                else -> {
-//                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
-//                    _status.value = LoadApiStatus.ERROR
-//                    null
-//                }
-//            }
-//        }
-//    }
+    private fun getLiveNoteById() {
+        liveNoteData = repository.getLiveNoteById(noteId)
+        _status.value = LoadApiStatus.DONE
+    }
+
+    fun updateNote() {
+        coroutineScope.launch {
+
+            when (val result = repository.updateNote(noteId, newNote)) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
+    }
 }
 
 data class YouTubeNoteUiState(

@@ -57,6 +57,20 @@ class YouTubeNoteFragment : Fragment() {
 
         })
 
+        viewModel.liveNoteData.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                binding.editDigest.setText(it.digest)
+                viewModel.newNote = it
+            }
+        })
+
+        binding.editDigest.setOnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) {
+                viewModel.newNote.digest = binding.editDigest.text.toString()
+                viewModel.updateNote()
+            }
+        }
+
         val adapter = TimeItemAdapter(
             TimeItemAdapter.OnClickListener { viewModel.playTimeItem(it) },
             uiState = viewModel.uiState

@@ -20,7 +20,7 @@ interface Repository {
     /**
      *  For the note (single source)
      */
-    suspend fun getNoteById(noteId: String): Result<Note?>
+    fun getLiveNoteById(noteId: String): MutableLiveData<Note?>
 
     suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult>
 
@@ -33,6 +33,8 @@ interface Repository {
     suspend fun updateTimeItem(noteId: String, timeItem: TimeItem): Result<*>
 
     suspend fun deleteTimeItem(timeItem: TimeItem)
+
+    suspend fun updateNote(noteId: String, note: Note): Result<String>
 
     /**
      *  User info (Login and Profile page method)
