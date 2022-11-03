@@ -13,6 +13,7 @@ import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.network.LoadApiStatus
+import com.tzuhsien.immediat.util.ServiceLocator.repository
 import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,11 +21,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-private lateinit var ytNote: Note
 
 class SearchViewModel(private val repository: Repository) : ViewModel() {
 
-    var videoId: String = ""
+    lateinit var ytInfoNote: Note
 
     private val _ytVideoData = MutableLiveData<YouTubeResult?>(null)
     val ytVideoData: LiveData<YouTubeResult?>
@@ -71,6 +71,16 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
     }
 
+    private fun extractYoutubeVideoId(query: String): String {
+        return if (youtubeWatchUrl in query) {
+            query
+                .substringAfter(youtubeWatchUrl)
+                .substringBefore("&", query.substringAfter(youtubeWatchUrl))
+        } else {
+            query.substringAfter(youtubeShareLink)
+        }
+    }
+
     private fun getYoutubeVideoInfoById(videoId: String) {
         coroutineScope.launch {
 
@@ -110,23 +120,46 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    private fun extractYoutubeVideoId(query: String): String {
-        return if (youtubeWatchUrl in query) {
-            query
-                .substringAfter(youtubeWatchUrl)
-                .substringBefore("&", query.substringAfter(youtubeWatchUrl))
+    fun navigateToYoutubeNote() {
+        if (null != existingNote()) {
+            _navigateToYoutubeNote.value = existingNote()!!.id
         } else {
-            query.substringAfter(youtubeShareLink)
+            updateYouTubeVideoInfo()
         }
     }
 
-    fun updateYouTubeVideoInfo() {
+    private fun existingNote(): Note? {
+
+        var existingNote: Note? = null
+        if (UserManager.usersNoteList.isNotEmpty()) {
+            for (note in UserManager.usersNoteList) {
+                if (note.source == Source.YOUTUBE.source && note.sourceId == ytInfoNote.sourceId) {
+                    existingNote = note
+                }
+            }
+        }
+        return existingNote
+    }
+
+    fun setYoutubeNoteData(videoItem: Item) {
+        ytInfoNote = Note(
+            sourceId = videoItem.id,
+            source = Source.YOUTUBE.source,
+            ownerId = UserManager.userId,
+            authors = listOf(UserManager.userId),
+            tags = listOf(Source.YOUTUBE.source),
+            thumbnails = videoItem.snippet.thumbnails.high.url,
+            title = videoItem.snippet.title
+        )
+    }
+
+    private fun updateYouTubeVideoInfo() {
 
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.updateYouTubeVideoInfo(ytNote.sourceId, ytNote)
+            val result = repository.updateYouTubeVideoInfo(ytInfoNote.sourceId, ytInfoNote)
 
             _navigateToYoutubeNote.value = when (result) {
                 is Result.Success -> {
@@ -157,24 +190,12 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         _navigateToYoutubeNote.value = null
     }
 
+    fun resetMsg() {
+        _showMsg.value = null
+    }
+
     override fun onCleared() {
         super.onCleared()
         viewModelJob.cancel()
-    }
-
-    fun setYoutubeNoteData(videoItem: Item) {
-        ytNote = Note(
-            sourceId = videoItem.id,
-            source = Source.YOUTUBE.source,
-            ownerId = UserManager.userId,
-            authors = listOf(UserManager.userId),
-            tags = listOf(Source.YOUTUBE.source),
-            thumbnails = videoItem.snippet.thumbnails.high.url,
-            title = videoItem.snippet.title
-        )
-    }
-
-    fun resetMsg() {
-        _showMsg.value = null
     }
 }

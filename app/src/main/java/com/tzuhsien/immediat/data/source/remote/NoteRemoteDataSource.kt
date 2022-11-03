@@ -53,6 +53,7 @@ object NoteRemoteDataSource : DataSource {
                     }
                 }
 
+                UserManager.usersNoteList = list
                 liveData.value = list
             }
         return liveData
@@ -103,22 +104,7 @@ object NoteRemoteDataSource : DataSource {
 
     override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String> =
         suspendCoroutine { continuation ->
-            //TODO: LOGIN 後就進入LIST PAGE 拿USER為owner的所有筆記 > 加新的videoId之前local端先比對該sourceId不在user的筆記清單中才建立新note文件
-//            val notesRef = FirebaseFirestore.getInstance()
-//                .collection(PATH_NOTES)
-//                .whereEqualTo("sourceId", videoId)
-//                .whereEqualTo("ownerId", com.tzuhsien.immediat.data.source.local.UserManager.userId)
-//                .whereEqualTo("source", Source.YOUTUBE.source)
-//
-//            notesRef.get().addOnSuccessListener { task ->
-//                if (task.isSuccessful) {
-//                    for (document in task.result) {
-//                        Timber.d(document.id + " => " + document.data)
-//
-//                        if (document.exists()) {
 
-//                            continuation.resume(Result.Success(document.id))
-//                        } else {
             val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
             val doc = notes.document()
 
@@ -130,8 +116,6 @@ object NoteRemoteDataSource : DataSource {
                 .set(note)
                 .addOnCompleteListener { task2 ->
                     if (task2.isSuccessful) {
-                        Timber.i("[${this::class.simpleName}] note: $note ")
-
                         continuation.resume(Result.Success(doc.id))
                     } else {
                         task2.exception?.let {
@@ -144,17 +128,6 @@ object NoteRemoteDataSource : DataSource {
 
                 }
         }
-//                    }
-//
-//                } else {
-//                    task.exception?.let {
-//                        Timber.w("[${this::class.simpleName}] Error querying documents. ${it.message}\"")
-//                        return@addOnCompleteListener
-//                    }
-//                }
-//            }
-
-//        }
 
 
     override fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>> {
