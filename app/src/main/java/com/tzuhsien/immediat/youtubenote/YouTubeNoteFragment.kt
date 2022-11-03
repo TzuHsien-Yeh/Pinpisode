@@ -52,13 +52,18 @@ class YouTubeNoteFragment : Fragment() {
                 viewModel.playMoment.observe(viewLifecycleOwner, Observer { moments ->
                     moments[0]?.let { startAt ->
                         youTubePlayer.seekTo(startAt)
+                        youTubePlayer.play()
+                        Timber.i("youTubePlayer.play() start playing")
 
                         moments[1]?.let { endAt ->
 
-                            val timeLength = (endAt - startAt).toLong()
+                            val timeLength = ((endAt - startAt) * 1000).toLong()
 
+                            Timber.i ("timeLength = $timeLength")
                             Handler(Looper.getMainLooper()).postDelayed({
                                 youTubePlayer.pause()
+
+                                Timber.i("youTubePlayer.pause(): stop playing")
                             }, timeLength)
                         }
                     }
