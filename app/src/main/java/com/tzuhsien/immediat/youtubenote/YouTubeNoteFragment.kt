@@ -116,7 +116,7 @@ class YouTubeNoteFragment : Fragment() {
         }
 
         val adapter = TimeItemAdapter(
-            TimeItemAdapter.OnClickListener { viewModel.playTimeItem(it) },
+//            TimeItemAdapter.OnClickListener { viewModel.playTimeItem(it) },
             uiState = viewModel.uiState
         )
         binding.recyclerViewTimeItems.adapter = adapter
@@ -135,6 +135,8 @@ class YouTubeNoteFragment : Fragment() {
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             binding.youtubePlayerView.enterFullScreen()
+            // TODO : hide toolbar and bottom tool bar
+
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             binding.youtubePlayerView.exitFullScreen()
         }

@@ -13,14 +13,14 @@ import com.tzuhsien.immediat.databinding.ItemTimeCardBinding
 import com.tzuhsien.immediat.ext.formatDuration
 
 class TimeItemAdapter(
-    private val onClickListener: OnClickListener,
+//    private val onClickListener: OnClickListener,
     private val uiState: YouTubeNoteUiState,
 ) :
     ListAdapter<TimeItem, TimeItemAdapter.TimeItemViewHolder>(DiffCallback) {
 
-    class OnClickListener(val clickListener: (timeItem: TimeItem) -> Unit) {
-        fun onClick(timeItem: TimeItem) = clickListener(timeItem)
-    }
+//    class OnClickListener(val clickListener: (timeItem: TimeItem) -> Unit) {
+//        fun onClick(timeItem: TimeItem) = clickListener(timeItem)
+//    }
 
     class TimeItemViewHolder(private var binding: ItemTimeCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -28,6 +28,20 @@ class TimeItemAdapter(
         val context = binding.root.context
 
         fun bind(timeItem: TimeItem, uiState: YouTubeNoteUiState) {
+
+            var deleteViewState = 0
+
+            fun resetDeleteBtnStatus() {
+                deleteViewState = 0
+                binding.deleteTimeItem.text = "Delete"
+                binding.deleteTimeItem.typeface = Typeface.DEFAULT
+            }
+
+            fun confirmDeleteStatus() {
+                deleteViewState = 1
+                binding.deleteTimeItem.text = "Confirm on delete"
+                binding.deleteTimeItem.typeface = Typeface.DEFAULT_BOLD
+            }
 
             binding.textTimeStart.text = timeItem.startAt.formatDuration()
             if (null != timeItem.endAt) {
@@ -51,26 +65,33 @@ class TimeItemAdapter(
                 if (!hasFocus) {
                     timeItem.title = titleView.text.toString()
                     uiState.onItemTitleChanged(timeItem)
+                } else {
+                    resetDeleteBtnStatus()
                 }
             }
             contentView.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     timeItem.text = contentView.text.toString()
                     uiState.onItemContentChanged(timeItem)
+                } else {
+                    resetDeleteBtnStatus()
                 }
             }
 
-            var deleteViewState = 0
+            binding.deleteTimeItem.typeface = when (deleteViewState) {
+                0 -> Typeface.DEFAULT
+                1 -> Typeface.DEFAULT_BOLD
+                else -> Typeface.DEFAULT
+            }
+
             binding.deleteTimeItem.setOnClickListener {
-                when(deleteViewState) {
+                when (deleteViewState) {
                     0 -> {
-                        binding.deleteTimeItem.text = "Confirm on delete"
-                        binding.deleteTimeItem.typeface = Typeface.DEFAULT_BOLD
-                        deleteViewState = 1
+                        confirmDeleteStatus()
                     }
-                    1-> {
+                    1 -> {
                         uiState.onItemToDelete(timeItem)
-                        deleteViewState = 0
+                        resetDeleteBtnStatus()
                     }
                 }
             }
@@ -78,10 +99,14 @@ class TimeItemAdapter(
             // Play the timeTime when onClicked
             binding.textTimeStart.setOnClickListener {
                 uiState.onTimeClick(timeItem)
+
+                resetDeleteBtnStatus()
             }
 
             binding.textTimeEnd.setOnClickListener {
                 uiState.onTimeClick(timeItem)
+
+                resetDeleteBtnStatus()
             }
 
             // TODO:　SET content/title.inputType = TYPE_NULL if (!authorList.contains(UserManager.userId))
@@ -103,34 +128,32 @@ class TimeItemAdapter(
 //                    }
 //                }
 //            }
-            }
-        }
-
-        companion object DiffCallback : DiffUtil.ItemCallback<TimeItem>() {
-            override fun areItemsTheSame(oldItem: TimeItem, newItem: TimeItem): Boolean {
-                return oldItem === newItem
-            }
-
-            override fun areContentsTheSame(oldItem: TimeItem, newItem: TimeItem): Boolean {
-                return oldItem.title == newItem.title &&
-                        oldItem.startAt == newItem.startAt &&
-                        oldItem.endAt == newItem.endAt
-            }
-        }
-
-        override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int,
-        ): TimeItemViewHolder {
-            return TimeItemViewHolder(ItemTimeCardBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false))
-        }
-
-        override fun onBindViewHolder(holder: TimeItemViewHolder, position: Int) {
-            val item = getItem(position) as TimeItem
-            holder.itemView.setOnClickListener {
-                onClickListener.onClick(item)
-            }
-            return holder.bind(item, uiState)
         }
     }
+
+    companion object DiffCallback : DiffUtil.ItemCallback<TimeItem>() {
+        override fun areItemsTheSame(oldItem: TimeItem, newItem: TimeItem): Boolean {
+            return oldItem === newItem
+        }
+
+        override fun areContentsTheSame(oldItem: TimeItem, newItem: TimeItem): Boolean {
+            return oldItem.title == newItem.title &&
+                    oldItem.startAt == newItem.startAt &&
+                    oldItem.endAt == newItem.endAt
+        }
+    }
+
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): TimeItemAdapter.TimeItemViewHolder {
+        return TimeItemAdapter.TimeItemViewHolder(ItemTimeCardBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false))
+    }
+
+    override fun onBindViewHolder(holder: TimeItemViewHolder, position: Int) {
+        val item = getItem(position) as TimeItem
+
+        return holder.bind(item, uiState)
+    }
+}
