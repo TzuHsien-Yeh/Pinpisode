@@ -3,6 +3,7 @@ package com.tzuhsien.immediat.youtubenote
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
@@ -25,9 +26,15 @@ class YouTubeNoteViewModel(
     var startAt: Float = 0f
     var endAt: Float = 0f
 
-    private val _playMoment = MutableLiveData<List<Float?>>(listOf(null, null))
-    val playMoment: LiveData<List<Float?>>
-        get() = _playMoment
+    private val _playStart = MutableLiveData<Float?>(null)
+    val playStart: LiveData<Float?>
+        get() = _playStart
+
+    var playMomentEnd: Float? = null
+
+    private val _currentSecond = MutableLiveData<Float>()
+    val currentSecond: LiveData<Float>
+        get() = _currentSecond
 
     val uiState = YouTubeNoteUiState(
         onItemTitleChanged = { item ->
@@ -160,9 +167,9 @@ class YouTubeNoteViewModel(
 
     }
 
-    fun playTimeItem(timeItem: TimeItem) {
-        val moments = listOf(timeItem.startAt, timeItem.endAt)
-        _playMoment.value = moments
+    private fun playTimeItem(timeItem: TimeItem) {
+        _playStart.value = timeItem.startAt
+        playMomentEnd = timeItem.endAt
     }
 
 
@@ -194,6 +201,18 @@ class YouTubeNoteViewModel(
         super.onCleared()
         viewModelJob.cancel()
     }
+
+    fun clearPlayingMomentStart() {
+        _playStart.value = null
+    }
+
+    fun clearPlayingMomentEnd() {
+        playMomentEnd = null
+    }
+
+    fun getCurrentSecond(second: Float) {
+        _currentSecond.value = second
+    }
 }
 
 data class YouTubeNoteUiState(
@@ -202,4 +221,3 @@ data class YouTubeNoteUiState(
     var onItemToDelete: (TimeItem) -> Unit,
     val onTimeClick: (TimeItem) -> Unit
 )
-

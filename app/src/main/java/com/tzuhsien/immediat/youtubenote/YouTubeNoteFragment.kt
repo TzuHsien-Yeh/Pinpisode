@@ -2,8 +2,6 @@ package com.tzuhsien.immediat.youtubenote
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +9,7 @@ import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
@@ -18,7 +17,8 @@ import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import timber.log.Timber
-import kotlin.concurrent.timerTask
+import java.lang.Math.ceil
+import kotlin.math.ceil
 
 
 class YouTubeNoteFragment : Fragment() {
@@ -33,6 +33,7 @@ class YouTubeNoteFragment : Fragment() {
 
     var startOrStopToggle = 0
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -40,46 +41,51 @@ class YouTubeNoteFragment : Fragment() {
 
         binding = FragmentYoutubeNoteBinding.inflate(layoutInflater)
 
+        /**
+         *  YouTube player and behavior control
+         * */
         val youTubePlayerView: YouTubePlayerView = binding.youtubePlayerView
         lifecycle.addObserver(youTubePlayerView)
 
+        val videoId = viewModel.videoId
+
+        var ytPlayer: YouTubePlayer? = null
+
+        viewModel.playStart.observe(viewLifecycleOwner, Observer { startAt ->
+            startAt?.let {
+                ytPlayer?.seekTo(startAt)
+                ytPlayer?.play()
+            }
+        })
+
+        viewModel.currentSecond.observe(viewLifecycleOwner, Observer { currentSec ->
+            viewModel.playMomentEnd?.let {
+                if (it <= currentSec){
+                    ytPlayer?.pause()
+                    viewModel.clearPlayingMomentStart()
+                    viewModel.clearPlayingMomentEnd()
+                }
+            }
+        })
+
         youTubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(@NonNull youTubePlayer: YouTubePlayer) {
-                val videoId = viewModel.videoId
-
-                youTubePlayer.loadVideo(videoId, 0f)
-
-                viewModel.playMoment.observe(viewLifecycleOwner, Observer { moments ->
-                    moments[0]?.let { startAt ->
-                        youTubePlayer.seekTo(startAt)
-                        youTubePlayer.play()
-                        Timber.i("youTubePlayer.play() start playing")
-
-                        moments[1]?.let { endAt ->
-
-                            val timeLength = ((endAt - startAt) * 1000).toLong()
-
-                            Timber.i ("timeLength = $timeLength")
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                youTubePlayer.pause()
-
-                                Timber.i("youTubePlayer.pause(): stop playing")
-                            }, timeLength)
-                        }
-                    }
-                })
-                // TODO: recyclerview item onclick > play at the second / clip
+                youTubePlayer.cueVideo(videoId, 0f)
+                ytPlayer = youTubePlayer
             }
 
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
+
+                viewModel.getCurrentSecond(second)
+                Timber.d("viewModel.getCurrentSecond(second): $second")
 
                 binding.btnTakeTimestamp.setOnClickListener {
                     viewModel.createTimeItem(second, null)
                 }
 
                 binding.btnClip.setOnClickListener {
-                    when(startOrStopToggle) {
+                    when (startOrStopToggle) {
                         0 -> {
                             viewModel.startAt = second
                             startOrStopToggle = 1
@@ -98,23 +104,11 @@ class YouTubeNoteFragment : Fragment() {
                     }
                 }
             }
-
         })
 
-        viewModel.liveNoteData.observe(viewLifecycleOwner, Observer {
-            it?.let {
-                binding.editDigest.setText(it.digest)
-                viewModel.newNote = it
-            }
-        })
-
-        binding.editDigest.setOnFocusChangeListener { view, hasFocus ->
-            if (!hasFocus) {
-                viewModel.newNote.digest = binding.editDigest.text.toString()
-                viewModel.updateNote()
-            }
-        }
-
+        /**
+         *  RecyclerView views
+         * */
         val adapter = TimeItemAdapter(
 //            TimeItemAdapter.OnClickListener { viewModel.playTimeItem(it) },
             uiState = viewModel.uiState
@@ -124,6 +118,14 @@ class YouTubeNoteFragment : Fragment() {
             Timber.d("viewModel.liveTimeItemList.observe: $it")
             adapter.submitList(it)
             adapter.notifyDataSetChanged()
+        })
+
+        // EditText
+        viewModel.liveNoteData.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                binding.editDigest.setText(it.digest)
+                viewModel.newNote = it
+            }
         })
 
         return binding.root
