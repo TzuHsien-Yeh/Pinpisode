@@ -13,14 +13,9 @@ import com.tzuhsien.immediat.databinding.ItemTimeCardBinding
 import com.tzuhsien.immediat.ext.formatDuration
 
 class TimeItemAdapter(
-//    private val onClickListener: OnClickListener,
     private val uiState: YouTubeNoteUiState,
 ) :
     ListAdapter<TimeItem, TimeItemAdapter.TimeItemViewHolder>(DiffCallback) {
-
-//    class OnClickListener(val clickListener: (timeItem: TimeItem) -> Unit) {
-//        fun onClick(timeItem: TimeItem) = clickListener(timeItem)
-//    }
 
     class TimeItemViewHolder(private var binding: ItemTimeCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -146,8 +141,8 @@ class TimeItemAdapter(
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): TimeItemAdapter.TimeItemViewHolder {
-        return TimeItemAdapter.TimeItemViewHolder(ItemTimeCardBinding.inflate(
+    ): TimeItemViewHolder {
+        return TimeItemViewHolder(ItemTimeCardBinding.inflate(
             LayoutInflater.from(parent.context), parent, false))
     }
 

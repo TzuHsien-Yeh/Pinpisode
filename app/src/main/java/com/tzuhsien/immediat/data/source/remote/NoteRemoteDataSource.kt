@@ -11,6 +11,7 @@ import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.DataSource
+import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.data.succeeded
 import com.tzuhsien.immediat.network.YouTubeApi
 import com.tzuhsien.immediat.util.Util.getString
@@ -27,10 +28,34 @@ object NoteRemoteDataSource : DataSource {
     private const val PATH_USERS = "users"
     private const val PATH_TIME_ITEMS = "timeItems"
     private const val KEY_START_AT = "startAt" // for orderBy()
-    private const val KEY_LAST_EDIT_TIME = "lastEditTime" // for orderby()
+    private const val KEY_LAST_EDIT_TIME = "lastEditTime" // for orderBy()
 
-    override suspend fun getAllNotes() {
-        TODO("Not yet implemented")
+    override fun getAllLiveNotes(): MutableLiveData<List<Note>> {
+        val liveData = MutableLiveData<List<Note>>()
+
+        FirebaseFirestore.getInstance()
+            .collection(PATH_NOTES)
+            .whereEqualTo("ownerId", UserManager.userId)
+            .orderBy(KEY_LAST_EDIT_TIME, Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                Timber.i("addSnapshotListener detect")
+
+                error?.let {
+                    Timber.w("[${this::class.simpleName}] Error getting documents. ${it.message}")
+                }
+
+                val list = mutableListOf<Note>()
+                if (snapshot != null) {
+                    for (doc in snapshot) {
+                        Timber.d(doc.id + " => " + doc.data)
+                        val noteItem = doc.toObject(Note::class.java)
+                        list.add(noteItem)
+                    }
+                }
+
+                liveData.value = list
+            }
+        return liveData
     }
 
     override fun getLiveNoteById(noteId: String): MutableLiveData<Note?> {

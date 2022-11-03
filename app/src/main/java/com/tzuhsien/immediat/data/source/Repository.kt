@@ -11,8 +11,7 @@ interface Repository {
     /**
      *  Pages that show a whole list of notes
      * */
-    // notes of which the user is the owner (home page)
-    suspend fun getAllNotes()
+    fun getAllLiveNotes(): MutableLiveData<List<Note>>
 
     // notes of which the user is not the owner
     suspend fun getCoauthoringNotes()

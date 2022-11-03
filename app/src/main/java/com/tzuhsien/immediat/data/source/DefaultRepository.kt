@@ -7,8 +7,9 @@ import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.YouTubeResult
 
 class DefaultRepository(private val noteRemoteDataSource: DataSource): Repository {
-    override suspend fun getAllNotes() {
-        TODO("Not yet implemented")
+
+    override fun getAllLiveNotes(): MutableLiveData<List<Note>> {
+        return noteRemoteDataSource.getAllLiveNotes()
     }
 
     override fun getLiveNoteById(noteId: String):  MutableLiveData<Note?>  {
