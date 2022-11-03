@@ -38,6 +38,7 @@ class SearchFragment : Fragment() {
                 }
 
                 override fun onQueryTextChange(query: String?): Boolean {
+                    viewModel.resetMsg()
                     return false
                 }
             }

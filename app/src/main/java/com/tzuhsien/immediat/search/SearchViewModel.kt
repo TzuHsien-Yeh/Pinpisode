@@ -26,7 +26,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
     var videoId: String = ""
 
-    private val _ytVideoData = MutableLiveData<YouTubeResult?>()
+    private val _ytVideoData = MutableLiveData<YouTubeResult?>(null)
     val ytVideoData: LiveData<YouTubeResult?>
         get() = _ytVideoData
 
@@ -43,18 +43,13 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
-    private val _showMsg = MutableLiveData<String?>()
+    private val _showMsg = MutableLiveData<String?>(null)
     val showMsg: LiveData<String?>
         get() = _showMsg
 
     private val _navigateToYoutubeNote = MutableLiveData<String?>()
     val navigateToYoutubeNote: LiveData<String?>
         get() = _navigateToYoutubeNote
-
-    init {
-        _ytVideoData.value = null
-        _showMsg.value = null
-    }
 
     val youtubeWatchUrl = "youtube.com/watch?v="
     val youtubeShareLink = "youtu.be/"
@@ -66,7 +61,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             val videoId = extractYoutubeVideoId(query)
             if (videoId.isNotEmpty()) {
                 getYoutubeVideoInfoById(videoId)
-                // TODO: prepare to call YT search api
+                // TODO: else -> prepare to call YT search api
             }
         } else {
 
@@ -177,5 +172,9 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             thumbnails = videoItem.snippet.thumbnails.high.url,
             title = videoItem.snippet.title
         )
+    }
+
+    fun resetMsg() {
+        _showMsg.value = null
     }
 }
