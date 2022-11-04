@@ -12,14 +12,15 @@ import com.tzuhsien.immediat.network.LoadApiStatus
 import timber.log.Timber
 
 class NoteListViewModel(private val repository: Repository) : ViewModel() {
-    var liveNoteList = MutableLiveData<List<Note>>()
+    private var _liveNoteList = MutableLiveData<List<Note>>()
+    val liveNoteList: LiveData<List<Note>>
+        get() = _liveNoteList
 
     var set = mutableSetOf<String>()
-    var tagSet = MutableLiveData<Set<String>>()
 
-//    private val _selectedTag = MutableLiveData<String>()
-//    val selectedTag: LiveData<String>
-//        get() = _selectedTag
+    private val _tagSet = MutableLiveData<Set<String>>()
+    val tagSet: LiveData<Set<String>>
+        get() = _tagSet
 
     var selectedTag: String? = null
 
@@ -31,19 +32,13 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     val navigateToYoutubeNote: LiveData<Note>
         get() = _navigateToYoutubeNote
 
-    val uiState = NoteListUiState(
-        onTagClick = {
-            selectedTag = it
-        }
-    )
-
     init {
         getAllLiveNotes()
     }
 
     private fun getAllLiveNotes() {
         _status.value = LoadApiStatus.DONE
-        liveNoteList = repository.getAllLiveNotes()
+        _liveNoteList = repository.getAllLiveNotes()
     }
 
     fun getAllTags(notes: List<Note>){
@@ -53,7 +48,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                     set.add(tag)
                 }
             }
-        tagSet.value = set
+        _tagSet.value = set
     }
 
     fun navigateToNotePage(note: Note) {
@@ -69,13 +64,12 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
     }
 
-    fun hideSelectedTagFromTagSet(tag: String) {
+    fun tagSelected(tag: String) {
         selectedTag = tag
-        tagSet.value = tagSet.value // invoke live data change
+
+        // invoke live data change
+        _tagSet.value = _tagSet.value
+        _liveNoteList.value = _liveNoteList.value
     }
 
 }
-
-data class NoteListUiState(
-    val onTagClick: (String) -> Unit
-)

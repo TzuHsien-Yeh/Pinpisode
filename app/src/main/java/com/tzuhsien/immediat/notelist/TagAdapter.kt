@@ -16,28 +16,6 @@ private val onClickListener: OnTagClickListener
     class TagViewHolder(private val binding: ItemTagBinding): RecyclerView.ViewHolder(binding.root){
         fun bind(tag: String){
             binding.textTag.text = tag
-//            binding.cardTag.visibility = View.VISIBLE
-//            binding.cardTag.setOnClickListener {
-//                binding.cardTag.visibility = View.GONE
-//                uiState.onTagClick(tag)
-//            }
-
-//            binding.chipTag.text = tag
-//            binding.chipTag.setOnCheckedChangeListener { compoundButton, b ->
-//                if (b){
-//                    binding.chipGroupTag.view(itemView)
-//                    uiState.onTagClick(tag)
-//                } else {
-//                    binding.chipGroupTag.allViews.
-//                }
-//            }
-////            binding.chipGroupTag.setOnCheckedStateChangeListener { group, checkedIds ->
-////                if (checkedIds.isNotEmpty()){
-////                     group.removeView(itemView)
-////                } else {
-////                    binding.chipTag.visibility = View.VISIBLE
-////                }
-////            }
         }
     }
 

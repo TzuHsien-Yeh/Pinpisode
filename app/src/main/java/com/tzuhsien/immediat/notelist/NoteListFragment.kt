@@ -32,22 +32,14 @@ class NoteListFragment : Fragment() {
         val tagAdapter = TagAdapter(onClickListener = TagAdapter.OnTagClickListener {
             binding.textSelectedTag.text = it
             binding.cardSelectedTag.visibility = View.VISIBLE
-            viewModel.hideSelectedTagFromTagSet(it)
+            viewModel.tagSelected(it)
         })
         binding.recyclerviewTag.adapter = tagAdapter
         viewModel.tagSet.observe(viewLifecycleOwner, Observer { set ->
-            tagAdapter.submitList(set.filter { it != viewModel.selectedTag }.sorted().toList())
+            set?.let {
+                tagAdapter.submitList(set.filter { it != viewModel.selectedTag }.sorted().toList())
+            }
         })
-
-//        viewModel.selectedTag.observe(viewLifecycleOwner, Observer {
-//            if (null == it) {
-//                binding.cardSelectedTag.visibility = View.GONE
-//            } else {
-//                binding.cardSelectedTag.visibility = View.VISIBLE
-//                binding.textSelectedTag.text = it
-//            }
-//        })
-
 
         /**
          * Note list
@@ -56,9 +48,15 @@ class NoteListFragment : Fragment() {
             viewModel.navigateToNotePage(it)
         })
         binding.recyclerviewNoteList.adapter = noteAdapter
-        viewModel.liveNoteList.observe(viewLifecycleOwner, Observer {
-            viewModel.getAllTags(it)
-            noteAdapter.submitList(it)
+        viewModel.liveNoteList.observe(viewLifecycleOwner, Observer { list ->
+            list?.let {
+                viewModel.getAllTags(list)
+                if (null != viewModel.selectedTag) {
+                    noteAdapter.submitList(list.filter { it.tags.contains(viewModel.selectedTag) })
+                } else {
+                    noteAdapter.submitList(list)
+                }
+            }
         })
 
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
