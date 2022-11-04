@@ -11,7 +11,6 @@ import androidx.navigation.fragment.findNavController
 import com.tzuhsien.immediat.databinding.FragmentNoteListBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
-import timber.log.Timber
 
 class NoteListFragment : Fragment() {
 
@@ -30,16 +29,25 @@ class NoteListFragment : Fragment() {
         /**
          * Tag list
          * */
-        val tagAdapter = TagAdapter(onClickListener = TagAdapter.OnTagClickListener{
-            Timber.d("TagAdapter(onClickListener = TagAdapter.OnTagClickListener triggered")
-            binding.cardSelectedTag.visibility = View.VISIBLE
+        val tagAdapter = TagAdapter(onClickListener = TagAdapter.OnTagClickListener {
             binding.textSelectedTag.text = it
-            viewModel.removeSelectedTagFromTagSet(it)
+            binding.cardSelectedTag.visibility = View.VISIBLE
+            viewModel.hideSelectedTagFromTagSet(it)
         })
         binding.recyclerviewTag.adapter = tagAdapter
-        viewModel.tagSet.observe(viewLifecycleOwner, Observer {
-            tagAdapter.submitList(it.toList())
+        viewModel.tagSet.observe(viewLifecycleOwner, Observer { set ->
+            tagAdapter.submitList(set.filter { it != viewModel.selectedTag }.sorted().toList())
         })
+
+//        viewModel.selectedTag.observe(viewLifecycleOwner, Observer {
+//            if (null == it) {
+//                binding.cardSelectedTag.visibility = View.GONE
+//            } else {
+//                binding.cardSelectedTag.visibility = View.VISIBLE
+//                binding.textSelectedTag.text = it
+//            }
+//        })
+
 
         /**
          * Note list

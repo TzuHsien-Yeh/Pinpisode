@@ -9,7 +9,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/chip_tag"
+        android:id="@+id/card_tag"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,5 +30,20 @@
             android:textSize="16sp"
             android:textColor="@color/colorPrimaryVariant"/>
     </androidx.cardview.widget.CardView>
+
+<!--    <com.google.android.material.chip.ChipGroup-->
+<!--        android:id="@+id/chip_group_tag"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="match_parent"-->
+<!--        app:singleSelection="true"-->
+<!--        app:layout_constraintStart_toStartOf="parent">-->
+
+<!--        <com.google.android.material.chip.Chip-->
+<!--            android:id="@+id/chip_tag"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="match_parent"-->
+<!--            tools:text="BBBB"/>-->
+
+<!--    </com.google.android.material.chip.ChipGroup>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
