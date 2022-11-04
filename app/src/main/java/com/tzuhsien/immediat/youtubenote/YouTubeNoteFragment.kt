@@ -107,10 +107,25 @@ class YouTubeNoteFragment : Fragment() {
         })
 
         /**
+         * Digest of the video (editText)
+         * */
+        binding.editDigest.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                viewModel.newNote.digest = binding.editDigest.text.toString()
+                viewModel.updateNote()
+            }
+        }
+        viewModel.liveNoteData.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                binding.editDigest.setText(it.digest)
+                viewModel.newNote = it
+            }
+        })
+
+        /**
          *  RecyclerView views
          * */
         val adapter = TimeItemAdapter(
-//            TimeItemAdapter.OnClickListener { viewModel.playTimeItem(it) },
             uiState = viewModel.uiState
         )
         binding.recyclerViewTimeItems.adapter = adapter
@@ -118,14 +133,6 @@ class YouTubeNoteFragment : Fragment() {
             Timber.d("viewModel.liveTimeItemList.observe: $it")
             adapter.submitList(it)
             adapter.notifyDataSetChanged()
-        })
-
-        // EditText
-        viewModel.liveNoteData.observe(viewLifecycleOwner, Observer {
-            it?.let {
-                binding.editDigest.setText(it.digest)
-                viewModel.newNote = it
-            }
         })
 
         return binding.root

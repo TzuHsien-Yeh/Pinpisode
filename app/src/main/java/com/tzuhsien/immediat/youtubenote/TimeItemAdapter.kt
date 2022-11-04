@@ -47,6 +47,9 @@ class TimeItemAdapter(
                 binding.textTimeEnd.visibility = View.GONE
             }
 
+            /**
+             * EditText instant update
+             * */
             val titleView = binding.editTextItemTitle
             val contentView = binding.editTextInputText
 
