@@ -13,5 +13,7 @@ data class Note (
     var digest: String = "",
     val isPublic: Boolean = false,
     val thumbnails: String = "",
-    val title: String = ""
+    val title: String = "",
+    val duration: String = "",
+    var lastTimestamp: Float = 0F
 )

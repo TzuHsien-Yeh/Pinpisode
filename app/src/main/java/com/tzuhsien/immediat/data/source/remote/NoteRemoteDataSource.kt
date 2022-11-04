@@ -254,7 +254,11 @@ object NoteRemoteDataSource : DataSource {
             note.lastEditTime = Calendar.getInstance().timeInMillis
 
             doc
-                .set(note)
+                .update(
+                    "digest", note.digest,
+                    "lastTimestamp", note.lastTimestamp,
+                    "lastEditTime", note.lastEditTime
+                )
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         continuation.resume(Result.Success(""))

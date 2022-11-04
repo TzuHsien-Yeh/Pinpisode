@@ -2,6 +2,7 @@ package com.tzuhsien.immediat.ext
 
 import android.text.format.DateUtils
 import java.text.SimpleDateFormat
+import kotlin.time.Duration
 
 
 // Convert UTC to local time
@@ -13,3 +14,5 @@ fun String.utcToLocalTime(): String {
 }
 
 fun Float.formatDuration(): String = DateUtils.formatElapsedTime(this.toLong())
+
+fun String.parseDuration(): Long? = Duration.parseIsoStringOrNull(this)?.inWholeMilliseconds

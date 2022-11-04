@@ -3,7 +3,6 @@ package com.tzuhsien.immediat.youtubenote
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
@@ -11,6 +10,7 @@ import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.network.LoadApiStatus
+import com.tzuhsien.immediat.util.ServiceLocator.repository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -51,9 +51,13 @@ class YouTubeNoteViewModel(
         }
     )
 
-    var liveTimeItemList = MutableLiveData<List<TimeItem>>()
+    private var _liveTimeItemList = MutableLiveData<List<TimeItem>>()
+    val liveTimeItemList: LiveData<List<TimeItem>>
+        get() = _liveTimeItemList
 
-    var liveNoteData = MutableLiveData<Note?>()
+    private var _liveNoteData = MutableLiveData<Note?>()
+    val liveNoteData: LiveData<Note?>
+        get() = _liveNoteData
 
     var newNote: Note = Note()
 
@@ -75,12 +79,12 @@ class YouTubeNoteViewModel(
     }
 
     private fun getLiveTimeItemsResult() {
-        liveTimeItemList = repository.getLiveTimeItems(noteId)
+        _liveTimeItemList = repository.getLiveTimeItems(noteId)
         _status.value = LoadApiStatus.DONE
     }
 
     private fun getLiveNoteById() {
-        liveNoteData = repository.getLiveNoteById(noteId)
+        _liveNoteData = repository.getLiveNoteById(noteId)
         _status.value = LoadApiStatus.DONE
     }
 
@@ -98,6 +102,22 @@ class YouTubeNoteViewModel(
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
                     result.data
+                    Timber.d("liveNoteData.value?.lastTimestamp = ${liveNoteData.value?.lastTimestamp}")
+                    liveNoteData.value?.let { noteFromDb ->
+                        if (noteFromDb.lastTimestamp < startAt) {
+                            if (null != endAt && noteFromDb.lastTimestamp < endAt) {
+                                newNote.lastTimestamp = endAt
+                                updateNote()
+                            } else {
+                                newNote.lastTimestamp = startAt
+                                updateNote()
+                            }
+                        } else {
+                            newNote.lastTimestamp = noteFromDb.lastTimestamp
+                            updateNote()
+                        }
+                    }
+
                 }
                 is Result.Fail -> {
                     _error.value = result.error

@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import kotlin.time.Duration
 
 
 class SearchViewModel(private val repository: Repository) : ViewModel() {
@@ -149,7 +150,8 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             authors = listOf(UserManager.userId),
             tags = listOf(Source.YOUTUBE.source),
             thumbnails = videoItem.snippet.thumbnails.high.url,
-            title = videoItem.snippet.title
+            title = videoItem.snippet.title,
+            duration = videoItem.contentDetails.duration
         )
     }
 
