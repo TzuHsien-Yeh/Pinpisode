@@ -17,4 +17,12 @@
 <!--    theme colors-->
 
     <color name="colorPrimaryVariant">#c6a2a7</color>
+    <color name="color_on_primary">#39292d</color>
+
+    <color name="color_secondary">#e0b7c3</color>
+    <color name="color_secondary_variant">#e09fc4</color>
+
+
+
+    <color name="theme_medium"></color>
 </resources>

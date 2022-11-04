@@ -7,12 +7,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.databinding.FragmentNoteListBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
+import timber.log.Timber
 
 class NoteListFragment : Fragment() {
 
@@ -28,13 +27,30 @@ class NoteListFragment : Fragment() {
     ): View? {
         binding = FragmentNoteListBinding.inflate(layoutInflater)
 
-        val adapter = NoteAdapter(onClickListener = NoteAdapter.OnNoteClickListener {
+        /**
+         * Tag list
+         * */
+        val tagAdapter = TagAdapter(onClickListener = TagAdapter.OnTagClickListener{
+            Timber.d("TagAdapter(onClickListener = TagAdapter.OnTagClickListener triggered")
+            binding.cardSelectedTag.visibility = View.VISIBLE
+            binding.textSelectedTag.text = it
+            viewModel.removeSelectedTagFromTagSet(it)
+        })
+        binding.recyclerviewTag.adapter = tagAdapter
+        viewModel.tagSet.observe(viewLifecycleOwner, Observer {
+            tagAdapter.submitList(it.toList())
+        })
+
+        /**
+         * Note list
+         * */
+        val noteAdapter = NoteAdapter(onClickListener = NoteAdapter.OnNoteClickListener {
             viewModel.navigateToNotePage(it)
         })
-        binding.recyclerviewNoteList.adapter = adapter
-
+        binding.recyclerviewNoteList.adapter = noteAdapter
         viewModel.liveNoteList.observe(viewLifecycleOwner, Observer {
-            adapter.submitList(it)
+            viewModel.getAllTags(it)
+            noteAdapter.submitList(it)
         })
 
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
