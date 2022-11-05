@@ -8,6 +8,7 @@ import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimeItem
+import com.tzuhsien.immediat.data.model.TimeItemDisplay
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.network.LoadApiStatus
 import com.tzuhsien.immediat.util.ServiceLocator.repository
@@ -22,6 +23,12 @@ class YouTubeNoteViewModel(
     private val noteId: String,
     val videoId: String
     ) : ViewModel() {
+
+    // state of clipping btn
+    var startOrStopToggle = 0
+
+    // state of displaying options:
+    var displayState: TimeItemDisplay = TimeItemDisplay.ALL
 
     var startAt: Float = 0f
     var endAt: Float = 0f
@@ -232,6 +239,10 @@ class YouTubeNoteViewModel(
 
     fun getCurrentSecond(second: Float) {
         _currentSecond.value = second
+    }
+
+    fun notifyDisplayChange() {
+        _liveTimeItemList.value = _liveTimeItemList.value
     }
 }
 

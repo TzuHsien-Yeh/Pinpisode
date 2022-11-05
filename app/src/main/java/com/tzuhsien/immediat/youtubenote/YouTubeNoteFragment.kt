@@ -12,8 +12,8 @@ import androidx.lifecycle.Observer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-import com.tzuhsien.immediat.MainActivity
 import com.tzuhsien.immediat.R
+import com.tzuhsien.immediat.data.model.TimeItemDisplay
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import timber.log.Timber
@@ -28,9 +28,6 @@ class YouTubeNoteFragment : Fragment() {
         )
     }
     private lateinit var binding: FragmentYoutubeNoteBinding
-
-    var startOrStopToggle = 0
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,10 +80,10 @@ class YouTubeNoteFragment : Fragment() {
                 }
 
                 binding.btnClip.setOnClickListener {
-                    when (startOrStopToggle) {
+                    when (viewModel.startOrStopToggle) {
                         0 -> {
                             viewModel.startAt = second
-                            startOrStopToggle = 1
+                            viewModel.startOrStopToggle = 1
                             binding.btnClip.setImageResource(R.drawable.ic_square)
                             Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
                         }
@@ -97,7 +94,7 @@ class YouTubeNoteFragment : Fragment() {
                             binding.btnClip.setImageResource(R.drawable.ic_youtube_black)
 //                            binding.btnClip.setImageResource(R.drawable.ic_end_clipping)
                             viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
-                            startOrStopToggle = 0
+                            viewModel.startOrStopToggle = 0
                         }
                     }
                 }
@@ -127,11 +124,43 @@ class YouTubeNoteFragment : Fragment() {
             uiState = viewModel.uiState
         )
         binding.recyclerViewTimeItems.adapter = adapter
-        viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer {
-            Timber.d("viewModel.liveTimeItemList.observe: $it")
-            adapter.submitList(it)
-            adapter.notifyDataSetChanged()
+        viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer { list ->
+            when (viewModel.displayState) {
+                TimeItemDisplay.ALL -> {
+                    adapter.submitList(list)
+                }
+                TimeItemDisplay.TIMESTAMP -> {
+                    adapter.submitList(list.filter { it.endAt == null })
+                }
+                TimeItemDisplay.CLIP -> {
+                    adapter.submitList(list.filter { it.endAt != null })
+                }
+            }
         })
+
+        binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_youtube_black)
+        binding.icTimeItemDisplayOptions.setOnClickListener {
+            when (viewModel.displayState) {
+                TimeItemDisplay.ALL -> {
+                    // to display only timestamps
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_pin)
+                    viewModel.displayState = TimeItemDisplay.TIMESTAMP
+                    viewModel.notifyDisplayChange()
+                }
+                TimeItemDisplay.TIMESTAMP -> {
+                    // to display only clips
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_square)
+                    viewModel.displayState = TimeItemDisplay.CLIP
+                    viewModel.notifyDisplayChange()
+                }
+
+                TimeItemDisplay.CLIP -> {
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_youtube_black)
+                    viewModel.displayState = TimeItemDisplay.ALL
+                    viewModel.notifyDisplayChange()
+                }
+            }
+        }
 
         return binding.root
     }
