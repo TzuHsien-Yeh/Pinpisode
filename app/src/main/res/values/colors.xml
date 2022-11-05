@@ -25,4 +25,6 @@
 
 
     <color name="theme_medium"></color>
+    
+    <color name="old_book_color">#F3EFE6</color>
 </resources>

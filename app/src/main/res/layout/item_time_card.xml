@@ -15,7 +15,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:cardElevation="4dp"
         app:cardCornerRadius="20dp"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/old_book_color"
         app:cardMaxElevation="2dp"
         app:cardPreventCornerOverlap="true"
         app:cardUseCompatPadding="false">

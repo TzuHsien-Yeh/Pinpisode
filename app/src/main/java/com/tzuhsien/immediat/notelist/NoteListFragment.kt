@@ -119,12 +119,15 @@ class NoteListFragment : Fragment() {
         })
 
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
-            findNavController().navigate(
-                YouTubeNoteFragmentDirections.actionGlobalTakeNoteFragment(
-                    noteIdKey = it.id,
-                    videoIdKey = it.sourceId
+            it?.let {
+                findNavController().navigate(
+                    YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
+                        noteIdKey = it.id,
+                        videoIdKey = it.sourceId
+                    )
                 )
-            )
+                viewModel.doneNavigationToYtNote()
+            }
         })
 
         return binding.root

@@ -26,8 +26,16 @@
         <argument android:name="video_id_key"
             app:argType="string"
             app:nullable="false"/>
+        <action
+            android:id="@+id/action_youTubeNoteFragment_to_noteListFragment"
+            app:destination="@id/noteListFragment" />
+        <action
+            android:id="@+id/action_youTubeNoteFragment_pop"
+            app:popUpTo="@id/youTubeNoteFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
-    <action android:id="@+id/action_global_takeNoteFragment"
+    <action android:id="@+id/action_global_YouTubeNoteFragment"
         app:destination="@id/youTubeNoteFragment" />
+    <action android:id="@+id/action_global_noteListFragment" app:destination="@id/noteListFragment" />
 </navigation>

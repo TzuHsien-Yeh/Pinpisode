@@ -30,8 +30,8 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     val status: LiveData<LoadApiStatus>
         get() = _status
 
-    private val _navigateToYoutubeNote = MutableLiveData<Note>()
-    val navigateToYoutubeNote: LiveData<Note>
+    private val _navigateToYoutubeNote = MutableLiveData<Note?>(null)
+    val navigateToYoutubeNote: LiveData<Note?>
         get() = _navigateToYoutubeNote
 
     init {
@@ -107,6 +107,10 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
     fun changeOrderDirection() {
         _liveNoteList.value = _liveNoteList.value?.reversed()
+    }
+
+    fun doneNavigationToYtNote() {
+        _navigateToYoutubeNote.value = null
     }
 
 }
