@@ -35,7 +35,7 @@ object NoteRemoteDataSource : DataSource {
 
         FirebaseFirestore.getInstance()
             .collection(PATH_NOTES)
-            .whereEqualTo("ownerId", UserManager.userId)
+            .whereArrayContains("authors", UserManager.userId)
             .orderBy(KEY_LAST_EDIT_TIME, Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 Timber.i("addSnapshotListener detect")
@@ -53,7 +53,19 @@ object NoteRemoteDataSource : DataSource {
                     }
                 }
 
-                UserManager.usersNoteList = list
+                UserManager.allEditableNoteList = list
+                UserManager.usersNoteList = list.filter { it.ownerId == UserManager.userId }
+                fun getAllTags(): MutableSet<String> {
+                    val set = mutableSetOf<String>()
+                    for (note in UserManager.allEditableNoteList) {
+                        for (tag in note.tags) {
+                            set.add(tag)
+                        }
+                    }
+                    return set
+                }
+                UserManager.tagSet = getAllTags()
+
                 liveData.value = list
             }
         return liveData
@@ -272,6 +284,34 @@ object NoteRemoteDataSource : DataSource {
                     }
                 }
         }
+
+    override suspend fun updateTags(noteId: String, note: Note): Result<String> =
+        suspendCoroutine { continuation ->
+            val doc = FirebaseFirestore.getInstance()
+                .collection(PATH_NOTES)
+                .document(noteId)
+
+            note.lastEditTime = Calendar.getInstance().timeInMillis
+
+            doc
+                .update(
+                    "tags", note.tags,
+                    "lastEditTime", note.lastEditTime
+                )
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success(""))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+        }
+
 
     override suspend fun addUser(token: String) {
         TODO("Not yet implemented")

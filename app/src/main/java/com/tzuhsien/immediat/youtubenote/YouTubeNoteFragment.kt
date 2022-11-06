@@ -9,13 +9,16 @@ import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
+import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.getLiveNoteById
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
+import com.tzuhsien.immediat.tag.TagDialogFragmentDirections
 import timber.log.Timber
 
 
@@ -111,9 +114,9 @@ class YouTubeNoteFragment : Fragment() {
             }
         }
         viewModel.liveNoteData.observe(viewLifecycleOwner, Observer {
-            it?.let {
-                binding.editDigest.setText(it.digest)
-                viewModel.newNote = it
+            it?.let { note ->
+                binding.editDigest.setText(note.digest)
+                viewModel.newNote = note
             }
         })
 
@@ -160,6 +163,11 @@ class YouTubeNoteFragment : Fragment() {
                     viewModel.notifyDisplayChange()
                 }
             }
+        }
+
+        // Navigate to tag fragment
+        binding.icAddTag.setOnClickListener {
+            findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(viewModel.newNote))
         }
 
         return binding.root

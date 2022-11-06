@@ -15,7 +15,7 @@
         app:layout_constraintStart_toStartOf="parent"
         android:queryHint="Search or paste url"
         android:iconifiedByDefault="false"
-        android:background="@drawable/bg_search_bar"/>
+        />
 
     <TextView
         android:id="@+id/text_search_result"
@@ -83,7 +83,6 @@
                 app:layout_constraintTop_toBottomOf="@+id/text_channel_name"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     </androidx.cardview.widget.CardView>
 
     <TextView
@@ -96,6 +95,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/searchview_search"/>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

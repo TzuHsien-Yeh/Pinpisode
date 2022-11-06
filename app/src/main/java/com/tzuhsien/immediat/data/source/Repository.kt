@@ -35,6 +35,8 @@ interface Repository {
 
     suspend fun updateNote(noteId: String, note: Note): Result<String>
 
+    suspend fun updateTags(noteId: String, note: Note): Result<String>
+
     /**
      *  User info (Login and Profile page method)
      * */

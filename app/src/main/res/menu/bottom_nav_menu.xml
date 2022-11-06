@@ -10,10 +10,11 @@
         android:title=""/>
 
     <item
-        android:id="@+id/navigation_coauthoring"
+        android:id="@+id/navigation_profile"
         android:title=""/>
 
     <item
         android:id="@+id/navigation_share"
+        android:icon="@drawable/icon_share"
         android:title=""/>
 </menu>

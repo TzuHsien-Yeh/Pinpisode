@@ -65,35 +65,36 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/note_page_bottom_options"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="50dp"
         android:paddingVertical="4dp"
         android:background="@color/old_book_color"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageView
             android:id="@+id/ic_share"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ic_coauthoring"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:src="@drawable/ic_share"/>
+            android:src="@drawable/icon_share"/>
 
         <ImageView
             android:id="@+id/ic_coauthoring"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ic_add_tag"
             app:layout_constraintHorizontal_bias="0.5"
+            android:src="@drawable/ic_add_user"
             app:layout_constraintStart_toEndOf="@+id/ic_share"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/ic_add_tag"
-            android:layout_width="wrap_content"
+            android:layout_width="26dp"
             android:layout_height="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ic_time_item_display_options"
@@ -105,8 +106,8 @@
 
         <ImageView
             android:id="@+id/ic_time_item_display_options"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"

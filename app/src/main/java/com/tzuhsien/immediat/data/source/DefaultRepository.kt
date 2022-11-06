@@ -47,6 +47,10 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.updateNote(noteId, note)
     }
 
+    override suspend fun updateTags(noteId: String, note: Note): Result<String> {
+        return noteRemoteDataSource.updateTags(noteId, note)
+    }
+
     override suspend fun addUser(token: String) {
         TODO("Not yet implemented")
     }

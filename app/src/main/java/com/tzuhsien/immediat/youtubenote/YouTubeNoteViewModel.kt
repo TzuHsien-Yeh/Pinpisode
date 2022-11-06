@@ -90,7 +90,7 @@ class YouTubeNoteViewModel(
         _status.value = LoadApiStatus.DONE
     }
 
-    private fun getLiveNoteById() {
+    fun getLiveNoteById() {
         _liveNoteData = repository.getLiveNoteById(noteId)
         _status.value = LoadApiStatus.DONE
     }
@@ -244,6 +244,7 @@ class YouTubeNoteViewModel(
     fun notifyDisplayChange() {
         _liveTimeItemList.value = _liveTimeItemList.value
     }
+
 }
 
 data class YouTubeNoteUiState(
