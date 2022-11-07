@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="false"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".youtubenote.YouTubeNoteFragment">
+
+    <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+        android:id="@+id/youtube_player_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:autoPlay="false" />
+
+    <EditText
+        android:id="@+id/edit_digest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginEnd="16dp"
+        android:maxLength="60"
+        android:hint="Input video summary"
+        android:textSize="16sp"
+        android:background="@color/transparent"
+        app:layout_constraintTop_toBottomOf="@+id/youtube_player_view"
+        app:layout_constraintBottom_toTopOf="@+id/recycler_view_time_items"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_time_items"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/note_page_bottom_options"
+        app:layout_constraintTop_toBottomOf="@+id/edit_digest"
+        tools:listitem="@layout/item_time_card"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_take_timestamp"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginVertical="8dp"
+        android:src="@drawable/ic_pin"
+        app:fabCustomSize="54dp"
+        android:scaleX="-1"
+        app:layout_constraintBottom_toTopOf="@id/note_page_bottom_options"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_clip"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/ic_youtube_black"
+        app:fabCustomSize="54dp"
+        app:layout_constraintBottom_toTopOf="@id/btn_take_timestamp"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/note_page_bottom_options"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingVertical="4dp"
+        android:background="@color/old_book_color"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/ic_share"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ic_coauthoring"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/icon_share"/>
+
+        <ImageView
+            android:id="@+id/ic_coauthoring"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ic_add_tag"
+            app:layout_constraintHorizontal_bias="0.5"
+            android:src="@drawable/ic_add_user"
+            app:layout_constraintStart_toEndOf="@+id/ic_share"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ic_add_tag"
+            android:layout_width="26dp"
+            android:layout_height="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ic_time_item_display_options"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/ic_coauthoring"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_tag"
+            android:rotation="90"/>
+
+        <ImageView
+            android:id="@+id/ic_time_item_display_options"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/ic_add_tag"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/ic_pin"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
