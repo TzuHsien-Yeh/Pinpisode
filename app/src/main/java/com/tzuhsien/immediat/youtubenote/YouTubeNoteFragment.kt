@@ -18,6 +18,7 @@ import com.tzuhsien.immediat.data.model.TimeItemDisplay
 import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.getLiveNoteById
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
+import com.tzuhsien.immediat.ext.parseDuration
 import com.tzuhsien.immediat.tag.TagDialogFragmentDirections
 import timber.log.Timber
 
@@ -58,7 +59,7 @@ class YouTubeNoteFragment : Fragment() {
 
         viewModel.currentSecond.observe(viewLifecycleOwner, Observer { currentSec ->
             viewModel.playMomentEnd?.let {
-                if (it <= currentSec){
+                if (it <= currentSec) {
                     ytPlayer?.pause()
                     viewModel.clearPlayingMomentStart()
                     viewModel.clearPlayingMomentEnd()
@@ -117,6 +118,10 @@ class YouTubeNoteFragment : Fragment() {
             it?.let { note ->
                 binding.editDigest.setText(note.digest)
                 viewModel.newNote = note
+
+                if (note.duration.parseDuration() == 0L) {
+                    viewModel.updateInfoFromYouTube(note)
+                }
             }
         })
 
@@ -167,7 +172,8 @@ class YouTubeNoteFragment : Fragment() {
 
         // Navigate to tag fragment
         binding.icAddTag.setOnClickListener {
-            findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(viewModel.newNote))
+            findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(
+                viewModel.newNote))
         }
 
         return binding.root

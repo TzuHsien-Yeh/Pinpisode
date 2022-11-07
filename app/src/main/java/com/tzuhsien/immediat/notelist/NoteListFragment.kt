@@ -11,8 +11,8 @@ import androidx.navigation.fragment.findNavController
 import com.tzuhsien.immediat.data.model.Sort
 import com.tzuhsien.immediat.databinding.FragmentNoteListBinding
 import com.tzuhsien.immediat.ext.getVmFactory
+import com.tzuhsien.immediat.ext.parseDuration
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
-import timber.log.Timber
 
 class NoteListFragment : Fragment() {
 
@@ -38,8 +38,10 @@ class NoteListFragment : Fragment() {
         })
         binding.recyclerviewTag.adapter = tagAdapter
         viewModel.tagSet.observe(viewLifecycleOwner, Observer { set ->
-            set?.let {
+            if (null != set) {
                 tagAdapter.submitList(set.filter { it != viewModel.selectedTag }.sorted().toList())
+            } else {
+                tagAdapter.submitList(set)
             }
         })
         binding.cardSelectedTag.setOnClickListener {
@@ -50,7 +52,6 @@ class NoteListFragment : Fragment() {
         /**
          * Sorting and ordering
          * */
-
         var sortState = 0
 
         binding.textSortOptions.text = Sort.LAST_EDIT.VALUE
@@ -111,9 +112,15 @@ class NoteListFragment : Fragment() {
             list?.let {
                 viewModel.getAllTags(list)
                 if (null != viewModel.selectedTag) {
-                    noteAdapter.submitList(list.filter { it.tags.contains(viewModel.selectedTag) })
+                    noteAdapter.submitList(list.filter { !it.tags.contains(viewModel.selectedTag) })
                 } else {
                     noteAdapter.submitList(list)
+                }
+
+                for (note in list) {
+                    if (note.duration.parseDuration() == 0L) {
+                        viewModel.updateInfoFromYouTube(note.id, note)
+                    }
                 }
             }
         })

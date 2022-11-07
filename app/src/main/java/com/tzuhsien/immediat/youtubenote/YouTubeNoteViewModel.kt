@@ -9,9 +9,11 @@ import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
+import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.network.LoadApiStatus
 import com.tzuhsien.immediat.util.ServiceLocator.repository
+import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -66,6 +68,7 @@ class YouTubeNoteViewModel(
     val liveNoteData: LiveData<Note?>
         get() = _liveNoteData
 
+    // updating note data from live data from firebase
     var newNote: Note = Note()
 
     private val _status = MutableLiveData<LoadApiStatus>()
@@ -90,7 +93,7 @@ class YouTubeNoteViewModel(
         _status.value = LoadApiStatus.DONE
     }
 
-    fun getLiveNoteById() {
+    private fun getLiveNoteById() {
         _liveNoteData = repository.getLiveNoteById(noteId)
         _status.value = LoadApiStatus.DONE
     }
@@ -124,7 +127,6 @@ class YouTubeNoteViewModel(
                             updateNote()
                         }
                     }
-
                 }
                 is Result.Fail -> {
                     _error.value = result.error
@@ -243,6 +245,73 @@ class YouTubeNoteViewModel(
 
     fun notifyDisplayChange() {
         _liveTimeItemList.value = _liveTimeItemList.value
+    }
+
+    fun updateInfoFromYouTube(note: Note) {
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            when (val result = repository.getYouTubeVideoInfoById(note.sourceId)) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                    if (result.data.items[0].contentDetails.duration != note.duration) {
+                        val noteToUpdate = Note()
+                        noteToUpdate.duration = result.data.items[0].contentDetails.duration
+                        noteToUpdate.thumbnail = result.data.items[0].snippet.thumbnails.high.url
+                        noteToUpdate.title = result.data.items[0].snippet.title
+                        updateYouTubeInfo(noteToUpdate)
+                    }
+                    result.data
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                else -> {
+                    _error.value = Util.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+            }
+        }
+    }
+
+    private fun updateYouTubeInfo(note: Note) {
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            when (val result = repository.updateYouTubeInfo(
+                noteId = noteId,
+                note = note
+            )) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                    result.data
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
     }
 
 }

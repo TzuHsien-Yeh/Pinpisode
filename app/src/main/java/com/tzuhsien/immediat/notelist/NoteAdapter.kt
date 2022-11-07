@@ -17,7 +17,7 @@ class NoteAdapter (
     class NoteViewHolder(private val binding: ItemNoteBinding) : RecyclerView.ViewHolder(binding.root){
         fun bind(note: Note) {
             Glide.with(binding.imgThumbnail)
-                .load(note.thumbnails)
+                .load(note.thumbnail)
                 .into(binding.imgThumbnail)
             binding.textSourceTitle.text = note.title
             binding.textDigest.text = note.digest

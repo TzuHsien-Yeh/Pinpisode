@@ -23,7 +23,9 @@ interface Repository {
 
     suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult>
 
-    suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String>
+    suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<String>
+
+    suspend fun updateYouTubeInfo(noteId: String, note: Note): Result<String>
 
     fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>>
 

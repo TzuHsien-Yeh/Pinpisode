@@ -13,14 +13,12 @@ import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.network.LoadApiStatus
-import com.tzuhsien.immediat.util.ServiceLocator.repository
 import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import kotlin.time.Duration
 
 
 class SearchViewModel(private val repository: Repository) : ViewModel() {
@@ -149,7 +147,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             ownerId = UserManager.userId,
             authors = listOf(UserManager.userId),
             tags = listOf(Source.YOUTUBE.source),
-            thumbnails = videoItem.snippet.thumbnails.high.url,
+            thumbnail = videoItem.snippet.thumbnails.high.url,
             title = videoItem.snippet.title,
             duration = videoItem.contentDetails.duration
         )
@@ -161,7 +159,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.updateYouTubeVideoInfo(ytInfoNote.sourceId, ytInfoNote)
+            val result = repository.createYouTubeVideoNote(ytInfoNote.sourceId, ytInfoNote)
 
             _navigateToYoutubeNote.value = when (result) {
                 is Result.Success -> {

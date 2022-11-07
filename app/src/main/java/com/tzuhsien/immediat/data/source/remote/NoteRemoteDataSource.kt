@@ -57,7 +57,7 @@ object NoteRemoteDataSource : DataSource {
                 UserManager.usersNoteList = list.filter { it.ownerId == UserManager.userId }
                 fun getAllTags(): MutableSet<String> {
                     val set = mutableSetOf<String>()
-                    for (note in UserManager.allEditableNoteList) {
+                    for (note in list) {
                         for (tag in note.tags) {
                             set.add(tag)
                         }
@@ -114,7 +114,7 @@ object NoteRemoteDataSource : DataSource {
         }
     }
 
-    override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String> =
+    override suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<String> =
         suspendCoroutine { continuation ->
 
             val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
@@ -140,6 +140,35 @@ object NoteRemoteDataSource : DataSource {
 
                 }
         }
+
+    override suspend fun updateYouTubeInfo(noteId: String, note: Note): Result<String> =
+        suspendCoroutine { continuation ->
+
+            val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
+            val doc = notes.document(noteId)
+
+            note.lastEditTime = Calendar.getInstance().timeInMillis
+
+            doc
+                .update(
+                    "duration", note.duration,
+                    "title", note.title,
+                    "thumbnail", note.thumbnail
+                )
+                .addOnCompleteListener { task2 ->
+                    if (task2.isSuccessful) {
+                        continuation.resume(Result.Success(doc.id))
+                    } else {
+                        task2.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(
+                            R.string.unknown_error)))
+                    }
+
+                }
+    }
 
 
     override fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>> {

@@ -24,9 +24,14 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.getYouTubeVideoInfoById(id)
     }
 
-    override suspend fun updateYouTubeVideoInfo(videoId: String, note: Note): Result<String> {
-        return noteRemoteDataSource.updateYouTubeVideoInfo(videoId, note)
+    override suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<String> {
+        return noteRemoteDataSource.createYouTubeVideoNote(videoId, note)
     }
+
+    override suspend fun updateYouTubeInfo(noteId: String, note: Note): Result<String> {
+        return noteRemoteDataSource.updateYouTubeInfo(noteId, note)
+    }
+
     override fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>> {
         return noteRemoteDataSource.getLiveTimeItems(noteId)
     }
