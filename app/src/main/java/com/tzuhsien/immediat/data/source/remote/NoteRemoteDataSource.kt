@@ -73,6 +73,29 @@ object NoteRemoteDataSource : DataSource {
         return liveData
     }
 
+    override suspend fun getNoteInfoById(noteId: String): Result<Note> =
+        suspendCoroutine { continuation ->
+            FirebaseFirestore.getInstance()
+                .collection(PATH_NOTES)
+                .document(noteId)
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val note = task.result.toObject(Note::class.java)
+                        continuation.resume(Result.Success(note!!))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error getting documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+
+        }
+
+
     override fun getLiveNoteById(noteId: String): MutableLiveData<Note?> {
 
         val liveData = MutableLiveData<Note?>()
@@ -92,6 +115,7 @@ object NoteRemoteDataSource : DataSource {
             }
         return liveData
     }
+
 
     override suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult> {
         if (!isInternetConnected()) {
@@ -120,6 +144,7 @@ object NoteRemoteDataSource : DataSource {
             notes
                 .whereEqualTo("source", Source.YOUTUBE.source)
                 .whereEqualTo("sourceId", videoId)
+                .whereEqualTo("ownerId", UserManager.userId)
                 .get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {

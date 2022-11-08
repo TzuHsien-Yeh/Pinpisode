@@ -8,7 +8,7 @@ object UserManager {
 
     // Hardcoded mock user data
 //    val userId = "TynspyKXE1kkaDu36DgA"
-    val userId = "sssss"
+    val userId = "aaa"
     val userName = "Shrimp"
     val userEmail = "shrimp@gmail.com"
 

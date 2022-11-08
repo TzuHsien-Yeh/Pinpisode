@@ -16,6 +16,8 @@ interface Repository {
     /**
      *  For the note (single source)
      */
+    suspend fun getNoteInfoById(noteId: String): Result<Note>
+
     fun getLiveNoteById(noteId: String): MutableLiveData<Note?>
 
     suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult>

@@ -12,6 +12,10 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.getAllLiveNotes()
     }
 
+    override suspend fun getNoteInfoById(noteId: String): Result<Note> {
+        return noteRemoteDataSource.getNoteInfoById(noteId)
+    }
+
     override fun getLiveNoteById(noteId: String):  MutableLiveData<Note?>  {
         return noteRemoteDataSource.getLiveNoteById(noteId)
     }

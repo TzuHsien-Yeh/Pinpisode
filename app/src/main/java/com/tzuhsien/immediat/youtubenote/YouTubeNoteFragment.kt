@@ -2,28 +2,26 @@ package com.tzuhsien.immediat.youtubenote
 
 import android.content.Intent
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.NonNull
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
+import com.google.common.base.Strings.isNullOrEmpty
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
+import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseDuration
 import com.tzuhsien.immediat.tag.TagDialogFragmentDirections
-import com.tzuhsien.immediat.util.Util
 import timber.log.Timber
 
 
@@ -114,23 +112,39 @@ class YouTubeNoteFragment : Fragment() {
          * */
         binding.editDigest.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                viewModel.newNote.digest = binding.editDigest.text.toString()
+                viewModel.noteToBeUpdated?.digest = binding.editDigest.text.toString()
                 viewModel.updateNote()
             }
         }
         viewModel.liveNoteData.observe(viewLifecycleOwner, Observer { note ->
-            if (null != note) {
-                viewModel.noteId = note.id
-                viewModel.getLiveTimeItemsResult(note.id)
-
+            note?.let {
                 binding.editDigest.setText(note.digest)
-                viewModel.newNote = note
+                viewModel.noteToBeUpdated = note
 
                 if (note.duration.parseDuration() == 0L) {
                     viewModel.updateInfoFromYouTube(note)
                 }
             }
         })
+
+        /**
+         *  Edit or read only mode
+         * */
+        viewModel.canEdit.observe(viewLifecycleOwner) {
+            binding.editDigest.isEnabled = it
+            if (it) {
+                binding.editDigest.visibility = View.VISIBLE
+                binding.editDigest.hint = getString(R.string.input_video_summary)
+            } else if (viewModel.noteToBeUpdated?.digest.isNullOrEmpty()) {
+                binding.editDigest.visibility = View.GONE
+            } else {
+                binding.editDigest.visibility = View.VISIBLE
+                binding.editDigest.hint = getString(R.string.input_video_summary)
+            }
+
+            binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
+            binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
+        }
 
         /**
          *  RecyclerView views
@@ -194,7 +208,7 @@ class YouTubeNoteFragment : Fragment() {
          * */
         binding.icAddTag.setOnClickListener {
             findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(
-                viewModel.newNote))
+                viewModel.noteToBeUpdated!!))
         }
 
         /**
@@ -204,7 +218,7 @@ class YouTubeNoteFragment : Fragment() {
             val shareIntent = Intent().apply {
                 action = Intent.ACTION_SEND
                 type="text/plain"
-                putExtra(Intent.EXTRA_TEXT, getString(R.string.youtube_note_uri, videoId))
+                putExtra(Intent.EXTRA_TEXT, getString(R.string.youtube_note_uri, viewModel.noteId, videoId))
             }
             startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
         }

@@ -10,6 +10,10 @@
     <string name="manage_tags_for_this_note">Manage tags for this note</string>
     <string name="id_edit_add_tag">edit_add_tag</string>
     <string name="add_new_tag">Add new tag</string>
-    <string name="youtube_note_uri">http://pinpisode/youtube_note/%s</string>
+    <string name="youtube_note_uri">http://pinpisode/youtube_note/%1s/%2s</string>
     <string name="send_to">Share link with</string>
+    <string name="input_video_summary">Input video summary</string>
+    <string name="moment">Moment</string>
+    <string name="add_some_notes">Add some notes</string>
+    <string name="delete">Delete</string>
 </resources>

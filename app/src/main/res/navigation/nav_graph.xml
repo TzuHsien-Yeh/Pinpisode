@@ -32,7 +32,7 @@
 
         <deepLink
             android:autoVerify="true"
-            app:uri="http://pinpisode/youtube_note/{video_id_key}" />
+            app:uri="http://pinpisode/youtube_note/{note_id_key}/{video_id_key}" />
 
         <action
             android:id="@+id/action_youTubeNoteFragment_to_noteListFragment"
