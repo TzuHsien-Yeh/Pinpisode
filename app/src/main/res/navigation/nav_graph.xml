@@ -20,12 +20,16 @@
         android:name="com.tzuhsien.immediat.youtubenote.YouTubeNoteFragment"
         android:label="fragment_take_note"
         tools:layout="@layout/fragment_youtube_note">
-        <argument android:name="note_id_key"
+        <argument
+            android:name="note_id_key"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="video_id_key"
             app:argType="string"
             app:nullable="false"/>
-        <argument android:name="video_id_key"
-            app:argType="string"
-            app:nullable="false"/>
+
         <action
             android:id="@+id/action_youTubeNoteFragment_to_noteListFragment"
             app:destination="@id/noteListFragment" />
@@ -33,6 +37,7 @@
             android:id="@+id/action_youTubeNoteFragment_pop"
             app:popUpTo="@id/youTubeNoteFragment"
             app:popUpToInclusive="true" />
+
     </fragment>
 
     <action android:id="@+id/action_global_YouTubeNoteFragment"

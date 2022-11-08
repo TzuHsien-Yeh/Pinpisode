@@ -1,7 +1,9 @@
 package com.tzuhsien.immediat
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Rect
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -14,7 +16,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tzuhsien.immediat.databinding.ActivityMainBinding
+import com.tzuhsien.immediat.ext.extractYoutubeVideoId
 import com.tzuhsien.immediat.notelist.NoteListFragmentDirections
+import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
 
 
@@ -22,6 +26,19 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        /**
+         *  Read intent data
+         * */
+        var extras: Bundle? = intent?.extras
+        val sourceId = extras?.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
+
+        Timber.d("intent extras : $sourceId")
+
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        navController.navigate(YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = sourceId!!))
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -89,6 +106,7 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+
     }
 
     /**

@@ -13,9 +13,6 @@ interface Repository {
      * */
     fun getAllLiveNotes(): MutableLiveData<List<Note>>
 
-    // notes of which the user is not the owner
-    suspend fun getCoauthoringNotes()
-
     /**
      *  For the note (single source)
      */
@@ -23,7 +20,9 @@ interface Repository {
 
     suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult>
 
-    suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<String>
+    suspend fun checkIfYouTubeNoteExists(videoId: String): Result<Note?>
+
+    suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<Note>
 
     suspend fun updateYouTubeInfo(noteId: String, note: Note): Result<String>
 

@@ -10,12 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
-import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.getLiveNoteById
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseDuration
@@ -77,9 +77,9 @@ class YouTubeNoteFragment : Fragment() {
                 super.onCurrentSecond(youTubePlayer, second)
 
                 viewModel.getCurrentSecond(second)
-                Timber.d("viewModel.getCurrentSecond(second): $second")
 
                 binding.btnTakeTimestamp.setOnClickListener {
+                    Timber.d("binding.btnTakeTimestamp.setOnClickListener clicked")
                     viewModel.createTimeItem(second, null)
                 }
 
@@ -114,8 +114,11 @@ class YouTubeNoteFragment : Fragment() {
                 viewModel.updateNote()
             }
         }
-        viewModel.liveNoteData.observe(viewLifecycleOwner, Observer {
-            it?.let { note ->
+        viewModel.liveNoteData.observe(viewLifecycleOwner, Observer { note ->
+            if (null != note) {
+                viewModel.noteId = note.id
+                viewModel.getLiveTimeItemsResult(note.id)
+
                 binding.editDigest.setText(note.digest)
                 viewModel.newNote = note
 
@@ -132,19 +135,27 @@ class YouTubeNoteFragment : Fragment() {
             uiState = viewModel.uiState
         )
         binding.recyclerViewTimeItems.adapter = adapter
-        viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer { list ->
-            when (viewModel.displayState) {
-                TimeItemDisplay.ALL -> {
-                    adapter.submitList(list)
-                }
-                TimeItemDisplay.TIMESTAMP -> {
-                    adapter.submitList(list.filter { it.endAt == null })
-                }
-                TimeItemDisplay.CLIP -> {
-                    adapter.submitList(list.filter { it.endAt != null })
-                }
+
+        viewModel.reObserveTimeItems.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
+            if (timeItemLiveDataAssigned == true) {
+                viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer { list ->
+                    list?.let {
+                        when (viewModel.displayState) {
+                            TimeItemDisplay.ALL -> {
+                                adapter.submitList(list)
+                            }
+                            TimeItemDisplay.TIMESTAMP -> {
+                                adapter.submitList(list.filter { it.endAt == null })
+                            }
+                            TimeItemDisplay.CLIP -> {
+                                adapter.submitList(list.filter { it.endAt != null })
+                            }
+                        }
+                    }
+
+                })
             }
-        })
+        }
 
         binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_youtube_black)
         binding.icTimeItemDisplayOptions.setOnClickListener {

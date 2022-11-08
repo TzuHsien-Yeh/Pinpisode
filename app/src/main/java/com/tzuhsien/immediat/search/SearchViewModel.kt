@@ -12,6 +12,7 @@ import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.data.source.local.UserManager
+import com.tzuhsien.immediat.ext.extractYoutubeVideoId
 import com.tzuhsien.immediat.network.LoadApiStatus
 import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +58,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
         // Check if the query is a YouTube url
         if (query.contains(youtubeWatchUrl) || query.contains(youtubeShareLink)) {
-            val videoId = extractYoutubeVideoId(query)
+            val videoId = query.extractYoutubeVideoId()
             if (videoId.isNotEmpty()) {
                 getYoutubeVideoInfoById(videoId)
                 // TODO: else -> prepare to call YT search api
@@ -68,16 +69,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
         }
 
-    }
-
-    private fun extractYoutubeVideoId(query: String): String {
-        return if (youtubeWatchUrl in query) {
-            query
-                .substringAfter(youtubeWatchUrl)
-                .substringBefore("&", query.substringAfter(youtubeWatchUrl))
-        } else {
-            query.substringAfter(youtubeShareLink)
-        }
     }
 
     private fun getYoutubeVideoInfoById(videoId: String) {
@@ -94,15 +85,14 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
                     Timber.d("video data: ${result.data}")
 
-                    if (result.data.items.isEmpty()) {
-                        _showMsg.value = Util.getString(R.string.video_not_available)
-                    }
-
                     result.data
                 }
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
+
+                    // Show msg if video not found (result list is empty)
+                    _showMsg.value = result.error
                     null
                 }
                 is Result.Error -> {
@@ -119,27 +109,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun navigateToYoutubeNote() {
-        if (null != existingNote()) {
-            _navigateToYoutubeNote.value = existingNote()!!.id
-        } else {
-            updateYouTubeVideoInfo()
-        }
-    }
-
-    private fun existingNote(): Note? {
-
-        var existingNote: Note? = null
-        if (UserManager.usersNoteList.isNotEmpty()) {
-            for (note in UserManager.usersNoteList) {
-                if (note.source == Source.YOUTUBE.source && note.sourceId == ytInfoNote.sourceId) {
-                    existingNote = note
-                }
-            }
-        }
-        return existingNote
-    }
-
     fun setYoutubeNoteData(videoItem: Item) {
         ytInfoNote = Note(
             sourceId = videoItem.id,
@@ -153,37 +122,8 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         )
     }
 
-    private fun updateYouTubeVideoInfo() {
-
-        coroutineScope.launch {
-
-            _status.value = LoadApiStatus.LOADING
-
-            val result = repository.createYouTubeVideoNote(ytInfoNote.sourceId, ytInfoNote)
-
-            _navigateToYoutubeNote.value = when (result) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
-                    result.data
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-            }
-        }
+    fun navigateToYoutubeNote() {
+        _navigateToYoutubeNote.value = ytInfoNote.sourceId
     }
 
     fun doneNavigateToTakeNote() {

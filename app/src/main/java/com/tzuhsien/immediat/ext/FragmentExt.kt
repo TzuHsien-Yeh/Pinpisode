@@ -13,7 +13,7 @@ fun Fragment.getVmFactory(): ViewModelFactory {
     return ViewModelFactory(repository)
 }
 
-fun Fragment.getVmFactory(noteId: String, videoId: String): YoutubeNoteViewModelFactory {
+fun Fragment.getVmFactory(noteId: String?, videoId: String): YoutubeNoteViewModelFactory {
     val repository = (requireContext().applicationContext as MyApplication).repository
     return YoutubeNoteViewModelFactory(repository, noteId, videoId)
 }

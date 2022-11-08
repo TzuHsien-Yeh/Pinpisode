@@ -16,3 +16,17 @@ fun String.utcToLocalTime(): String {
 fun Float.formatDuration(): String = DateUtils.formatElapsedTime(this.toLong())
 
 fun String.parseDuration(): Long? = Duration.parseIsoStringOrNull(this)?.inWholeMilliseconds
+
+
+fun String.extractYoutubeVideoId(): String {
+    val youtubeWatchUrl = "youtube.com/watch?v="
+    val youtubeShareLink = "youtu.be/"
+
+    return if (youtubeWatchUrl in this) {
+        this
+            .substringAfter(youtubeWatchUrl)
+            .substringBefore("&", this.substringAfter(youtubeWatchUrl))
+    } else {
+        this.substringAfter(youtubeShareLink)
+    }
+}

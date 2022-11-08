@@ -16,15 +16,15 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.getLiveNoteById(noteId)
     }
 
-    override suspend fun getCoauthoringNotes() {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult> {
         return noteRemoteDataSource.getYouTubeVideoInfoById(id)
     }
 
-    override suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<String> {
+    override suspend fun checkIfYouTubeNoteExists(videoId: String): Result<Note?> {
+        return noteRemoteDataSource.checkIfYouTubeNoteExists(videoId)
+    }
+
+    override suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<Note> {
         return noteRemoteDataSource.createYouTubeVideoNote(videoId, note)
     }
 

@@ -8,7 +8,7 @@ import com.tzuhsien.immediat.youtubenote.YouTubeNoteViewModel
 @Suppress("UNCHECKED_CAST")
 class YoutubeNoteViewModelFactory(
     private val repository: Repository,
-    private val noteId: String,
+    private val noteId: String?,
     private val videoId: String
 ) : ViewModelProvider.Factory {
 

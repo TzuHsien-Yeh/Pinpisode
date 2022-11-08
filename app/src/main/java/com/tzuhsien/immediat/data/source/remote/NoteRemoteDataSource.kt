@@ -1,8 +1,10 @@
 package com.tzuhsien.immediat.data.source.remote
 
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
@@ -91,10 +93,6 @@ object NoteRemoteDataSource : DataSource {
         return liveData
     }
 
-    override suspend fun getCoauthoringNotes() {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult> {
         if (!isInternetConnected()) {
             return Result.Fail(getString(R.string.internet_not_connected))
@@ -104,8 +102,8 @@ object NoteRemoteDataSource : DataSource {
             // this will run on a thread managed by Retrofit
             val listResult = YouTubeApi.retrofitService.getVideoInfo(id)
 
-            listResult.error?.let {
-                return Result.Fail(it)
+            if (listResult.items.isEmpty()) {
+                return Result.Fail(getString(R.string.video_not_available))
             }
             Result.Success(listResult)
         } catch (e: Exception) {
@@ -114,7 +112,42 @@ object NoteRemoteDataSource : DataSource {
         }
     }
 
-    override suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<String> =
+    override suspend fun checkIfYouTubeNoteExists(videoId: String): Result<Note?> =
+        suspendCoroutine { continuation ->
+
+            val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
+
+            notes
+                .whereEqualTo("source", Source.YOUTUBE.source)
+                .whereEqualTo("sourceId", videoId)
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val querySnapshot: QuerySnapshot? = task.result
+                        if (querySnapshot!!.isEmpty) {
+                            continuation.resume(Result.Success(null))
+                        } else {
+                            val result = mutableListOf<Note>()
+                            for(note in task.result) {
+                                val item = note.toObject(Note::class.java)
+                                result.add(item)
+                            }
+                            continuation.resume(Result.Success(result[0]))
+                        }
+
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error finding documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(
+                            R.string.unknown_error)))
+                    }
+
+                }
+        }
+
+    override suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<Note> =
         suspendCoroutine { continuation ->
 
             val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
@@ -126,11 +159,11 @@ object NoteRemoteDataSource : DataSource {
 
             doc
                 .set(note)
-                .addOnCompleteListener { task2 ->
-                    if (task2.isSuccessful) {
-                        continuation.resume(Result.Success(doc.id))
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success(note))
                     } else {
-                        task2.exception?.let {
+                        task.exception?.let {
                             Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
                             continuation.resume(Result.Error(it))
                         }
@@ -147,19 +180,17 @@ object NoteRemoteDataSource : DataSource {
             val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
             val doc = notes.document(noteId)
 
-            note.lastEditTime = Calendar.getInstance().timeInMillis
-
             doc
                 .update(
                     "duration", note.duration,
                     "title", note.title,
                     "thumbnail", note.thumbnail
                 )
-                .addOnCompleteListener { task2 ->
-                    if (task2.isSuccessful) {
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
                         continuation.resume(Result.Success(doc.id))
                     } else {
-                        task2.exception?.let {
+                        task.exception?.let {
                             Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
                             continuation.resume(Result.Error(it))
                         }

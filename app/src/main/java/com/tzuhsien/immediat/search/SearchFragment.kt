@@ -87,8 +87,8 @@ class SearchFragment : Fragment() {
             it?.let {
                 findNavController().navigate(
                     YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
-                        noteIdKey = it,
-                        videoIdKey = viewModel.ytInfoNote.sourceId
+//                        noteIdKey = null,
+                        videoIdKey = it
                     )
                 )
                 viewModel.doneNavigateToTakeNote()

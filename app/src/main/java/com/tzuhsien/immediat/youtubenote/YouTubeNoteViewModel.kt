@@ -6,11 +6,13 @@ import androidx.lifecycle.ViewModel
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.Note
-import com.tzuhsien.immediat.data.model.TimeItem
-import com.tzuhsien.immediat.data.model.TimeItemDisplay
-import com.tzuhsien.immediat.data.model.YouTubeResult
+import com.tzuhsien.immediat.data.model.*
 import com.tzuhsien.immediat.data.source.Repository
+import com.tzuhsien.immediat.data.source.local.UserManager
+import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.deleteTimeItem
+import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.getLiveNoteById
+import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.updateNote
+import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.updateTimeItem
 import com.tzuhsien.immediat.network.LoadApiStatus
 import com.tzuhsien.immediat.util.ServiceLocator.repository
 import com.tzuhsien.immediat.util.Util
@@ -22,9 +24,9 @@ import timber.log.Timber
 
 class YouTubeNoteViewModel(
     private val repository: Repository,
-    private val noteId: String,
-    val videoId: String
-    ) : ViewModel() {
+    var noteId: String?,
+    var videoId: String,
+) : ViewModel() {
 
     // state of clipping btn
     var startOrStopToggle = 0
@@ -64,12 +66,21 @@ class YouTubeNoteViewModel(
     val liveTimeItemList: LiveData<List<TimeItem>>
         get() = _liveTimeItemList
 
+    private var _reObserveTimeItems = MutableLiveData<Boolean>(false)
+    val reObserveTimeItems: LiveData<Boolean>
+        get() = _reObserveTimeItems
+
     private var _liveNoteData = MutableLiveData<Note?>()
     val liveNoteData: LiveData<Note?>
         get() = _liveNoteData
 
     // updating note data from live data from firebase
     var newNote: Note = Note()
+
+    // Get yt video data if entering youtubeNote page from yt deeplink
+    private val _ytVideoData = MutableLiveData<YouTubeResult?>(null)
+    val ytVideoData: LiveData<YouTubeResult?>
+        get() = _ytVideoData
 
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
@@ -84,28 +95,35 @@ class YouTubeNoteViewModel(
 
     init {
         Timber.d("[${this::class.simpleName}] noteId Passed in: $noteId")
-        getLiveTimeItemsResult()
-        getLiveNoteById()
+
+        if (null != noteId) {
+            // NoteId passed in from search page or noteList page
+            getLiveNoteById()
+        } else {
+            checkVideoExistence(videoId)
+        }
     }
 
-    private fun getLiveTimeItemsResult() {
-        _liveTimeItemList = repository.getLiveTimeItems(noteId)
+    fun getLiveTimeItemsResult(id: String) {
+        _liveTimeItemList = repository.getLiveTimeItems(id)
         _status.value = LoadApiStatus.DONE
+        _reObserveTimeItems.value = true
     }
 
     private fun getLiveNoteById() {
-        _liveNoteData = repository.getLiveNoteById(noteId)
-        _status.value = LoadApiStatus.DONE
+        noteId?.let {
+            _liveNoteData = repository.getLiveNoteById(it)
+            _status.value = LoadApiStatus.DONE
+        }
     }
 
     fun createTimeItem(startAt: Float, endAt: Float?) {
-
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
 
             when (val result = repository.addNewTimeItem(
-                noteId = noteId,
+                noteId = noteId!!,
                 timeItem = TimeItem(startAt = startAt, endAt = endAt)
             )) {
                 is Result.Success -> {
@@ -147,8 +165,7 @@ class YouTubeNoteViewModel(
     private fun updateTimeItem(timeItem: TimeItem) {
 
         coroutineScope.launch {
-
-            when (val result = repository.updateTimeItem(noteId, timeItem)) {
+            when (val result = repository.updateTimeItem(noteId!!, timeItem)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -173,8 +190,7 @@ class YouTubeNoteViewModel(
     private fun deleteTimeItem(timeItem: TimeItem) {
 
         coroutineScope.launch {
-
-            when (val result = repository.deleteTimeItem(noteId, timeItem)) {
+            when (val result = repository.deleteTimeItem(noteId!!, timeItem)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -204,8 +220,7 @@ class YouTubeNoteViewModel(
 
     fun updateNote() {
         coroutineScope.launch {
-
-            when (val result = repository.updateNote(noteId, newNote)) {
+            when (val result = repository.updateNote(noteId!!, newNote)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -290,7 +305,7 @@ class YouTubeNoteViewModel(
             _status.value = LoadApiStatus.LOADING
 
             when (val result = repository.updateYouTubeInfo(
-                noteId = noteId,
+                noteId = noteId!!,
                 note = note
             )) {
                 is Result.Success -> {
@@ -314,11 +329,128 @@ class YouTubeNoteViewModel(
         }
     }
 
+
+    private fun checkVideoExistence(videoId: String) {
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            val result = repository.checkIfYouTubeNoteExists(videoId)
+
+            _liveNoteData.value = when (result) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+
+                    Timber.d("checkIfYouTubeNoteExists: result ${result.data}")
+
+                    if (null == result.data) {
+                        // get info from yt and then create a new note
+                        getYoutubeVideoInfoById(videoId)
+                    }
+                    result.data
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                else -> {
+                    _error.value = Util.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+            }
+        }
+    }
+
+    private fun getYoutubeVideoInfoById(videoId: String) {
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            val result = repository.getYouTubeVideoInfoById(videoId)
+
+            _ytVideoData.value = when (result) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+
+                    createNewYouTubeNote(result.data.items[0])
+                    result.data
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                else -> {
+                    _error.value = Util.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+            }
+        }
+    }
+
+    private fun createNewYouTubeNote(video: Item) {
+        val newYtNote = Note(
+            sourceId = video.id,
+            source = Source.YOUTUBE.source,
+            ownerId = UserManager.userId,
+            authors = listOf(UserManager.userId),
+            tags = listOf(Source.YOUTUBE.source),
+            thumbnail = video.snippet.thumbnails.high.url,
+            title = video.snippet.title,
+            duration = video.contentDetails.duration
+        )
+
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            val result = repository.createYouTubeVideoNote(video.id, newYtNote)
+
+            _liveNoteData.value = when (result) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                    result.data
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+            }
+        }
+    }
+
 }
 
 data class YouTubeNoteUiState(
     var onItemTitleChanged: (TimeItem) -> Unit,
     var onItemContentChanged: (TimeItem) -> Unit,
     var onItemToDelete: (TimeItem) -> Unit,
-    val onTimeClick: (TimeItem) -> Unit
+    val onTimeClick: (TimeItem) -> Unit,
 )
