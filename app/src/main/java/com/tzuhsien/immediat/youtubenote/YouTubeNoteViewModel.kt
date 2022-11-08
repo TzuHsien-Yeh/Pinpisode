@@ -1,5 +1,7 @@
 package com.tzuhsien.immediat.youtubenote
 
+import android.content.Intent
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +18,7 @@ import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.updateTimeI
 import com.tzuhsien.immediat.network.LoadApiStatus
 import com.tzuhsien.immediat.util.ServiceLocator.repository
 import com.tzuhsien.immediat.util.Util
+import com.tzuhsien.immediat.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -107,6 +110,8 @@ class YouTubeNoteViewModel(
     fun getLiveTimeItemsResult(id: String) {
         _liveTimeItemList = repository.getLiveTimeItems(id)
         _status.value = LoadApiStatus.DONE
+
+        // Let fragment know it's time to start observing the reassigned _liveTimeItemList LiveData
         _reObserveTimeItems.value = true
     }
 
@@ -163,7 +168,6 @@ class YouTubeNoteViewModel(
     }
 
     private fun updateTimeItem(timeItem: TimeItem) {
-
         coroutineScope.launch {
             when (val result = repository.updateTimeItem(noteId!!, timeItem)) {
                 is Result.Success -> {
@@ -188,7 +192,6 @@ class YouTubeNoteViewModel(
     }
 
     private fun deleteTimeItem(timeItem: TimeItem) {
-
         coroutineScope.launch {
             when (val result = repository.deleteTimeItem(noteId!!, timeItem)) {
                 is Result.Success -> {

@@ -22,13 +22,17 @@
         tools:layout="@layout/fragment_youtube_note">
         <argument
             android:name="note_id_key"
+            android:defaultValue="@null"
             app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
         <argument
             android:name="video_id_key"
             app:argType="string"
-            app:nullable="false"/>
+            app:nullable="false" />
+
+        <deepLink
+            android:autoVerify="true"
+            app:uri="http://pinpisode/youtube_note/{video_id_key}" />
 
         <action
             android:id="@+id/action_youTubeNoteFragment_to_noteListFragment"

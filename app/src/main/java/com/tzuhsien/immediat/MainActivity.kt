@@ -31,14 +31,19 @@ class MainActivity : AppCompatActivity() {
         /**
          *  Read intent data
          * */
-        var extras: Bundle? = intent?.extras
-        val sourceId = extras?.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
+        if (null != intent) {
+            val extras: Bundle? = intent?.extras
+            val sourceId = extras?.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
 
-        Timber.d("intent extras : $sourceId")
+            Timber.d("intent extras : ${extras?.getString(Intent.EXTRA_TEXT)}, $sourceId")
 
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
-        navController.navigate(YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = sourceId!!))
+            val navController = findNavController(R.id.nav_host_fragment_activity_main)
+            navController.navigate(
+                YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = sourceId!!)
+            )
+        }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)

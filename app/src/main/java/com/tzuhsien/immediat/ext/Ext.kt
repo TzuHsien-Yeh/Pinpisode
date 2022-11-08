@@ -22,11 +22,17 @@ fun String.extractYoutubeVideoId(): String {
     val youtubeWatchUrl = "youtube.com/watch?v="
     val youtubeShareLink = "youtu.be/"
 
+    val appShareLink = "http://pinpisode/youtube_note/"
+
     return if (youtubeWatchUrl in this) {
         this
             .substringAfter(youtubeWatchUrl)
             .substringBefore("&", this.substringAfter(youtubeWatchUrl))
     } else {
-        this.substringAfter(youtubeShareLink)
+        if (youtubeShareLink in this) {
+            this.substringAfter(youtubeShareLink)
+        } else {
+            this.substringAfter(appShareLink)
+        }
     }
 }

@@ -1,11 +1,14 @@
 package com.tzuhsien.immediat.youtubenote
 
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.NonNull
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -20,6 +23,7 @@ import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseDuration
 import com.tzuhsien.immediat.tag.TagDialogFragmentDirections
+import com.tzuhsien.immediat.util.Util
 import timber.log.Timber
 
 
@@ -157,6 +161,10 @@ class YouTubeNoteFragment : Fragment() {
             }
         }
 
+
+        /**
+         *  Buttons on the bottom of the page: Toggle the display of timeItems
+         * */
         binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_youtube_black)
         binding.icTimeItemDisplayOptions.setOnClickListener {
             when (viewModel.displayState) {
@@ -181,10 +189,24 @@ class YouTubeNoteFragment : Fragment() {
             }
         }
 
-        // Navigate to tag fragment
+        /**
+         *  Buttons on the bottom of the page: Navigate to tag fragment
+         * */
         binding.icAddTag.setOnClickListener {
             findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(
                 viewModel.newNote))
+        }
+
+        /**
+         *  Buttons on the bottom of the page: Share this note
+         * */
+        binding.icShare.setOnClickListener {
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type="text/plain"
+                putExtra(Intent.EXTRA_TEXT, getString(R.string.youtube_note_uri, videoId))
+            }
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
         }
 
         return binding.root

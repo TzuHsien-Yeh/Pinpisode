@@ -23,8 +23,8 @@ object Util {
         return activeNetwork?.isConnectedOrConnecting == true
     }
 
-    fun getString(resourceId: Int): String {
-        return applicationContext().getString(resourceId)
-    }
+    fun getString(resourceId: Int, value: String? = null): String {
 
+        return applicationContext().getString(resourceId, value)
+    }
 }
