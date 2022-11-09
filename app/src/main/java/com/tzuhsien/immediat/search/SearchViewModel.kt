@@ -113,8 +113,8 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         ytInfoNote = Note(
             sourceId = videoItem.id,
             source = Source.YOUTUBE.source,
-            ownerId = UserManager.userId,
-            authors = listOf(UserManager.userId),
+            ownerId = UserManager.userId!!,
+            authors = listOf(UserManager.userId!!),
             tags = listOf(Source.YOUTUBE.source),
             thumbnail = videoItem.snippet.thumbnails.high.url,
             title = videoItem.snippet.title,

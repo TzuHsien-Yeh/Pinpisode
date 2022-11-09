@@ -152,7 +152,7 @@ class YouTubeNoteViewModel(
         _status.value = LoadApiStatus.DONE
     }
 
-    fun getLiveTimeItemsResult(noteId: String) {
+    private fun getLiveTimeItemsResult(noteId: String) {
         _liveTimeItemList = repository.getLiveTimeItems(noteId)
         _status.value = LoadApiStatus.DONE
 
@@ -165,9 +165,7 @@ class YouTubeNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.checkIfYouTubeNoteExists(videoId)
-
-            when (result) {
+            when (val result = repository.checkIfYouTubeNoteExists(videoId)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -204,9 +202,7 @@ class YouTubeNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.getYouTubeVideoInfoById(videoId)
-
-            when (result) {
+            when (val result = repository.getYouTubeVideoInfoById(videoId)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -237,8 +233,8 @@ class YouTubeNoteViewModel(
         val newYtNote = Note(
             sourceId = video.id,
             source = Source.YOUTUBE.source,
-            ownerId = UserManager.userId,
-            authors = listOf(UserManager.userId),
+            ownerId = UserManager.userId!!,
+            authors = listOf(UserManager.userId!!),
             tags = listOf(Source.YOUTUBE.source),
             thumbnail = video.snippet.thumbnails.high.url,
             title = video.snippet.title,

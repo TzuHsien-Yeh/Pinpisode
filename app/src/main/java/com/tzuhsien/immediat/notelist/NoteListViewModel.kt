@@ -33,9 +33,9 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
     var isAscending: Boolean = true // 0: Ascending order; 1: Descending
 
-    private val _updatedYoutubeResult = MutableLiveData<YouTubeResult>()
-    val updatedYoutubeResult: LiveData<YouTubeResult>
-        get() = _updatedYoutubeResult
+//    private val _updatedYoutubeResult = MutableLiveData<YouTubeResult>()
+//    val updatedYoutubeResult: LiveData<YouTubeResult>
+//        get() = _updatedYoutubeResult
 
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
@@ -55,6 +55,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     init {
         getAllLiveNotes()
         _tagSet.value = UserManager.tagSet
+        Timber.d("NoteListViewModel: ${UserManager.userId}")
     }
 
     private fun getAllLiveNotes() {

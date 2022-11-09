@@ -1,9 +1,11 @@
 package com.tzuhsien.immediat.data.source
 
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.auth.FirebaseUser
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.Note
+import com.tzuhsien.immediat.data.model.UserInfo
 import com.tzuhsien.immediat.data.model.YouTubeResult
 
 class DefaultRepository(private val noteRemoteDataSource: DataSource): Repository {
@@ -60,7 +62,11 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.updateTags(noteId, note)
     }
 
-    override suspend fun addUser(token: String) {
-        TODO("Not yet implemented")
+    override suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo): Result<UserInfo> {
+        return noteRemoteDataSource.updateUser(firebaseUser, user)
+    }
+
+    override suspend fun getCurrentUser(): Result<UserInfo?> {
+        return noteRemoteDataSource.getCurrentUser()
     }
 }

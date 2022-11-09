@@ -1,11 +1,10 @@
 package com.tzuhsien.immediat.data.source
 
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.auth.User
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.TimeItem
-import com.tzuhsien.immediat.data.model.Note
-import com.tzuhsien.immediat.data.model.TimestampNote
-import com.tzuhsien.immediat.data.model.YouTubeResult
+import com.tzuhsien.immediat.data.model.*
 
 interface Repository {
     /**
@@ -41,7 +40,9 @@ interface Repository {
     suspend fun updateTags(noteId: String, note: Note): Result<String>
 
     /**
-     *  User info (Login and Profile page method)
+     *  Users
      * */
-    suspend fun addUser(token: String)
+    suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo) : Result<UserInfo>
+
+    suspend fun getCurrentUser(): Result<UserInfo?>
 }

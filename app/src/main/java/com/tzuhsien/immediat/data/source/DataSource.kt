@@ -1,9 +1,11 @@
 package com.tzuhsien.immediat.data.source
 
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.auth.FirebaseUser
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimeItem
+import com.tzuhsien.immediat.data.model.UserInfo
 import com.tzuhsien.immediat.data.model.YouTubeResult
 
 interface DataSource {
@@ -43,5 +45,7 @@ interface DataSource {
     /**
      *  User info (Login and Profile page method)
      * */
-    suspend fun addUser(token: String)
+    suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo) : Result<UserInfo>
+
+    suspend fun getCurrentUser(): Result<UserInfo?>
 }

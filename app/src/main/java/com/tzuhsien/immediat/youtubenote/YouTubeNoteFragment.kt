@@ -194,7 +194,6 @@ class YouTubeNoteFragment : Fragment() {
                     viewModel.displayState = TimeItemDisplay.CLIP
                     viewModel.notifyDisplayChange()
                 }
-
                 TimeItemDisplay.CLIP -> {
                     binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_youtube_black)
                     viewModel.displayState = TimeItemDisplay.ALL
@@ -210,6 +209,10 @@ class YouTubeNoteFragment : Fragment() {
             findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(
                 viewModel.noteToBeUpdated!!))
         }
+
+        /**
+         *  Buttons on the bottom of the page: Coauthoring
+         * */
 
         /**
          *  Buttons on the bottom of the page: Share this note
