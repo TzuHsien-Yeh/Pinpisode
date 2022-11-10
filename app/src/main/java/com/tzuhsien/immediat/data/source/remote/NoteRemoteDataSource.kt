@@ -440,6 +440,10 @@ object NoteRemoteDataSource : DataSource {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val userInfo = task.result.toObject(UserInfo::class.java)
+                        UserManager.userId = userInfo?.id
+                        UserManager.userEmail = userInfo?.email
+                        UserManager.userName = userInfo?.name
+                        UserManager.userPic = userInfo?.pic
                         continuation.resume(Result.Success(userInfo))
                     } else {
                         task.exception?.let {

@@ -63,5 +63,10 @@
         android:name="com.tzuhsien.immediat.signin.SignInFragment"
         android:label="fragment_sign_in"
         tools:layout="@layout/fragment_sign_in" /><action android:id="@+id/action_global_signInFragment" app:destination="@id/signInFragment"/>
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.tzuhsien.immediat.profile.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
 
 </navigation>

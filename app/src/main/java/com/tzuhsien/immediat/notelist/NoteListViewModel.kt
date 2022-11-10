@@ -206,9 +206,8 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         if (null == UserManager.userId) {
             coroutineScope.launch {
                 _status.value = LoadApiStatus.LOADING
-                val currentUserResult = repository.getCurrentUser()
 
-                UserManager.user = when(currentUserResult) {
+                when(val currentUserResult = repository.getCurrentUser()) {
                     is Result.Success -> {
                         _error.value = null
                         _status.value = LoadApiStatus.DONE
