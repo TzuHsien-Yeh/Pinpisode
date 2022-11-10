@@ -84,10 +84,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
-        val navView: BottomNavigationView = binding.bottomNavView
-        navView.setupWithNavController(navController) // make items show their status as selected
-
         val toolbar: Toolbar = binding.toolbar
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
@@ -98,64 +94,42 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener{controller, destination, arguments->
             when(destination.id){
 
-                R.id.navigation_note_list -> {
-                    binding.toolbar.visibility = View.VISIBLE
+                R.id.noteListFragment -> {
                     binding.toolbar.navigationIcon = null
                     binding.toolbarText.text = getString(R.string.pin_your_episodes)
-                    binding.bottomNavView.visibility = View.VISIBLE
                 }
 
-                R.id.youTubeNoteFragment -> {
-                    navView.visibility = View.GONE
+                R.id.searchFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
                     binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
                     binding.toolbar.setNavigationOnClickListener {
-
                         navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
-                        binding.toolbar.navigationIcon = null
-                        binding.toolbarText.text = getString(R.string.pin_your_episodes)
-                        binding.bottomNavView.visibility = View.VISIBLE
+                    }
+                    binding.toolbarText.text = getString(R.string.find_your_episodes)
+                }
+
+                R.id.profileFragment -> {
+                    binding.toolbar.visibility = View.VISIBLE
+                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationOnClickListener {
+                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                    }
+                    binding.toolbarText.text = getString(R.string.profile)
+                }
+
+                R.id.youTubeNoteFragment -> {
+                    binding.toolbar.visibility = View.VISIBLE
+                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationOnClickListener {
+                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
                     }
                     binding.toolbarText.text = getString(R.string.youtube_note)
                 }
 
                 R.id.signInFragment -> {
-                    navView.visibility = View.GONE
                     binding.toolbar.visibility = View.GONE
                 }
 
-
-            }
-        }
-
-        navView.setOnItemSelectedListener { item: MenuItem ->
-            when (item.itemId) {
-
-                R.id.navigation_note_list -> {
-                    navController.navigate(R.id.noteListFragment)
-                    binding.toolbar.navigationIcon = null
-                    binding.toolbarText.text = getString(R.string.pin_your_episodes)
-                    binding.bottomNavView.visibility = View.VISIBLE
-                    true
-                }
-
-                R.id.navigation_search -> {
-                    navController.navigate(R.id.searchFragment)
-                    binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.navigationIcon = null
-                    binding.toolbarText.text = getString(R.string.find_your_episodes)
-                    true
-                }
-
-                R.id.profileFragment -> {
-                    navController.navigate(R.id.profileFragment)
-                    binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.navigationIcon = null
-                    binding.toolbarText.text = getString(R.string.profile)
-                    true
-                }
-
-                else -> false
             }
         }
 

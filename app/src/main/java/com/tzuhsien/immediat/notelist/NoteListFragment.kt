@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.OnCompleteListener
@@ -45,6 +46,21 @@ class NoteListFragment : Fragment() {
         }
 
         binding = FragmentNoteListBinding.inflate(layoutInflater)
+
+        /**
+         *  Navigation Buttons
+         * */
+        Glide.with(binding.imgPicToProfile)
+            .load(UserManager.userPic)
+            .into(binding.imgPicToProfile)
+        binding.textUserName.text = UserManager.userName
+        binding.imgPicToProfile.setOnClickListener {
+            findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToProfileFragment())
+        }
+
+        binding.btnToSearchPage.setOnClickListener {
+            findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToSearchFragment())
+        }
 
         /**
          * Tag list
