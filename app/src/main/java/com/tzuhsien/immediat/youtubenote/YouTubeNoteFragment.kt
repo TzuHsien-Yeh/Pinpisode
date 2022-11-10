@@ -15,6 +15,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.tzuhsien.immediat.R
+import com.tzuhsien.immediat.coauthor.CoauthorDialogFragment
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
@@ -211,6 +212,13 @@ class YouTubeNoteFragment : Fragment() {
         /**
          *  Buttons on the bottom of the page: Coauthoring
          * */
+        binding.icCoauthoring.setOnClickListener {
+            findNavController().navigate(
+                YouTubeNoteFragmentDirections.actionYouTubeNoteFragmentToCoauthorDialogFragment(
+                    viewModel.noteToBeUpdated!!
+                )
+            )
+        }
 
         /**
          *  Buttons on the bottom of the page: Share this note

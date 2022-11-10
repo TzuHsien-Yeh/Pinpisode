@@ -48,6 +48,9 @@
             android:id="@+id/action_youTubeNoteFragment_pop"
             app:popUpTo="@id/youTubeNoteFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_youTubeNoteFragment_to_coauthorDialogFragment"
+            app:destination="@id/coauthorDialogFragment" />
 
     </fragment>
 
@@ -75,5 +78,19 @@
         android:name="com.tzuhsien.immediat.profile.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" />
+    <dialog
+        android:id="@+id/coauthorDialogFragment"
+        android:name="com.tzuhsien.immediat.coauthor.CoauthorDialogFragment"
+        android:label="fragment_coauthor_dialog"
+        tools:layout="@layout/fragment_coauthor_dialog" >
+
+        <argument android:name="note_key"
+            app:argType="com.tzuhsien.immediat.data.model.Note"
+            app:nullable="false"/>
+
+        <action
+            android:id="@+id/action_coauthorDialogFragment_to_youTubeNoteFragment"
+            app:destination="@id/youTubeNoteFragment" />
+    </dialog>
 
 </navigation>

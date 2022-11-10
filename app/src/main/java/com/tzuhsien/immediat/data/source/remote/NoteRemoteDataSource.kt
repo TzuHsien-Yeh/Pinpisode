@@ -156,7 +156,7 @@ object NoteRemoteDataSource : DataSource {
                             continuation.resume(Result.Success(null))
                         } else {
                             val result = mutableListOf<Note>()
-                            for(note in task.result) {
+                            for (note in task.result) {
                                 val item = note.toObject(Note::class.java)
                                 result.add(item)
                             }
@@ -227,7 +227,7 @@ object NoteRemoteDataSource : DataSource {
                     }
 
                 }
-    }
+        }
 
 
     override fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>> {
@@ -400,29 +400,31 @@ object NoteRemoteDataSource : DataSource {
         }
 
 
-    override suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo) : Result<UserInfo> =
+    override suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo): Result<UserInfo> =
         suspendCoroutine { continuation ->
-        val doc = FirebaseFirestore.getInstance().collection(PATH_USERS).document(firebaseUser.uid)
+            // Create a new user (or update info) of current signed in google account to users collection
+            val doc =
+                FirebaseFirestore.getInstance().collection(PATH_USERS).document(firebaseUser.uid)
 
             user.id = firebaseUser.uid
 
-        doc
-            .set(user)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    UserManager.userId = user.id
-                    continuation.resume(Result.Success(user))
-                } else {
-                    task.exception?.let {
-                        Timber.w("[${this::class.simpleName}] Error adding user document. ${it.message}\"")
-                        continuation.resume(Result.Error(it))
-                        return@addOnCompleteListener
+            doc
+                .set(user)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        UserManager.userId = user.id
+                        continuation.resume(Result.Success(user))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error adding user document. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
                     }
-                    continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
                 }
-            }
 
-    }
+        }
 
     override suspend fun getCurrentUser(): Result<UserInfo?> = suspendCoroutine { continuation ->
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
@@ -456,6 +458,62 @@ object NoteRemoteDataSource : DataSource {
                     }
                 }
         }
-
     }
+
+    override suspend fun findUserByEmail(query: String): Result<UserInfo?> =
+        suspendCoroutine { continuation ->
+
+            val user = FirebaseFirestore.getInstance().collection(PATH_USERS)
+
+            user
+                .whereEqualTo("email", query)
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val querySnapshot: QuerySnapshot? = task.result
+                        if (querySnapshot!!.isEmpty) {
+                            continuation.resume(Result.Success(null))
+                        } else {
+                            val result = mutableListOf<UserInfo>()
+                            for (user in task.result) {
+                                val user = user.toObject(UserInfo::class.java)
+                                result.add(user)
+                            }
+
+                            if (result.isEmpty()) {
+                                continuation.resume(Result.Fail(getString(R.string.user_not_found)))
+                            } else {
+                                continuation.resume(Result.Success(result[0]))
+                            }
+                        }
+
+                    } else {
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(
+                            R.string.unknown_error)))
+                    }
+
+                }
+        }
+
+    override suspend fun updateNoteAuthors(noteId: String, authors: Set<String>): Result<Boolean> =
+        suspendCoroutine { continuation ->
+
+            val doc = FirebaseFirestore.getInstance().collection(PATH_NOTES).document(noteId)
+
+            doc
+                .update("authors", authors.toList())
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success(true))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error updating document. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+
+        }
 }

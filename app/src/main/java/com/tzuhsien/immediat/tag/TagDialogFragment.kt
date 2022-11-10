@@ -25,7 +25,6 @@ import timber.log.Timber
 
 class TagDialogFragment : AppCompatDialogFragment() {
 
-
     private val viewModel by viewModels<TagViewModel> { getVmFactory(TagDialogFragmentArgs.fromBundle(requireArguments()).noteKey) }
     private lateinit var binding: DialogTagBinding
 

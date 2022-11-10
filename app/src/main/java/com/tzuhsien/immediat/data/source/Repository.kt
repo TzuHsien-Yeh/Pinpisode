@@ -45,4 +45,8 @@ interface Repository {
     suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo) : Result<UserInfo>
 
     suspend fun getCurrentUser(): Result<UserInfo?>
+
+    suspend fun findUserByEmail(query: String): Result<UserInfo?>
+
+    suspend fun updateNoteAuthors(id: String, authors: Set<String>): Result<Boolean>
 }

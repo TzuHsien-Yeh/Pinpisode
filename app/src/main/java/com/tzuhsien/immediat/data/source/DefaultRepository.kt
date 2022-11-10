@@ -69,4 +69,12 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
     override suspend fun getCurrentUser(): Result<UserInfo?> {
         return noteRemoteDataSource.getCurrentUser()
     }
+
+    override suspend fun findUserByEmail(query: String): Result<UserInfo?> {
+        return noteRemoteDataSource.findUserByEmail(query)
+    }
+
+    override suspend fun updateNoteAuthors(noteId: String, authors: Set<String>): Result<Boolean> {
+        return noteRemoteDataSource.updateNoteAuthors(noteId, authors)
+    }
 }
