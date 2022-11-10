@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class SignInViewModel(private val repository: Repository): ViewModel() {
 
@@ -36,6 +37,7 @@ class SignInViewModel(private val repository: Repository): ViewModel() {
 
     fun updateUser(firebaseUser: FirebaseUser, account: GoogleSignInAccount) {
 
+        // create a new user or update google account data to the existing user in users collection
         val userInfo = UserInfo(
             name = account.displayName!!,
             email = account.email!!,
@@ -46,21 +48,47 @@ class SignInViewModel(private val repository: Repository): ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.updateUser(firebaseUser, userInfo)
-
-            _navigateUp.value = when (result) {
+            when (val result = repository.updateUser(firebaseUser, userInfo)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
-                    result.data
+
+                    updateLocalUserData()
                 }
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
                 is Result.Error -> {
                     _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
+    }
+
+    private fun updateLocalUserData() {
+        coroutineScope.launch {
+            _status.value = LoadApiStatus.LOADING
+
+            _navigateUp.value = when(val currentUserResult = repository.getCurrentUser()) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+
+                    currentUserResult.data
+                }
+                is Result.Fail -> {
+                    _error.value = currentUserResult.error
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                is Result.Error -> {
+                    _error.value = currentUserResult.exception.toString()
                     _status.value = LoadApiStatus.ERROR
                     null
                 }

@@ -275,7 +275,6 @@ object NoteRemoteDataSource : DataSource {
                 .set(timeItem)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Timber.i("[${this::class.simpleName}] time items: $timeItem ")
                         continuation.resume(Result.Success(doc.id))
                     } else {
                         task.exception?.let {
@@ -444,6 +443,8 @@ object NoteRemoteDataSource : DataSource {
                         UserManager.userEmail = userInfo?.email
                         UserManager.userName = userInfo?.name
                         UserManager.userPic = userInfo?.pic
+                        Timber.d("UserInfo: ${UserManager.userId},${UserManager.userName},${UserManager.userEmail},${UserManager.userPic}")
+
                         continuation.resume(Result.Success(userInfo))
                     } else {
                         task.exception?.let {

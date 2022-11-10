@@ -53,8 +53,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         get() = _navigateToYoutubeNote
 
     init {
-        Log.d("Log: NoteListViewModel", "${UserManager.userId}")
-        Timber.d("[Timber: ${this::class.simpleName}] NoteListViewModel: ${UserManager.userId}")
+        Timber.d("[Timber NoteListViewModel: ${UserManager.userId}, ${UserManager.userName}, ${UserManager.userEmail}")
         getAllLiveNotes()
         _tagSet.value = UserManager.tagSet
     }

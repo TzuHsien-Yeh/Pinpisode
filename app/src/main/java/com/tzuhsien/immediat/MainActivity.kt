@@ -95,6 +95,7 @@ class MainActivity : AppCompatActivity() {
             when(destination.id){
 
                 R.id.noteListFragment -> {
+                    binding.toolbar.visibility = View.VISIBLE
                     binding.toolbar.navigationIcon = null
                     binding.toolbarText.text = getString(R.string.pin_your_episodes)
                 }
@@ -128,6 +129,7 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.signInFragment -> {
                     binding.toolbar.visibility = View.GONE
+                    binding.toolbar.navigationIcon = null
                 }
 
             }
