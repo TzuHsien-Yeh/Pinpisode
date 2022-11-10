@@ -1,20 +1,24 @@
 package com.tzuhsien.immediat.notelist
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.*
+import com.tzuhsien.immediat.data.model.Note
+import com.tzuhsien.immediat.data.model.Sort
+import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.data.source.local.UserManager
-import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.updateNote
 import com.tzuhsien.immediat.ext.parseDuration
 import com.tzuhsien.immediat.network.LoadApiStatus
 import com.tzuhsien.immediat.util.Util
-import kotlinx.coroutines.*
-import org.checkerframework.checker.units.qual.s
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class NoteListViewModel(private val repository: Repository) : ViewModel() {
@@ -33,10 +37,6 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
     var isAscending: Boolean = true // 0: Ascending order; 1: Descending
 
-//    private val _updatedYoutubeResult = MutableLiveData<YouTubeResult>()
-//    val updatedYoutubeResult: LiveData<YouTubeResult>
-//        get() = _updatedYoutubeResult
-
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
         get() = _status
@@ -53,9 +53,10 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         get() = _navigateToYoutubeNote
 
     init {
+        Log.d("Log: NoteListViewModel", "${UserManager.userId}")
+        Timber.d("[Timber: ${this::class.simpleName}] NoteListViewModel: ${UserManager.userId}")
         getAllLiveNotes()
         _tagSet.value = UserManager.tagSet
-        Timber.d("NoteListViewModel: ${UserManager.userId}")
     }
 
     private fun getAllLiveNotes() {
@@ -198,6 +199,40 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
     fun doneNavigationToYtNote() {
         _navigateToYoutubeNote.value = null
+    }
+
+    fun updateLocalUserId() {
+
+        if (null == UserManager.userId) {
+            coroutineScope.launch {
+                _status.value = LoadApiStatus.LOADING
+                val currentUserResult = repository.getCurrentUser()
+
+                UserManager.user = when(currentUserResult) {
+                    is Result.Success -> {
+                        _error.value = null
+                        _status.value = LoadApiStatus.DONE
+                        UserManager.userId = currentUserResult.data?.id
+                        currentUserResult.data
+                    }
+                    is Result.Fail -> {
+                        _error.value = currentUserResult.error
+                        _status.value = LoadApiStatus.ERROR
+                        null
+                    }
+                    is Result.Error -> {
+                        _error.value = currentUserResult.exception.toString()
+                        _status.value = LoadApiStatus.ERROR
+                        null
+                    }
+                    else -> {
+                        _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                        _status.value = LoadApiStatus.ERROR
+                        null
+                    }
+                }
+            }
+        }
     }
 
 }

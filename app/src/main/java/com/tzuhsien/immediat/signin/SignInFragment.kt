@@ -50,7 +50,7 @@ class SignInFragment : Fragment() {
 
         viewModel.navigateUp.observe(viewLifecycleOwner) {
             it?.let {
-                findNavController().navigateUp()
+                findNavController().navigate(SignInFragmentDirections.actionGlobalNoteListFragment())
             }
         }
 

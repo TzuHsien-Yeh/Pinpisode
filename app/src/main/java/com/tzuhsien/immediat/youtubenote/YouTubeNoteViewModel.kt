@@ -9,10 +9,7 @@ import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.*
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.data.source.local.UserManager
-import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.deleteTimeItem
-import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.updateTimeItem
 import com.tzuhsien.immediat.network.LoadApiStatus
-import com.tzuhsien.immediat.util.ServiceLocator.repository
 import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,9 +61,9 @@ class YouTubeNoteViewModel(
     val liveTimeItemList: LiveData<List<TimeItem>>
         get() = _liveTimeItemList
 
-    private var _reObserveTimeItems = MutableLiveData<Boolean>(false)
-    val reObserveTimeItems: LiveData<Boolean>
-        get() = _reObserveTimeItems
+    private var _timeItemLiveDataReassigned = MutableLiveData<Boolean>(false)
+    val timeItemLiveDataReassigned: LiveData<Boolean>
+        get() = _timeItemLiveDataReassigned
 
     private var _liveNoteData = MutableLiveData<Note?>()
     val liveNoteData: LiveData<Note?>
@@ -74,11 +71,6 @@ class YouTubeNoteViewModel(
 
     // initial value is the note info gotten once from firebase
     var noteToBeUpdated: Note? = null
-
-//    // Get yt video data if entering youtubeNote page from yt deeplink
-//    private val _ytVideoData = MutableLiveData<YouTubeResult?>(null)
-//    val ytVideoData: LiveData<YouTubeResult?>
-//        get() = _ytVideoData
 
     /** Decide whether the viewer can edit the note **/
     private var _canEdit = MutableLiveData<Boolean>(false)
@@ -157,7 +149,7 @@ class YouTubeNoteViewModel(
         _status.value = LoadApiStatus.DONE
 
         // Let fragment know it's time to start observing the reassigned _liveTimeItemList LiveData
-        _reObserveTimeItems.value = true
+        _timeItemLiveDataReassigned.value = true
     }
 
     private fun checkVideoExistence(videoId: String) {

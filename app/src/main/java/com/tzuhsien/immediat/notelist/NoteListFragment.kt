@@ -33,11 +33,15 @@ class NoteListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
+        Timber.d("Timber[${this::class.simpleName}] NoteListFragment[onCreateView]: ${UserManager.userId}")
 
-        Timber.d("NoteListFragment[onCreateView]: ${UserManager.userId}")
-
+        /**
+         * Check and handle sign in status
+         * */
         if (null == GoogleSignIn.getLastSignedInAccount(requireContext())) {
             findNavController().navigate(SignInFragmentDirections.actionGlobalSignInFragment())
+        } else {
+            viewModel.updateLocalUserId()
         }
 
         binding = FragmentNoteListBinding.inflate(layoutInflater)
@@ -72,7 +76,7 @@ class NoteListFragment : Fragment() {
         binding.sortAsc.alpha = 1F
         binding.sortDesc.alpha = 0.5F
         binding.cardSortBy.setOnClickListener {
-            when(sortState) {
+            when (sortState) {
                 0 -> {
                     binding.textSortOptions.text = Sort.DURATION.VALUE
                     binding.sortAsc.alpha = 1F
@@ -100,7 +104,7 @@ class NoteListFragment : Fragment() {
             }
         }
         binding.btnSwitchDirection.setOnClickListener {
-            if(binding.sortAsc.alpha != 1F) {
+            if (binding.sortAsc.alpha != 1F) {
                 //change to DESC
                 viewModel.isAscending = false
                 viewModel.changeOrderDirection()
@@ -122,7 +126,9 @@ class NoteListFragment : Fragment() {
             viewModel.navigateToNotePage(it)
         })
         binding.recyclerviewNoteList.adapter = noteAdapter
-        viewModel.liveNoteList.observe(viewLifecycleOwner, Observer { list ->
+
+        viewModel.liveNoteList.observe(viewLifecycleOwner) { list ->
+            Timber.d("viewModel.liveNoteList.observe: $list")
             list?.let {
                 viewModel.getAllTags(list)
                 if (null != viewModel.selectedTag) {
@@ -137,7 +143,7 @@ class NoteListFragment : Fragment() {
                     }
                 }
             }
-        })
+        }
 
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
             it?.let {

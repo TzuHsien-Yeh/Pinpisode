@@ -11,13 +11,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import com.google.common.base.Strings.isNullOrEmpty
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
-import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseDuration
@@ -154,7 +152,7 @@ class YouTubeNoteFragment : Fragment() {
         )
         binding.recyclerViewTimeItems.adapter = adapter
 
-        viewModel.reObserveTimeItems.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
+        viewModel.timeItemLiveDataReassigned.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
             if (timeItemLiveDataAssigned == true) {
                 viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer { list ->
                     list?.let {

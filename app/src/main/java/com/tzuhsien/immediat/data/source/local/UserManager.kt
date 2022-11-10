@@ -29,6 +29,7 @@ object UserManager {
             editor.putString(USER_ID, value).commit()
         }
 
+    var user: UserInfo? = null
 
     var userName: String = "Shrimp"
     var userEmail: String = "shrimp@gmail.com"

@@ -12,9 +12,13 @@ import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.api.AnnotationsProto.http
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.ActivityMainBinding
 import com.tzuhsien.immediat.ext.extractYoutubeVideoId
@@ -32,19 +36,21 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        /**
-         *  Read intent data
-         * */
-        if (null != intent) {
-            val extras: Bundle? = intent?.extras
-            val sourceId = extras?.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
+        /** Read intent data **/
 
-            Timber.d("intent extras : ${extras?.getString(Intent.EXTRA_TEXT)}, $sourceId")
+        Timber.d("onNewIntent CALLED")
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
-            val navController = findNavController(R.id.nav_host_fragment_activity_main)
-            navController.navigate(
-                YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = sourceId!!)
-            )
+        intent?.data?.let {
+            if (it.toString().contains("http://pinpisode/")) {
+                navController.handleDeepLink(intent)
+                Timber.d("[onNewIntent] handleDeepLink called")
+            }
+        }
+
+        intent?.extras?.let {
+            handleIntent(it)
+            Timber.d("[onNewIntent] handleIntent called")
         }
     }
 
@@ -56,16 +62,31 @@ class MainActivity : AppCompatActivity() {
         // initialize timber
         Timber.plant(Timber.DebugTree())
 
-
-        val navView: BottomNavigationView = binding.bottomNavView
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
-        navView.setupWithNavController(navController) // make items show their status as selected
 
-        viewModel.currentUser.observe(this){
-            if (null == it) {
-                navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment())
+        /** Read intent data if the activity has not been created when getting intent from other app **/
+
+        Timber.d("onCreate CALLED")
+        Timber.d("intent.data: ${intent.data}, ${intent.data?.host}, ${intent.data?.query}")
+        Timber.d("intent.extra: ${intent.extras?.getString(Intent.EXTRA_TEXT)}")
+
+        if (null != intent) {
+            intent.data?.let {
+                if (it.toString().contains("http://pinpisode/")) {
+                    navController.handleDeepLink(intent)
+                    Timber.d("[onCreate] handleDeepLink called")
+                }
+            }
+
+            intent.extras?.let {
+                handleIntent(it)
+                Timber.d("[onCreate] handleIntent called")
             }
         }
+
+
+        val navView: BottomNavigationView = binding.bottomNavView
+        navView.setupWithNavController(navController) // make items show their status as selected
 
         val toolbar: Toolbar = binding.toolbar
         setSupportActionBar(toolbar)
@@ -144,5 +165,32 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return super.dispatchTouchEvent(event)
+    }
+
+    private fun handleIntent(intentExtras: Bundle){
+
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+
+        /**
+         * Check and handle sign in status
+         * */
+        if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
+            Timber.d("[${this::class.simpleName}]: null == GoogleSignIn.getLastSignedInAccount(applicationContext)")
+            navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment())
+        } else {
+            viewModel.updateLocalUserId()
+        }
+
+        if (UserManager.userId != null) {
+            val sourceId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
+            if (null != sourceId){
+                Timber.d("HANDLE INTENT FUN intent extras : $sourceId")
+
+                navController.navigate(
+                    YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = sourceId)
+                )
+            }
+        }
+
     }
 }
