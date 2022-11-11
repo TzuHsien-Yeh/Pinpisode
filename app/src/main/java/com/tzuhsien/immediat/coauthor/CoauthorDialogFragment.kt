@@ -1,6 +1,7 @@
 package com.tzuhsien.immediat.coauthor
 
-import androidx.lifecycle.ViewModelProvider
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,10 +11,8 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
-import com.tzuhsien.immediat.R
-import com.tzuhsien.immediat.databinding.DialogTagBinding
+import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentCoauthorDialogBinding
-import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.tag.TagDialogFragmentArgs
 
@@ -27,6 +26,32 @@ class CoauthorDialogFragment : DialogFragment() {
         savedInstanceState: Bundle?,
     ): View? {
         binding = FragmentCoauthorDialogBinding.inflate(layoutInflater)
+
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val adapter = AuthorAdapter()
+        binding.recyclerviewAuthors.adapter = adapter
+        viewModel.liveCoauthorInfo.observe(viewLifecycleOwner) { authorList ->
+            authorList?.let { list ->
+                adapter.submitList(list)
+            }
+        }
+
+        viewModel.noteOwner.observe(viewLifecycleOwner) {
+            Glide.with(binding.imgOwnerPic)
+                .load(it?.pic)
+                .into(binding.imgOwnerPic)
+        }
+
+        if (UserManager.userId == viewModel.note.ownerId) {
+            binding.searchUserByEmail.visibility = View.VISIBLE
+            binding.textAddCoauthors.visibility = View.VISIBLE
+            binding.textOnlyOwnerCanInviteCoauthors.visibility = View.GONE
+        } else {
+            binding.searchUserByEmail.visibility = View.GONE
+            binding.textAddCoauthors.visibility = View.GONE
+            binding.textOnlyOwnerCanInviteCoauthors.visibility = View.VISIBLE
+        }
 
         binding.searchUserByEmail.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
@@ -42,6 +67,8 @@ class CoauthorDialogFragment : DialogFragment() {
                 }
             }
         )
+
+        binding.textNotFound.visibility = View.GONE
 
         viewModel.foundUser.observe(viewLifecycleOwner) {
             if (null != it) {
@@ -62,6 +89,7 @@ class CoauthorDialogFragment : DialogFragment() {
 
         binding.viewGroupUserSearchResult.setOnClickListener {
             viewModel.addUserAsCoauthor()
+            viewModel.resetFoundUser()
         }
 
         viewModel.addSuccess.observe(viewLifecycleOwner) {

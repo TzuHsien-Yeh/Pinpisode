@@ -52,4 +52,8 @@ interface DataSource {
     suspend fun findUserByEmail(query: String): Result<UserInfo?>
 
     suspend fun updateNoteAuthors(noteId: String, authors: Set<String>): Result<Boolean>
+
+    fun getLiveCoauthorsInfoOfTheNote(note: Note): MutableLiveData<List<UserInfo>>
+
+    suspend fun getUserInfoById(id: String): Result<UserInfo>
 }

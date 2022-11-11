@@ -516,4 +516,54 @@ object NoteRemoteDataSource : DataSource {
                 }
 
         }
+
+    override fun getLiveCoauthorsInfoOfTheNote(note: Note): MutableLiveData<List<UserInfo>> {
+        val liveData = MutableLiveData<List<UserInfo>>()
+
+        FirebaseFirestore.getInstance()
+            .collection(PATH_USERS)
+            .whereIn("id", note.authors)
+            .whereNotEqualTo("id", note.ownerId)
+            .addSnapshotListener { snapshot, error ->
+                    Timber.i("addSnapshotListener detect")
+
+                    error?.let {
+                        Timber.w("[${this::class.simpleName}] Error getting documents. ${it.message}")
+                    }
+
+                    val list = mutableListOf<UserInfo>()
+                    if (snapshot != null) {
+                        for (doc in snapshot) {
+                            Timber.d(doc.id + " => " + doc.data)
+                            val user = doc.toObject(UserInfo::class.java)
+                            list.add(user)
+                        }
+                    }
+                    liveData.value = list
+                }
+        return liveData
+    }
+
+    override suspend fun getUserInfoById(id: String): Result<UserInfo> = suspendCoroutine { continuation ->
+
+        FirebaseFirestore.getInstance()
+            .collection(PATH_USERS)
+            .document(id)
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = task.result.toObject(UserInfo::class.java)
+                    Timber.d("$user")
+                    continuation.resume(Result.Success(user!!))
+                } else {
+                    task.exception?.let {
+                        Timber.w("[${this::class.simpleName}] Error getting document. ${it.message}\"")
+                        continuation.resume(Result.Error(it))
+                        return@addOnCompleteListener
+                    }
+                    continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                }
+            }
+
+    }
 }

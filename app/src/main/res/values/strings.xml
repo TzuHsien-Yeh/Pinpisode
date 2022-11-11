@@ -23,4 +23,8 @@
     <string name="login_fail">Login Fail</string>
     <string name="log_out">Log Out</string>
     <string name="user_not_found">User not found</string>
+    <string name="note_owner">Owner</string>
+    <string name="add_coauthors">Add coauthors</string>
+    <string name="coauthor">Coauthor</string>
+    <string name="only_note_owner_can_invite_user_to_coauthor">Only note owner can invite others to coauthor</string>
 </resources>

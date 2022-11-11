@@ -77,4 +77,12 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
     override suspend fun updateNoteAuthors(noteId: String, authors: Set<String>): Result<Boolean> {
         return noteRemoteDataSource.updateNoteAuthors(noteId, authors)
     }
+
+    override fun getLiveCoauthorsInfoOfTheNote(note: Note): MutableLiveData<List<UserInfo>> {
+        return noteRemoteDataSource.getLiveCoauthorsInfoOfTheNote(note)
+    }
+
+    override suspend fun getUserInfoById(id: String): Result<UserInfo> {
+        return noteRemoteDataSource.getUserInfoById(id)
+    }
 }

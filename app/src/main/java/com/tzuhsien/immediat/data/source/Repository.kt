@@ -49,4 +49,8 @@ interface Repository {
     suspend fun findUserByEmail(query: String): Result<UserInfo?>
 
     suspend fun updateNoteAuthors(id: String, authors: Set<String>): Result<Boolean>
+
+    fun getLiveCoauthorsInfoOfTheNote(note: Note): MutableLiveData<List<UserInfo>>
+
+    suspend fun getUserInfoById(id: String): Result<UserInfo>
 }
