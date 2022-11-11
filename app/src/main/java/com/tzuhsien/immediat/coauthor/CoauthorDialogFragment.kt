@@ -69,6 +69,7 @@ class CoauthorDialogFragment : DialogFragment() {
         )
 
         binding.textNotFound.visibility = View.GONE
+        binding.viewGroupUserSearchResult.visibility = View.GONE
 
         viewModel.foundUser.observe(viewLifecycleOwner) {
             if (null != it) {
@@ -89,6 +90,7 @@ class CoauthorDialogFragment : DialogFragment() {
 
         binding.viewGroupUserSearchResult.setOnClickListener {
             viewModel.addUserAsCoauthor()
+            binding.viewGroupUserSearchResult.visibility = View.GONE
             viewModel.resetFoundUser()
         }
 

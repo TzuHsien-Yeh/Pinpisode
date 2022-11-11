@@ -1,12 +1,15 @@
 package com.tzuhsien.immediat.notelist
 
+import android.opengl.Visibility
 import android.text.format.DateUtils
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.databinding.ItemNoteBinding
 
@@ -16,6 +19,7 @@ class NoteAdapter (
 
     class NoteViewHolder(private val binding: ItemNoteBinding) : RecyclerView.ViewHolder(binding.root){
         fun bind(note: Note) {
+            val context = binding.root.context
             Glide.with(binding.imgThumbnail)
                 .load(note.thumbnail)
                 .into(binding.imgThumbnail)
@@ -23,6 +27,14 @@ class NoteAdapter (
             binding.textDigest.text = note.digest
             val timeAgo = DateUtils.getRelativeTimeSpanString(note.lastEditTime)
             binding.textLastEditTime.text = timeAgo
+            binding.textNumberOfCoauthors.visibility = if (note.authors.size == 1) View.GONE else View.VISIBLE
+            binding.textNumberOfCoauthors.text = context.getString(
+                R.string.number_of_coauthors, (note.authors.size.minus(1))
+            )
+
+            binding.ic3Dots.setOnClickListener {
+                // navigate to
+            }
         }
     }
 

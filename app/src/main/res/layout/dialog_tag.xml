@@ -48,6 +48,7 @@
             android:textColorHint="@color/color_on_primary"
             android:paddingStart="2dp"
             android:paddingEnd="10dp"
+            android:inputType="text"
             android:textSize="12sp"
             android:maxLines="1"
             android:maxLength="20"

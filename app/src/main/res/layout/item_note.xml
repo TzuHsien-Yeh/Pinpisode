@@ -29,7 +29,6 @@
                 android:layout_height="110dp"
                 android:scaleType="centerCrop"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:shapeAppearanceOverlay="@style/small_rounded_corner"/>
 
@@ -38,25 +37,36 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
+                android:layout_marginEnd="4dp"
+                android:maxLines="3"
+                android:ellipsize="end"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toEndOf="@id/img_thumbnail"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/ic_3_dots"
                 android:textStyle="bold"
                 android:textSize="14sp"
                 tools:text="xxxxxxxx"/>
 
+            <ImageView
+                android:id="@+id/ic_3_dots"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_3_dots"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
             <TextView
                 android:id="@+id/text_digest"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="2dp"
+                android:layout_marginBottom="6dp"
                 tools:text="EIKO sings YONEZU's song"
                 android:textSize="12sp"
                 app:layout_constraintTop_toBottomOf="@+id/text_source_title"
-                app:layout_constraintBottom_toTopOf="@+id/text_last_edit_time"
                 app:layout_constraintStart_toEndOf="@id/img_thumbnail"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintEnd_toEndOf="@id/text_source_title"/>
 
             <TextView
                 android:id="@+id/text_last_edit_time"
@@ -69,6 +79,15 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 tools:text="3 hours ago"/>
+
+            <TextView
+                android:id="@+id/text_number_of_coauthors"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@id/text_last_edit_time"
+                android:textSize="12sp"
+                tools:text="%d coauthors" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

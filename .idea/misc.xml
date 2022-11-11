@@ -20,6 +20,7 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/dialog_tag.xml" value="0.3484375" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_coauthor_dialog.xml" value="0.22" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_note_list.xml" value="0.29143897996357016" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_option_dialog.xml" value="0.19791666666666666" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_paste_url.xml" value="0.3625" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_profile.xml" value="0.25679347826086957" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_search.xml" value="0.2359375" />
@@ -28,7 +29,7 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_take_note.xml" value="0.16666666666666666" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_youtube_note.xml" value="0.33" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_author.xml" value="0.21666666666666667" />
-        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_note.xml" value="0.22" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_note.xml" value="0.4703703703703704" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_tag.xml" value="0.22" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_time_card.xml" value="0.4466666666666667" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_timestamp_card.xml" value="0.22135416666666666" />
