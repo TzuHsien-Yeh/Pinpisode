@@ -178,23 +178,23 @@ class YouTubeNoteFragment : Fragment() {
         /**
          *  Buttons on the bottom of the page: Toggle the display of timeItems
          * */
-        binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_youtube_black)
+        binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_all)
         binding.icTimeItemDisplayOptions.setOnClickListener {
             when (viewModel.displayState) {
                 TimeItemDisplay.ALL -> {
                     // to display only timestamps
-                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_pin)
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_timestamps)
                     viewModel.displayState = TimeItemDisplay.TIMESTAMP
                     viewModel.notifyDisplayChange()
                 }
                 TimeItemDisplay.TIMESTAMP -> {
                     // to display only clips
-                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_square)
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_clips)
                     viewModel.displayState = TimeItemDisplay.CLIP
                     viewModel.notifyDisplayChange()
                 }
                 TimeItemDisplay.CLIP -> {
-                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_youtube_black)
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_all)
                     viewModel.displayState = TimeItemDisplay.ALL
                     viewModel.notifyDisplayChange()
                 }

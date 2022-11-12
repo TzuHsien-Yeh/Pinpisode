@@ -6,6 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:text="YouTube"
     style="@style/ChipCustomStyle"
+    android:textColor="@color/tag_text_color"
     app:chipStrokeColor="@color/color_primary_variant"
     app:chipStrokeWidth="@dimen/dimen_minimum">
 

@@ -13,7 +13,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginBottom="10dp"
         android:visibility="gone"
-        app:cardBackgroundColor="@color/color_primary"
+        app:cardBackgroundColor="@color/selected_tag_background"
         app:cardCornerRadius="20dp"
         app:cardElevation="4dp"
         app:cardMaxElevation="10dp"
@@ -27,6 +27,7 @@
             android:layout_height="match_parent"
             android:layout_marginHorizontal="8dp"
             android:layout_marginVertical="6dp"
+            android:textColor="@color/tag_text_color"
             android:textSize="17sp"
             tools:text="YouTube" />
     </androidx.cardview.widget.CardView>
@@ -84,7 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textSize="16sp"
-            android:textColor="@color/color_on_primary"
+            android:textColor="@color/color_primary"
             tools:text="duration"/>
 
     </androidx.cardview.widget.CardView>
@@ -137,6 +138,7 @@
         android:layout_margin="24dp"
         android:src="@drawable/ic_search"
         app:fabCustomSize="60dp"
+        android:background="@color/color_primary_variant"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
