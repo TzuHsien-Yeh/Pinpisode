@@ -73,7 +73,7 @@ object SpotifyService {
         }
     }
 
-    fun getCoverImage(imageUri: ImageUri, handler: (Bitmap) -> Unit)  {
+    fun getCoverArt(imageUri: ImageUri, handler: (Bitmap) -> Unit)  {
         spotifyAppRemote?.imagesApi?.getImage(imageUri)?.setResultCallback {
             handler(it)
         }

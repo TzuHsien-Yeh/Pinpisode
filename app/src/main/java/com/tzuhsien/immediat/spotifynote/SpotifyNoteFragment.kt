@@ -12,6 +12,7 @@ import com.spotify.protocol.types.PlayerState
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.databinding.FragmentSpotifyNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
+import com.tzuhsien.immediat.spotifynote.SpotifyService.getCoverArt
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekBack
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekForward
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekTo
@@ -50,24 +51,24 @@ class SpotifyNoteFragment : Fragment() {
             binding.seekBackButton.isEnabled = it
             binding.seekForwardButton.isEnabled = it
 
-            SpotifyService.getCurrentTrackInfo { track ->
-                binding.textSourceTitle.text = track.name
+            if (it) {
+                SpotifyService.play(SPOTIFY_URI + viewModel.sourceId)
 
-                SpotifyService.getCoverImage(track.imageUri) {
-                    binding.imgCoverArt.setImageBitmap(it)
+                SpotifyService.subscribeToPlayerState { state ->
+                    updateSeekbar(state)
+                    updatePlayPauseButton(state)
+                    getCoverArt(state.track.imageUri) {
+                        binding.imgCoverArt.setImageBitmap(it)
+                    }
+                    binding.textSourceTitle.text = state.track.name
                 }
             }
 
-            SpotifyService.subscribeToPlayerState { state ->
-                updateSeekbar(state)
-                updatePlayPauseButton(state)
-            }
         }
 
         binding.playPauseButton.setOnClickListener {
             when (viewModel.playingState) {
                 PlayingState.STOPPED -> {
-                    SpotifyService.play(SPOTIFY_URI + viewModel.sourceId)
                     viewModel.playingState = PlayingState.PLAYING
                 }
 
@@ -128,5 +129,4 @@ class SpotifyNoteFragment : Fragment() {
             binding.playPauseButton.setImageResource(R.drawable.btn_pause)
         }
     }
-
 }
