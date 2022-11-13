@@ -50,3 +50,10 @@ fun String.extractSpotifySourceId(): String {
         this.substringAfter(spotifyUri)
     }
 }
+
+fun String.parseSpotifyImageUri(): String {
+    val spotifyImageUri = "spotify:image:"
+    val imgHttpsUri = "https://i.scdn.co/image/"
+
+    return imgHttpsUri + this.substringAfter(spotifyImageUri)
+}

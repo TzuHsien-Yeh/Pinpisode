@@ -56,6 +56,12 @@ class YouTubeNoteViewModel(
             playTimeItem(item)
         }
     )
+    // initial value is the note info gotten once from firebase
+    var noteToBeUpdated: Note? = null
+
+    private var _liveNoteData = MutableLiveData<Note?>()
+    val liveNoteData: LiveData<Note?>
+        get() = _liveNoteData
 
     private var _liveTimeItemList = MutableLiveData<List<TimeItem>>()
     val liveTimeItemList: LiveData<List<TimeItem>>
@@ -65,12 +71,6 @@ class YouTubeNoteViewModel(
     val timeItemLiveDataReassigned: LiveData<Boolean>
         get() = _timeItemLiveDataReassigned
 
-    private var _liveNoteData = MutableLiveData<Note?>()
-    val liveNoteData: LiveData<Note?>
-        get() = _liveNoteData
-
-    // initial value is the note info gotten once from firebase
-    var noteToBeUpdated: Note? = null
 
     /** Decide whether the viewer can edit the note **/
     private var _canEdit = MutableLiveData<Boolean>(false)
@@ -157,7 +157,7 @@ class YouTubeNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.checkIfYouTubeNoteExists(videoId)) {
+            when (val result = repository.checkIfNoteAlreadyExists(Source.YOUTUBE.source, videoId)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -233,7 +233,11 @@ class YouTubeNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.createYouTubeVideoNote(video.id, newYtNote)
+            val result = repository.createNote(
+                source = Source.YOUTUBE.source,
+                sourceId = video.id,
+                note = newYtNote
+            )
 
             noteToBeUpdated = when (result) {
                 is Result.Success -> {
@@ -461,7 +465,7 @@ class YouTubeNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.updateYouTubeInfo(
+            when (val result = repository.updateNoteInfoFromSourceApi(
                 noteId = noteId!!,
                 note = note
             )) {

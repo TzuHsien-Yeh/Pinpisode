@@ -1,21 +1,20 @@
 package com.tzuhsien.immediat.data.source.remote
 
-import android.os.Build.VERSION_CODES.P
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.snapshots
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.*
+import com.tzuhsien.immediat.data.model.Note
+import com.tzuhsien.immediat.data.model.TimeItem
+import com.tzuhsien.immediat.data.model.UserInfo
+import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.DataSource
 import com.tzuhsien.immediat.data.source.local.UserManager
-import com.tzuhsien.immediat.data.succeeded
 import com.tzuhsien.immediat.network.YouTubeApi
 import com.tzuhsien.immediat.util.Util.getString
 import com.tzuhsien.immediat.util.Util.isInternetConnected
@@ -139,14 +138,14 @@ object NoteRemoteDataSource : DataSource {
         }
     }
 
-    override suspend fun checkIfYouTubeNoteExists(videoId: String): Result<Note?> =
+    override suspend fun checkIfNoteAlreadyExists(source: String, sourceId: String): Result<Note?> =
         suspendCoroutine { continuation ->
 
             val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
 
             notes
-                .whereEqualTo("source", Source.YOUTUBE.source)
-                .whereEqualTo("sourceId", videoId)
+                .whereEqualTo("source", source)
+                .whereEqualTo("sourceId", sourceId)
                 .whereEqualTo("ownerId", UserManager.userId)
                 .get()
                 .addOnCompleteListener { task ->
@@ -175,13 +174,15 @@ object NoteRemoteDataSource : DataSource {
                 }
         }
 
-    override suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<Note> =
+    override suspend fun createNote(source: String, sourceId: String, note: Note): Result<Note> =
         suspendCoroutine { continuation ->
 
             val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
             val doc = notes.document()
 
             note.id = doc.id
+
+            note.source = source
 
             note.lastEditTime = Calendar.getInstance().timeInMillis
 
@@ -202,7 +203,7 @@ object NoteRemoteDataSource : DataSource {
                 }
         }
 
-    override suspend fun updateYouTubeInfo(noteId: String, note: Note): Result<String> =
+    override suspend fun updateNoteInfoFromSourceApi(noteId: String, note: Note): Result<String> =
         suspendCoroutine { continuation ->
 
             val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)

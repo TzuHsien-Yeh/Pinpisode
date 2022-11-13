@@ -10,9 +10,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.spotify.protocol.types.PlayerState
 import com.tzuhsien.immediat.R
+import com.tzuhsien.immediat.data.model.Note
+import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.databinding.FragmentSpotifyNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
-import com.tzuhsien.immediat.spotifynote.SpotifyService.getCoverArt
+import com.tzuhsien.immediat.ext.parseSpotifyImageUri
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekBack
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekForward
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekTo
@@ -34,12 +36,6 @@ class SpotifyNoteFragment : Fragment() {
         Timber.d("onDestroy(): SpotifyService.disconnect()")
     }
 
-    override fun onStop() {
-        super.onStop()
-        SpotifyService.disconnect()
-        Timber.d("onStop(): SpotifyService.disconnect()")
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -57,12 +53,41 @@ class SpotifyNoteFragment : Fragment() {
                 SpotifyService.subscribeToPlayerState { state ->
                     updateSeekbar(state)
                     updatePlayPauseButton(state)
-                    getCoverArt(state.track.imageUri) {
+                    SpotifyService.getCoverArt(state.track.imageUri) {
                         binding.imgCoverArt.setImageBitmap(it)
                     }
                     binding.textSourceTitle.text = state.track.name
+                    if (!state.isPaused) {
+                        // Update new info after the playerState catching up with the current playing track
+                        viewModel.updateNewInfo(state)
+                    }
                 }
+
             }
+
+        }
+
+        viewModel.getInfoFromPlayerState.observe(viewLifecycleOwner) {
+            it?.let {
+
+                viewModel.shouldCreateNewNote.observe(viewLifecycleOwner) { shouldCreateNote ->
+                    SpotifyService.getCurrentTrack { track ->
+                        val newSpotifyNote = Note(
+                            source = Source.SPOTIFY.source,
+                            sourceId = viewModel.sourceId,
+                            title = track.name,
+                            thumbnail = track.imageUri.raw!!.parseSpotifyImageUri(),
+                            duration = track.duration.toString()
+                        )
+
+                        if (shouldCreateNote) {
+                            viewModel.createNewSpotifyNote(newSpotifyNote)
+                            viewModel.createNewNoteFinished()
+                        }
+                    }
+
+            }
+        }
 
         }
 

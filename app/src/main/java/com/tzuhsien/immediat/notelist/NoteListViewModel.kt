@@ -1,6 +1,5 @@
 package com.tzuhsien.immediat.notelist
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -105,7 +104,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.updateYouTubeInfo(
+            when (val result = repository.updateNoteInfoFromSourceApi(
                 noteId = noteId,
                 note = note
             )) {

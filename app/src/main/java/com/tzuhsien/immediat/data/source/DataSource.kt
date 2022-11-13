@@ -24,11 +24,11 @@ interface DataSource {
 
     suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult>
 
-    suspend fun checkIfYouTubeNoteExists(videoId: String): Result<Note?>
+    suspend fun checkIfNoteAlreadyExists(source: String, sourceId: String): Result<Note?>
 
-    suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<Note>
+    suspend fun createNote(source: String, sourceId: String, note: Note): Result<Note>
 
-    suspend fun updateYouTubeInfo(noteId: String, note: Note): Result<String>
+    suspend fun updateNoteInfoFromSourceApi(noteId: String, note: Note): Result<String>
 
     fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>>
 

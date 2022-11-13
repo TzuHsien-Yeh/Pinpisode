@@ -3,8 +3,8 @@ package com.tzuhsien.immediat.data.source
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseUser
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.Note
+import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.UserInfo
 import com.tzuhsien.immediat.data.model.YouTubeResult
 
@@ -26,16 +26,16 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.getYouTubeVideoInfoById(id)
     }
 
-    override suspend fun checkIfYouTubeNoteExists(videoId: String): Result<Note?> {
-        return noteRemoteDataSource.checkIfYouTubeNoteExists(videoId)
+    override suspend fun checkIfNoteAlreadyExists(source: String, sourceId: String): Result<Note?> {
+        return noteRemoteDataSource.checkIfNoteAlreadyExists(source, sourceId)
     }
 
-    override suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<Note> {
-        return noteRemoteDataSource.createYouTubeVideoNote(videoId, note)
+    override suspend fun createNote(source: String, sourceId: String, note: Note): Result<Note> {
+        return noteRemoteDataSource.createNote(source, sourceId, note)
     }
 
-    override suspend fun updateYouTubeInfo(noteId: String, note: Note): Result<String> {
-        return noteRemoteDataSource.updateYouTubeInfo(noteId, note)
+    override suspend fun updateNoteInfoFromSourceApi(noteId: String, note: Note): Result<String> {
+        return noteRemoteDataSource.updateNoteInfoFromSourceApi(noteId, note)
     }
 
     override fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>> {

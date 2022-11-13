@@ -67,12 +67,6 @@ object SpotifyService {
         spotifyAppRemote?.playerApi?.pause()
     }
 
-    fun getCurrentTrackInfo(handler: (track: Track) -> Unit) {
-        spotifyAppRemote?.playerApi?.playerState?.setResultCallback { result ->
-            handler(result.track)
-        }
-    }
-
     fun getCoverArt(imageUri: ImageUri, handler: (Bitmap) -> Unit)  {
         spotifyAppRemote?.imagesApi?.getImage(imageUri)?.setResultCallback {
             handler(it)
@@ -89,6 +83,12 @@ object SpotifyService {
 
     fun seekTo (seekToPosition: Long) {
         spotifyAppRemote?.playerApi?.seekTo(seekToPosition)
+    }
+
+    fun getCurrentTrack(handler: (track: Track) -> Unit) {
+        spotifyAppRemote?.playerApi?.playerState?.setResultCallback { result ->
+            handler(result.track)
+        }
     }
 
     fun subscribeToPlayerState(handler: (PlayerState) -> Unit){

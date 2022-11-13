@@ -2,9 +2,11 @@ package com.tzuhsien.immediat.data.source
 
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.auth.User
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.*
+import com.tzuhsien.immediat.data.model.Note
+import com.tzuhsien.immediat.data.model.TimeItem
+import com.tzuhsien.immediat.data.model.UserInfo
+import com.tzuhsien.immediat.data.model.YouTubeResult
 
 interface Repository {
     /**
@@ -21,11 +23,11 @@ interface Repository {
 
     suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult>
 
-    suspend fun checkIfYouTubeNoteExists(videoId: String): Result<Note?>
+    suspend fun checkIfNoteAlreadyExists(source: String, sourceId: String): Result<Note?>
 
-    suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<Note>
+    suspend fun createNote(source: String, sourceId: String, note: Note): Result<Note>
 
-    suspend fun updateYouTubeInfo(noteId: String, note: Note): Result<String>
+    suspend fun updateNoteInfoFromSourceApi(noteId: String, note: Note): Result<String>
 
     fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>>
 
