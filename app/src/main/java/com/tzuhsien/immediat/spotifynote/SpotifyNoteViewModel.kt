@@ -40,8 +40,6 @@ class SpotifyNoteViewModel(
     // initial value is the note info gotten once from firebase
     var noteToBeUpdated: Note? = null
 
-//    var newSpotifyNote: Note? = null
-
     private val _shouldCreateNewNote = MutableLiveData<Boolean>(false)
     val shouldCreateNewNote: LiveData<Boolean>
         get() = _shouldCreateNewNote
@@ -272,7 +270,6 @@ class SpotifyNoteViewModel(
 
 
 }
-
 
 data class SpotifyNoteUiState(
     var onItemTitleChanged: (TimeItem) -> Unit,

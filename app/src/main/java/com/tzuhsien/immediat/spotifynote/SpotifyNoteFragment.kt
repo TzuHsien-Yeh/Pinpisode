@@ -75,6 +75,7 @@ class SpotifyNoteFragment : Fragment() {
                         val newSpotifyNote = Note(
                             source = Source.SPOTIFY.source,
                             sourceId = viewModel.sourceId,
+                            tags = listOf(Source.SPOTIFY.source),
                             title = track.name,
                             thumbnail = track.imageUri.raw!!.parseSpotifyImageUri(),
                             duration = track.duration.toString()
