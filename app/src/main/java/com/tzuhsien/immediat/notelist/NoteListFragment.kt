@@ -10,14 +10,13 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.tasks.OnCompleteListener
 import com.tzuhsien.immediat.data.model.Sort
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentNoteListBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseDuration
 import com.tzuhsien.immediat.signin.SignInFragmentDirections
+import com.tzuhsien.immediat.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
 
@@ -169,9 +168,21 @@ class NoteListFragment : Fragment() {
                         videoIdKey = it.sourceId
                     )
                 )
-                viewModel.doneNavigationToYtNote()
+                viewModel.doneNavigationToNote()
             }
         })
+
+        viewModel.navigateToSpotifyNote.observe(viewLifecycleOwner) {
+            it?.let {
+                findNavController().navigate(
+                    SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+                        noteIdKey = it.id,
+                        sourceIdKey = it.sourceId
+                    )
+                )
+                viewModel.doneNavigationToNote()
+            }
+        }
 
         return binding.root
     }

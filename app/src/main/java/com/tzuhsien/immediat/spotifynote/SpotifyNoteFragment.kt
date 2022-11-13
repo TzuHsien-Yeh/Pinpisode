@@ -119,8 +119,8 @@ class SpotifyNoteFragment : Fragment() {
          * */
         binding.seekTo.apply {
             this.isEnabled = false
-            progressDrawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
-            indeterminateDrawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
+            progressDrawable.setColorFilter(Color.parseColor("#ff4664"), PorterDuff.Mode.SRC_ATOP)
+            indeterminateDrawable.setColorFilter(Color.parseColor("#ff4664"), PorterDuff.Mode.SRC_ATOP)
         }
         trackProgressBar =
             TrackProgressBar(binding.seekTo) { seekToPosition: Long -> seekTo(seekToPosition) }

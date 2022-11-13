@@ -51,6 +51,10 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     val navigateToYoutubeNote: LiveData<Note?>
         get() = _navigateToYoutubeNote
 
+    private val _navigateToSpotifyNote = MutableLiveData<Note?>(null)
+    val navigateToSpotifyNote: LiveData<Note?>
+        get() = _navigateToSpotifyNote
+
     init {
         Timber.d("[Timber NoteListViewModel: ${UserManager.userId}, ${UserManager.userName}, ${UserManager.userEmail}")
         getAllLiveNotes()
@@ -145,9 +149,9 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                 _navigateToYoutubeNote.value = note
             }
 
-//            Source.SPOTIFY.source -> {
-//                _navigateToSpotifyNote.value = note
-//            }
+            Source.SPOTIFY.source -> {
+                _navigateToSpotifyNote.value = note
+            }
         }
 
     }
@@ -195,8 +199,9 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         _liveNoteList.value = _liveNoteList.value?.reversed()
     }
 
-    fun doneNavigationToYtNote() {
+    fun doneNavigationToNote() {
         _navigateToYoutubeNote.value = null
+        _navigateToSpotifyNote.value = null
     }
 
     fun updateLocalUserId() {
