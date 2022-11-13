@@ -36,3 +36,17 @@ fun String.extractYoutubeVideoId(): String {
         }
     }
 }
+
+fun String.extractSpotifySourceId(): String {
+    val spotifyShareLink = "https://open.spotify.com/"
+    val spotifyUri = "spotify:"
+
+    return if (spotifyShareLink in this) {
+        this.substringAfter(spotifyShareLink)
+            .substringBefore("?si=")
+            .replace("/", ":")
+
+    } else {
+        this.substringAfter(spotifyUri)
+    }
+}

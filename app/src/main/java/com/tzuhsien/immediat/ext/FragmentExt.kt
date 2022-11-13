@@ -5,7 +5,7 @@ import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.factory.NoteViewModelFactory
 import com.tzuhsien.immediat.factory.ViewModelFactory
-import com.tzuhsien.immediat.factory.YoutubeNoteViewModelFactory
+import com.tzuhsien.immediat.factory.NoteSourceViewModelFactory
 
 
 fun Fragment.getVmFactory(): ViewModelFactory {
@@ -13,9 +13,9 @@ fun Fragment.getVmFactory(): ViewModelFactory {
     return ViewModelFactory(repository)
 }
 
-fun Fragment.getVmFactory(noteId: String?, videoId: String): YoutubeNoteViewModelFactory {
+fun Fragment.getVmFactory(noteId: String?, sourceId: String): NoteSourceViewModelFactory {
     val repository = (requireContext().applicationContext as MyApplication).repository
-    return YoutubeNoteViewModelFactory(repository, noteId, videoId)
+    return NoteSourceViewModelFactory(repository, noteId, sourceId)
 }
 
 fun Fragment.getVmFactory(note: Note): NoteViewModelFactory {

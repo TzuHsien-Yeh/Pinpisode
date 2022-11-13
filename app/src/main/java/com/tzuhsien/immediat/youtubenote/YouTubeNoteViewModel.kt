@@ -200,22 +200,18 @@ class YouTubeNoteViewModel(
                     _status.value = LoadApiStatus.DONE
 
                     createNewYouTubeNote(result.data.items[0])
-                    result.data
                 }
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
                 is Result.Error -> {
                     _error.value = result.exception.toString()
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
                 else -> {
                     _error.value = Util.getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
             }
         }

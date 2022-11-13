@@ -6,4 +6,5 @@
     <dimen name="list_item_spacing_half">8dp</dimen>
     <dimen name="dimen_minimum">1dp</dimen>
     <dimen name="note_bottom_ic_size">28dp</dimen>
+    <dimen name="standard">16dp</dimen>
 </resources>

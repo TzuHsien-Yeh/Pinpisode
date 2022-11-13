@@ -4,13 +4,12 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.UserInfo
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.network.LoadApiStatus
-import com.tzuhsien.immediat.util.Util
+import com.tzuhsien.immediat.spotifynote.SpotifyService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -75,6 +74,22 @@ class MainViewModel(private val repository: Repository): ViewModel() {
                     }
                 }
             }
+        }
+    }
+
+    fun connectToSpotify() {
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            val connectResult = SpotifyService.connectToAppRemote()
+
+            if (connectResult.isConnected) {
+                _status.value = LoadApiStatus.DONE
+            } else {
+                _error.value = "Spotify is not connected"
+            }
+
         }
     }
 }

@@ -3,41 +3,89 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="false"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".youtubenote.YouTubeNoteFragment">
+    tools:context=".spotifynote.SpotifyNoteFragment">
 
-    <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-        android:id="@+id/youtube_player_view"
-        android:layout_width="match_parent"
+        <!-- Image cover art -->
+        <ImageView
+            android:id="@+id/img_cover_art"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="@dimen/standard"
+            android:layout_marginStart="24dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.05"
+            tools:srcCompat="@drawable/app_icon" />
+
+    <TextView
+        android:id="@+id/text_source_title"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/standard"
         app:layout_constraintTop_toTopOf="parent"
-        app:autoPlay="false" />
+        app:layout_constraintStart_toEndOf="@+id/img_cover_art"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="avuiefvbqrevavele"/>
 
-    <EditText
-        android:id="@+id/edit_digest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="26dp"
-        android:layout_marginEnd="16dp"
-        android:maxLength="60"
-        android:inputType="text"
-        android:hint="@string/input_video_summary"
-        android:textSize="16sp"
+    <!-- Playback controls -->
+
+    <ImageView
+        android:id="@+id/seek_back_button"
+        android:layout_width="28dp"
+        android:layout_height="36dp"
         android:background="@color/transparent"
-        app:layout_constraintTop_toBottomOf="@+id/youtube_player_view"
-        app:layout_constraintBottom_toTopOf="@+id/recycler_view_time_items"/>
+        app:tint="@color/color_primary_variant"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="@id/play_pause_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/btn_seek_back" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_time_items"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/note_page_bottom_options"
-        app:layout_constraintTop_toBottomOf="@+id/edit_digest"
-        tools:listitem="@layout/item_time_card"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+    <ImageView
+        android:id="@+id/play_pause_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginTop="24dp"
+        android:background="@color/transparent"
+        app:tint="@color/color_primary_variant"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/img_cover_art"
+        app:layout_constraintVertical_bias="0.2"
+        app:srcCompat="@drawable/btn_play" />
+
+
+    <ImageView
+        android:id="@+id/seek_forward_button"
+        android:layout_width="28dp"
+        android:layout_height="36dp"
+        android:scaleType="centerCrop"
+        app:tint="@color/color_primary_variant"
+        android:background="@color/transparent"
+        app:layout_constraintBottom_toBottomOf="@id/play_pause_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.2"
+        app:srcCompat="@drawable/btn_seek_forward" />
+
+    <!-- Seek controls -->
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/seek_to"
+            android:layout_width="0dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="@dimen/standard"
+            android:layout_marginHorizontal="24dp"
+            android:progressTint="@color/color_primary"
+            android:thumbTint="@color/color_primary_variant"
+            app:tint="@color/color_primary_variant"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/play_pause_button" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_take_timestamp"

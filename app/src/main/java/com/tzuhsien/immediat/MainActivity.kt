@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -12,19 +11,16 @@ import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.setupWithNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.api.AnnotationsProto.http
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.ActivityMainBinding
+import com.tzuhsien.immediat.ext.extractSpotifySourceId
 import com.tzuhsien.immediat.ext.extractYoutubeVideoId
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.notelist.NoteListFragmentDirections
 import com.tzuhsien.immediat.signin.SignInFragmentDirections
+import com.tzuhsien.immediat.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
 
@@ -127,6 +123,15 @@ class MainActivity : AppCompatActivity() {
                     binding.toolbarText.text = getString(R.string.youtube_note)
                 }
 
+                R.id.spotifyNoteFragment -> {
+                    binding.toolbar.visibility = View.VISIBLE
+                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationOnClickListener {
+                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                    }
+                    binding.toolbarText.text = getString(R.string.spotify_note)
+                }
+
                 R.id.signInFragment -> {
                     binding.toolbar.visibility = View.GONE
                     binding.toolbar.navigationIcon = null
@@ -172,14 +177,31 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (UserManager.userId != null) {
-            val sourceId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
-            if (null != sourceId){
-                Timber.d("HANDLE INTENT FUN intent extras : $sourceId")
+            intentExtras.getString(Intent.EXTRA_TEXT)?.let {
+                if (it.contains("spotify")){
+                    // Handle Spotify intent
+                    val sourceId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
+                    if (null != sourceId){
+                        Timber.d("HANDLE spotify INTENT FUN intent extras : $sourceId")
 
-                navController.navigate(
-                    YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = sourceId)
-                )
+                        navController.navigate(
+                            SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(sourceIdKey = sourceId)
+                        )
+                    }
+
+                } else {
+                    // Handle YouTube intent
+                    val sourceId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
+                    if (null != sourceId){
+                        Timber.d("HANDLE youtube INTENT FUN intent extras : $sourceId")
+
+                        navController.navigate(
+                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = sourceId)
+                        )
+                    }
+                }
             }
+
         }
 
     }

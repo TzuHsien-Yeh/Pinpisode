@@ -92,5 +92,25 @@
             android:id="@+id/action_coauthorDialogFragment_to_youTubeNoteFragment"
             app:destination="@id/youTubeNoteFragment" />
     </dialog>
+    <fragment
+        android:id="@+id/spotifyNoteFragment"
+        android:name="com.tzuhsien.immediat.spotifynote.SpotifyNoteFragment"
+        android:label="fragment_spotify_note"
+        tools:layout="@layout/fragment_spotify_note">
+
+        <argument
+            android:name="note_id_key"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="source_id_key"
+            app:argType="string"
+            app:nullable="false" />
+
+    </fragment>
+
+
+    <action android:id="@+id/action_global_spotifyNoteFragment" app:destination="@id/spotifyNoteFragment"/>
 
 </navigation>
