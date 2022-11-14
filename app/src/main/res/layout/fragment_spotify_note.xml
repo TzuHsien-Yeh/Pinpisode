@@ -87,6 +87,47 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/play_pause_button" />
 
+    <TextView
+        android:id="@+id/text_current_second"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:layout_constraintTop_toBottomOf="@id/seek_to"
+        app:layout_constraintStart_toStartOf="@id/seek_to"/>
+
+    <TextView
+        android:id="@+id/text_total_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:layout_constraintTop_toBottomOf="@id/seek_to"
+        app:layout_constraintEnd_toEndOf="@id/seek_to"/>
+
+    <EditText
+        android:id="@+id/edit_digest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="44dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginEnd="16dp"
+        android:maxLength="60"
+        android:inputType="text"
+        android:hint="@string/input_video_summary"
+        android:textSize="16sp"
+        android:background="@color/transparent"
+        app:layout_constraintTop_toBottomOf="@+id/seek_to"
+        app:layout_constraintBottom_toTopOf="@+id/recycler_view_time_items"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_time_items"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/note_page_bottom_options"
+        app:layout_constraintTop_toBottomOf="@+id/edit_digest"
+        tools:listitem="@layout/item_time_card"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_take_timestamp"
         android:layout_width="54dp"
@@ -96,8 +137,9 @@
         app:borderWidth="0dp"
         android:backgroundTint="@color/color_primary_variant"
         android:src="@drawable/ic_pin"
-        app:fabCustomSize="54dp"
-        android:scaleX="-1"
+        app:maxImageSize="50dp"
+        app:tint="@color/color_primary"
+        app:fabCustomSize="55dp"
         app:layout_constraintBottom_toTopOf="@id/note_page_bottom_options"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -109,7 +151,9 @@
         android:layout_marginBottom="12dp"
         app:borderWidth="0dp"
         android:backgroundTint="@color/color_primary_variant"
-        android:src="@drawable/ic_youtube_black"
+        android:src="@drawable/ic_clip"
+        app:maxImageSize="50dp"
+        app:tint="@color/color_primary"
         app:fabCustomSize="54dp"
         app:layout_constraintBottom_toTopOf="@id/btn_take_timestamp"
         app:layout_constraintEnd_toEndOf="parent"/>

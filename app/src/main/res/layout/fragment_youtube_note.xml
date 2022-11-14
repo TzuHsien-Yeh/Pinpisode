@@ -48,8 +48,9 @@
         app:borderWidth="0dp"
         android:backgroundTint="@color/color_primary_variant"
         android:src="@drawable/ic_pin"
-        app:fabCustomSize="54dp"
-        android:scaleX="-1"
+        app:fabCustomSize="55dp"
+        app:maxImageSize="50dp"
+        app:tint="@color/color_primary"
         app:layout_constraintBottom_toTopOf="@id/note_page_bottom_options"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -61,11 +62,12 @@
         android:layout_marginBottom="12dp"
         app:borderWidth="0dp"
         android:backgroundTint="@color/color_primary_variant"
-        android:src="@drawable/ic_youtube_black"
+        android:src="@drawable/ic_clip"
         app:fabCustomSize="54dp"
+        app:maxImageSize="50dp"
+        app:tint="@color/color_primary"
         app:layout_constraintBottom_toTopOf="@id/btn_take_timestamp"
         app:layout_constraintEnd_toEndOf="parent"/>
-
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/note_page_bottom_options"
