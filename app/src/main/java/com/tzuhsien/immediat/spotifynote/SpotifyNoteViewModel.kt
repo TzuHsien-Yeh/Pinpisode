@@ -1,5 +1,6 @@
 package com.tzuhsien.immediat.spotifynote
 
+import android.os.Handler
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,6 +11,7 @@ import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.data.model.TimeItem
+import com.tzuhsien.immediat.data.model.TimeItemDisplay
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.network.LoadApiStatus
@@ -18,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 const val SPOTIFY_URI = "spotify:"
 
@@ -57,23 +60,51 @@ class SpotifyNoteViewModel(
         get() = _timeItemLiveDataReassigned
 
 
+    /** current position info from playerState **/
+    private val _currentPosition = MutableLiveData<Long>()
+    val currentPosition: LiveData<Long>
+        get() = _currentPosition
+
+    // state of clipping btn
+    var startOrStopToggle = 0
+
+    var startAt: Float = 0f
+    var endAt: Float = 0f
+
+    /**  play the time items **/
+    private val _toPlay = MutableLiveData<List<Float?>?>(null)
+    val toPlay: LiveData<List<Float?>?>
+        get() = _toPlay
+
+    private val _playStart = MutableLiveData<Float?>(null)
+    val playStart: LiveData<Float?>
+        get() = _playStart
+
+    private val _clipLength = MutableLiveData<Float?>(null)
+    val clipLength: LiveData<Float?>
+        get() = _clipLength
+
     /** Decide whether the viewer can edit the note **/
     private var _canEdit = MutableLiveData<Boolean>(false)
     val canEdit: LiveData<Boolean>
         get() = _canEdit
 
+    // state of displaying options:
+    var displayState: TimeItemDisplay = TimeItemDisplay.ALL
+
+
     val uiState = SpotifyNoteUiState(
         onItemTitleChanged = { item ->
-//            updateTimeItem(item)
+            updateTimeItem(item)
         },
         onItemContentChanged = { item ->
-//            updateTimeItem(item)
+            updateTimeItem(item)
         },
         onItemToDelete = { item ->
-//            deleteTimeItem(item)
+            deleteTimeItem(item)
         },
         onTimeClick = { item ->
-//            playTimeItem(item)
+            playTimeItem(item)
         }
     )
 
@@ -253,6 +284,10 @@ class SpotifyNoteViewModel(
         }
     }
 
+    fun updateNewInfo(state: PlayerState) {
+        _getInfoFromPlayerState.value = state
+    }
+
     fun createNewNoteFinished() {
         _shouldCreateNewNote.value = false
         _getInfoFromPlayerState.value = null
@@ -262,11 +297,183 @@ class SpotifyNoteViewModel(
         _canEdit.value = isInAuthors
         uiState.canEdit = isInAuthors
     }
-
-    fun updateNewInfo(state: PlayerState) {
-        _getInfoFromPlayerState.value = state
-    }
     /** End of initialization of the note **/
+
+
+    /**
+     * Deal with editing and updating
+     * **/
+    fun createTimeItem(startAt: Float, endAt: Float?) {
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            when (val result = repository.addNewTimeItem(
+                noteId = noteId!!,
+                timeItem = TimeItem(startAt = startAt, endAt = endAt)
+            )) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                    result.data
+                    Timber.d("liveNoteData.value?.lastTimestamp = ${liveNoteData.value?.lastTimestamp}")
+                    liveNoteData.value?.let { noteFromDb ->
+                        if (noteFromDb.lastTimestamp < startAt) {
+                            if (null != endAt && noteFromDb.lastTimestamp < endAt) {
+                                noteToBeUpdated?.lastTimestamp = endAt
+                                updateNote()
+                            } else {
+                                noteToBeUpdated?.lastTimestamp = startAt
+                                updateNote()
+                            }
+                        } else {
+                            noteToBeUpdated?.lastTimestamp = noteFromDb.lastTimestamp
+                            updateNote()
+                        }
+                    }
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
+    }
+
+    private fun updateTimeItem(timeItem: TimeItem) {
+        coroutineScope.launch {
+            when (val result = repository.updateTimeItem(noteId!!, timeItem)) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
+
+    }
+
+    private fun deleteTimeItem(timeItem: TimeItem) {
+        coroutineScope.launch {
+            when (val result = repository.deleteTimeItem(noteId!!, timeItem)) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
+
+    }
+
+    private fun playTimeItem(timeItem: TimeItem) {
+        _playStart.value = timeItem.startAt
+        _clipLength.value = (timeItem.endAt?.minus(timeItem.startAt))
+        _toPlay.value = listOf(timeItem.startAt, timeItem.endAt)
+    }
+
+    fun updateNote() {
+        coroutineScope.launch {
+            when (val result = repository.updateNote(noteId!!, noteToBeUpdated!!)) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
+    }
+
+    fun clearPlayingMomentStart() {
+        _playStart.value = null
+    }
+
+    fun clearPlayingMomentEnd() {
+        _clipLength.value = null
+    }
+
+    fun clearPlaying() {
+        _toPlay.value = null
+    }
+
+    fun notifyDisplayChange() {
+        _liveTimeItemList.value = _liveTimeItemList.value
+    }
+
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
+
+    /**
+     *  Get player position every 0.5 sec
+     * **/
+    val positionHandler = Handler()
+    private val positionUpdateRunnable = object : Runnable {
+        override fun run() {
+            _currentPosition.value = _currentPosition.value?.plus(500L)
+            positionHandler.postDelayed(this, 500.toLong())
+        }
+    }
+
+    fun updateCurrentPosition(position: Long) {
+        _currentPosition.value = position
+    }
+
+    fun startTrackingPosition() {
+        positionUpdateRunnable.run()
+    }
+
+    fun pauseTrackingPosition() {
+        positionHandler.removeCallbacks(positionUpdateRunnable)
+    }
+
+    fun unpauseTrackingPosition() {
+        positionHandler.removeCallbacks(positionUpdateRunnable)
+        positionHandler.postDelayed(positionUpdateRunnable, 500)
+    }
 
 
 }

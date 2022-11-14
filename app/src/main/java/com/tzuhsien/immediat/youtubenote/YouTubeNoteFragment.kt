@@ -15,7 +15,6 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.tzuhsien.immediat.R
-import com.tzuhsien.immediat.coauthor.CoauthorDialogFragment
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
@@ -241,10 +240,13 @@ class YouTubeNoteFragment : Fragment() {
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             binding.youtubePlayerView.enterFullScreen()
-            // TODO : hide toolbar and bottom tool bar
+
+            binding.notePageBottomOptions.visibility = View.GONE
 
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             binding.youtubePlayerView.exitFullScreen()
+
+            binding.notePageBottomOptions.visibility = View.VISIBLE
         }
     }
 }
