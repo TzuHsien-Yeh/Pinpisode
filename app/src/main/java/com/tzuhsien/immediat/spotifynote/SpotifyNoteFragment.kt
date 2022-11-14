@@ -3,6 +3,7 @@ package com.tzuhsien.immediat.spotifynote
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -57,49 +58,26 @@ class SpotifyNoteFragment : Fragment() {
                 SpotifyService.subscribeToPlayerState { state ->
                     updateSeekbar(state)
                     updatePlayPauseButton(state)
+                    viewModel.updateCurrentPosition(state.playbackPosition)
+                    viewModel.startTrackingPosition()
+
                     SpotifyService.getCoverArt(state.track.imageUri) {
                         binding.imgCoverArt.setImageBitmap(it)
                     }
                     binding.textSourceTitle.text = state.track.name
+                    binding.textTotalTime.text = state.track.duration.formatDuration()
+
                     if (!state.isPaused) {
                         // Update new info after the playerState catching up with the current playing track
                         viewModel.updateNewInfo(state)
+
+                        // track current playing position in real time
+                        viewModel.unpauseTrackingPosition()
+                    } else {
+                        // stop the timer from keep updating time
+                        viewModel.pauseTrackingPosition()
                     }
 
-                    if(!state.isPaused) {
-                        binding.textCurrentSecond.text = state.playbackPosition.formatDuration()
-                    }
-                    binding.textTotalTime.text = state.track.duration.formatDuration()
-
-                    if (!state.isPaused){
-                        viewModel.getCurrentPosition(state.playbackPosition)
-                    }
-
-                    /**
-                     *  Take timestamps / clips buttons
-                     * */
-                    binding.btnTakeTimestamp.setOnClickListener {
-                        Timber.d("binding.btnTakeTimestamp.setOnClickListener clicked")
-                        viewModel.createTimeItem((state.playbackPosition/1000).toFloat(), null)
-                    }
-                    binding.btnClip.setOnClickListener {
-                        when (viewModel.startOrStopToggle) {
-                            0 -> {
-                                viewModel.startAt = (state.playbackPosition/1000).toFloat()
-                                viewModel.startOrStopToggle = 1
-                                binding.btnClip.setImageResource(R.drawable.ic_clipping_stop)
-                                Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
-                            }
-                            1 -> {
-                                viewModel.endAt = (state.playbackPosition/1000).toFloat()
-                                Timber.d("btnClip second time clicked, viewModel.endAt = ${viewModel.endAt}")
-
-                                binding.btnClip.setImageResource(R.drawable.ic_clip)
-                                viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
-                                viewModel.startOrStopToggle = 0
-                            }
-                        }
-                    }
 
                 }
 
@@ -168,22 +146,121 @@ class SpotifyNoteFragment : Fragment() {
         trackProgressBar =
             TrackProgressBar(binding.seekTo) { seekToPosition: Long -> seekTo(seekToPosition) }
 
+
+
+
         /**
-         *  Play the time items
+         *  Update UI according to current position
          * **/
-        viewModel.playStart.observe(viewLifecycleOwner) { startAt ->
-            startAt?.let {
-                SpotifyService.seekTo((it * 1000).toLong())
+        viewModel.currentPosition.observe(viewLifecycleOwner) { currentSec ->
+
+            Timber.d("viewModel.currentPosition.observe: $currentSec")
+            // Text of time to show progress
+            binding.textCurrentSecond.text = currentSec.formatDuration()
+
+            /**
+             *  Take timestamps / clips buttons
+             * */
+            binding.btnTakeTimestamp.setOnClickListener {
+                Timber.d("binding.btnTakeTimestamp.setOnClickListener clicked")
+                viewModel.createTimeItem((currentSec/1000).toFloat(), null)
+            }
+            binding.btnClip.setOnClickListener {
+                when (viewModel.startOrStopToggle) {
+                    0 -> {
+                        viewModel.startAt = (currentSec/1000).toFloat()
+                        viewModel.startOrStopToggle = 1
+                        binding.btnClip.setImageResource(R.drawable.ic_clipping_stop)
+                        Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
+                    }
+                    1 -> {
+                        viewModel.endAt = (currentSec/1000).toFloat()
+                        Timber.d("btnClip second time clicked, viewModel.endAt = ${viewModel.endAt}")
+
+                        binding.btnClip.setImageResource(R.drawable.ic_clip)
+                        viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
+                        viewModel.startOrStopToggle = 0
+                    }
+                }
             }
         }
 
-        viewModel.currentPosition.observe(viewLifecycleOwner) { currentSec ->
-            viewModel.playMomentEnd?.let {
-                if (it <= currentSec) {
-                    SpotifyService.seekTo((it * 1000).toLong())
-                    viewModel.clearPlayingMomentStart()
-                    viewModel.clearPlayingMomentEnd()
-                }
+        /**
+         *  Play the time items
+         * **/
+//        viewModel.toPlay.observe(viewLifecycleOwner) { timeItem ->
+//            timeItem?.let { timeItem ->
+//
+//                timeItem[0]?.let {
+//                    SpotifyService.seekTo((it * 1000).toLong())
+//                    SpotifyService.resume()
+//                    Timber.d("viewModel.toPlay.observe: $it")
+//
+//                    viewModel.clearPlaying()
+//                }
+//
+//                timeItem[1]?.let { endAt ->
+//                    val clipLength = endAt.minus(timeItem[0]!!)
+//                    object : CountDownTimer( (clipLength * 1000).toLong(), 500) {
+//                        override fun onTick(millisUntilFinished: Long) {
+//
+////                            viewModel.clearPlayingMomentEnd()
+//                            Timber.d("countDownTimer onTick, clip length: $clipLength")
+//
+//                            viewModel.clearPlaying()
+//                            // cancel the countDownTimer once another time item clicked
+//                            if (null != timeItem[0]) {
+//                                cancel()
+//                            }
+//                        }
+//
+//                        // Callback function, fired when the time is up
+//                        override fun onFinish() {
+//                            SpotifyService.pause()
+//                        }
+//                    }.start()
+//
+//                }
+//
+//            }
+//
+//
+//        }
+
+        viewModel.playStart.observe(viewLifecycleOwner) { startAt ->
+            startAt?.let {
+                SpotifyService.seekTo((it * 1000).toLong())
+                SpotifyService.resume()
+                viewModel.clearPlayingMomentStart()
+                Timber.d("viewModel.playStart.observe startAt: $startAt")
+            }
+        }
+
+        // count down to stop if it is a clip
+        viewModel.clipLength.observe(viewLifecycleOwner) { clipLength ->
+
+            if (null != clipLength) {
+                object : CountDownTimer( (clipLength * 1000).toLong(), 500) {
+                    override fun onTick(millisUntilFinished: Long) {
+                        viewModel.clearPlayingMomentEnd()
+                        Timber.d("countDownTimer onTick, clip length: $clipLength")
+//                        // cancel the countDownTimer once another time item clicked
+//                        viewModel.playStart.observe(viewLifecycleOwner) {
+//
+//                            Timber.d("viewModel.playStart in countDownTimer : $it")
+//                            it?.let {
+//                                cancel()
+//                                Timber.d("countDownTimer canceled: viewModel.playStart: $it")
+//                            }
+//                        }
+                    }
+
+                    // Callback function, fired when the time is up
+                    override fun onFinish() {
+                        SpotifyService.pause()
+                    }
+                }.start()
+
             }
         }
 
@@ -281,4 +358,28 @@ class SpotifyNoteFragment : Fragment() {
             binding.playPauseButton.setImageResource(R.drawable.btn_pause)
         }
     }
+
+    /**
+     *  Get player position every 0.5 sec
+     * **/
+    ///
+//    private val timer = Timer()
+//
+//    fun startTick(){
+//        timer.scheduleAtFixedRate(timerTask {
+//            viewModel.currentSecond += 500L
+//            SpotifyService.pause()
+//            SpotifyService.resume()
+//        }, 0, 500)
+//    }
+//
+//    fun pauseTick(){
+//        timer.cancel()
+//    }
+//
+//    fun updateCurrentPositionFromPlayer(playerState: PlayerState){
+//        viewModel.currentSecond = playerState.playbackPosition
+//    }
+
+
 }

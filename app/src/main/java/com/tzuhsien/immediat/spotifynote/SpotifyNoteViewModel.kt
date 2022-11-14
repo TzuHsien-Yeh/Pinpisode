@@ -1,5 +1,6 @@
 package com.tzuhsien.immediat.spotifynote
 
+import android.os.Handler
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -70,11 +71,18 @@ class SpotifyNoteViewModel(
     var startAt: Float = 0f
     var endAt: Float = 0f
 
+    /**  play the time items **/
+    private val _toPlay = MutableLiveData<List<Float?>?>(null)
+    val toPlay: LiveData<List<Float?>?>
+        get() = _toPlay
+
     private val _playStart = MutableLiveData<Float?>(null)
     val playStart: LiveData<Float?>
         get() = _playStart
 
-    var playMomentEnd: Float? = null
+    private val _clipLength = MutableLiveData<Float?>(null)
+    val clipLength: LiveData<Float?>
+        get() = _clipLength
 
     /** Decide whether the viewer can edit the note **/
     private var _canEdit = MutableLiveData<Boolean>(false)
@@ -390,7 +398,8 @@ class SpotifyNoteViewModel(
 
     private fun playTimeItem(timeItem: TimeItem) {
         _playStart.value = timeItem.startAt
-        playMomentEnd = timeItem.endAt
+        _clipLength.value = (timeItem.endAt?.minus(timeItem.startAt))
+        _toPlay.value = listOf(timeItem.startAt, timeItem.endAt)
     }
 
     fun updateNote() {
@@ -416,17 +425,16 @@ class SpotifyNoteViewModel(
         }
     }
 
-    fun getCurrentPosition(position: Long) {
-        _currentPosition.value = position
-        Timber.d("fun getCurrentPosition(position: Long): $position")
-    }
-
     fun clearPlayingMomentStart() {
         _playStart.value = null
     }
 
     fun clearPlayingMomentEnd() {
-        playMomentEnd = null
+        _clipLength.value = null
+    }
+
+    fun clearPlaying() {
+        _toPlay.value = null
     }
 
     fun notifyDisplayChange() {
@@ -438,6 +446,35 @@ class SpotifyNoteViewModel(
         super.onCleared()
         viewModelJob.cancel()
     }
+
+    /**
+     *  Get player position every 0.5 sec
+     * **/
+    val positionHandler = Handler()
+    private val positionUpdateRunnable = object : Runnable {
+        override fun run() {
+            _currentPosition.value = _currentPosition.value?.plus(500L)
+            positionHandler.postDelayed(this, 500.toLong())
+        }
+    }
+
+    fun updateCurrentPosition(position: Long) {
+        _currentPosition.value = position
+    }
+
+    fun startTrackingPosition() {
+        positionUpdateRunnable.run()
+    }
+
+    fun pauseTrackingPosition() {
+        positionHandler.removeCallbacks(positionUpdateRunnable)
+    }
+
+    fun unpauseTrackingPosition() {
+        positionHandler.removeCallbacks(positionUpdateRunnable)
+        positionHandler.postDelayed(positionUpdateRunnable, 500)
+    }
+
 
 }
 
