@@ -1,5 +1,6 @@
 package com.tzuhsien.immediat.youtubenote
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,8 +15,8 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.tzuhsien.immediat.R
+import com.tzuhsien.immediat.coauthor.CoauthorDialogFragment
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
-import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.getLiveNoteById
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseDuration
@@ -77,9 +78,9 @@ class YouTubeNoteFragment : Fragment() {
                 super.onCurrentSecond(youTubePlayer, second)
 
                 viewModel.getCurrentSecond(second)
-                Timber.d("viewModel.getCurrentSecond(second): $second")
 
                 binding.btnTakeTimestamp.setOnClickListener {
+                    Timber.d("binding.btnTakeTimestamp.setOnClickListener clicked")
                     viewModel.createTimeItem(second, null)
                 }
 
@@ -110,14 +111,14 @@ class YouTubeNoteFragment : Fragment() {
          * */
         binding.editDigest.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                viewModel.newNote.digest = binding.editDigest.text.toString()
+                viewModel.noteToBeUpdated?.digest = binding.editDigest.text.toString()
                 viewModel.updateNote()
             }
         }
-        viewModel.liveNoteData.observe(viewLifecycleOwner, Observer {
-            it?.let { note ->
+        viewModel.liveNoteData.observe(viewLifecycleOwner, Observer { note ->
+            note?.let {
                 binding.editDigest.setText(note.digest)
-                viewModel.newNote = note
+                viewModel.noteToBeUpdated = note
 
                 if (note.duration.parseDuration() == 0L) {
                     viewModel.updateInfoFromYouTube(note)
@@ -126,54 +127,109 @@ class YouTubeNoteFragment : Fragment() {
         })
 
         /**
+         *  Edit or read only mode
+         * */
+        viewModel.canEdit.observe(viewLifecycleOwner) {
+            binding.editDigest.isEnabled = it
+            if (it) {
+                binding.editDigest.visibility = View.VISIBLE
+                binding.editDigest.hint = getString(R.string.input_video_summary)
+            } else if (viewModel.noteToBeUpdated?.digest.isNullOrEmpty()) {
+                binding.editDigest.visibility = View.GONE
+            } else {
+                binding.editDigest.visibility = View.VISIBLE
+                binding.editDigest.hint = getString(R.string.input_video_summary)
+            }
+
+            binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
+            binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
+        }
+
+        /**
          *  RecyclerView views
          * */
         val adapter = TimeItemAdapter(
             uiState = viewModel.uiState
         )
         binding.recyclerViewTimeItems.adapter = adapter
-        viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer { list ->
-            when (viewModel.displayState) {
-                TimeItemDisplay.ALL -> {
-                    adapter.submitList(list)
-                }
-                TimeItemDisplay.TIMESTAMP -> {
-                    adapter.submitList(list.filter { it.endAt == null })
-                }
-                TimeItemDisplay.CLIP -> {
-                    adapter.submitList(list.filter { it.endAt != null })
-                }
-            }
-        })
 
-        binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_youtube_black)
+        viewModel.timeItemLiveDataReassigned.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
+            if (timeItemLiveDataAssigned == true) {
+                viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer { list ->
+                    list?.let {
+                        when (viewModel.displayState) {
+                            TimeItemDisplay.ALL -> {
+                                adapter.submitList(list)
+                            }
+                            TimeItemDisplay.TIMESTAMP -> {
+                                adapter.submitList(list.filter { it.endAt == null })
+                            }
+                            TimeItemDisplay.CLIP -> {
+                                adapter.submitList(list.filter { it.endAt != null })
+                            }
+                        }
+                    }
+
+                })
+            }
+        }
+
+
+        /**
+         *  Buttons on the bottom of the page: Toggle the display of timeItems
+         * */
+        binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_all)
         binding.icTimeItemDisplayOptions.setOnClickListener {
             when (viewModel.displayState) {
                 TimeItemDisplay.ALL -> {
                     // to display only timestamps
-                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_pin)
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_timestamps)
                     viewModel.displayState = TimeItemDisplay.TIMESTAMP
                     viewModel.notifyDisplayChange()
                 }
                 TimeItemDisplay.TIMESTAMP -> {
                     // to display only clips
-                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_square)
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_clips)
                     viewModel.displayState = TimeItemDisplay.CLIP
                     viewModel.notifyDisplayChange()
                 }
-
                 TimeItemDisplay.CLIP -> {
-                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_youtube_black)
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_all)
                     viewModel.displayState = TimeItemDisplay.ALL
                     viewModel.notifyDisplayChange()
                 }
             }
         }
 
-        // Navigate to tag fragment
+        /**
+         *  Buttons on the bottom of the page: Navigate to tag fragment
+         * */
         binding.icAddTag.setOnClickListener {
             findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(
-                viewModel.newNote))
+                viewModel.noteToBeUpdated!!))
+        }
+
+        /**
+         *  Buttons on the bottom of the page: Coauthoring
+         * */
+        binding.icCoauthoring.setOnClickListener {
+            findNavController().navigate(
+                YouTubeNoteFragmentDirections.actionYouTubeNoteFragmentToCoauthorDialogFragment(
+                    viewModel.noteToBeUpdated!!
+                )
+            )
+        }
+
+        /**
+         *  Buttons on the bottom of the page: Share this note
+         * */
+        binding.icShare.setOnClickListener {
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type="text/plain"
+                putExtra(Intent.EXTRA_TEXT, getString(R.string.youtube_note_uri, viewModel.noteId, videoId))
+            }
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
         }
 
         return binding.root

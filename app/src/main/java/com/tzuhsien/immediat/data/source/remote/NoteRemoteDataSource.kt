@@ -1,18 +1,20 @@
 package com.tzuhsien.immediat.data.source.remote
 
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.Note
-import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.data.model.TimeItem
+import com.tzuhsien.immediat.data.model.UserInfo
 import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.source.DataSource
 import com.tzuhsien.immediat.data.source.local.UserManager
-import com.tzuhsien.immediat.data.succeeded
 import com.tzuhsien.immediat.network.YouTubeApi
 import com.tzuhsien.immediat.util.Util.getString
 import com.tzuhsien.immediat.util.Util.isInternetConnected
@@ -33,43 +35,68 @@ object NoteRemoteDataSource : DataSource {
     override fun getAllLiveNotes(): MutableLiveData<List<Note>> {
         val liveData = MutableLiveData<List<Note>>()
 
-        FirebaseFirestore.getInstance()
-            .collection(PATH_NOTES)
-            .whereArrayContains("authors", UserManager.userId)
-            .orderBy(KEY_LAST_EDIT_TIME, Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                Timber.i("addSnapshotListener detect")
+        UserManager.userId?.let {
+            FirebaseFirestore.getInstance()
+                .collection(PATH_NOTES)
+                .whereArrayContains("authors", it)
+                .orderBy(KEY_LAST_EDIT_TIME, Query.Direction.DESCENDING)
+                .addSnapshotListener { snapshot, error ->
+                    Timber.i("addSnapshotListener detect")
 
-                error?.let {
-                    Timber.w("[${this::class.simpleName}] Error getting documents. ${it.message}")
-                }
-
-                val list = mutableListOf<Note>()
-                if (snapshot != null) {
-                    for (doc in snapshot) {
-                        Timber.d(doc.id + " => " + doc.data)
-                        val noteItem = doc.toObject(Note::class.java)
-                        list.add(noteItem)
+                    error?.let {
+                        Timber.w("[${this::class.simpleName}] Error getting documents. ${it.message}")
                     }
-                }
 
-                UserManager.allEditableNoteList = list
-                UserManager.usersNoteList = list.filter { it.ownerId == UserManager.userId }
-                fun getAllTags(): MutableSet<String> {
-                    val set = mutableSetOf<String>()
-                    for (note in list) {
-                        for (tag in note.tags) {
-                            set.add(tag)
+                    val list = mutableListOf<Note>()
+                    if (snapshot != null) {
+                        for (doc in snapshot) {
+                            Timber.d(doc.id + " => " + doc.data)
+                            val noteItem = doc.toObject(Note::class.java)
+                            list.add(noteItem)
                         }
                     }
-                    return set
-                }
-                UserManager.tagSet = getAllTags()
 
-                liveData.value = list
-            }
+                    UserManager.allEditableNoteList = list
+                    UserManager.usersNoteList = list.filter { it.ownerId == UserManager.userId }
+                    fun getAllTags(): MutableSet<String> {
+                        val set = mutableSetOf<String>()
+                        for (note in list) {
+                            for (tag in note.tags) {
+                                set.add(tag)
+                            }
+                        }
+                        return set
+                    }
+                    UserManager.tagSet = getAllTags()
+
+                    liveData.value = list
+                }
+        }
         return liveData
     }
+
+    override suspend fun getNoteInfoById(noteId: String): Result<Note> =
+        suspendCoroutine { continuation ->
+            FirebaseFirestore.getInstance()
+                .collection(PATH_NOTES)
+                .document(noteId)
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val note = task.result.toObject(Note::class.java)
+                        continuation.resume(Result.Success(note!!))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error getting documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+
+        }
+
 
     override fun getLiveNoteById(noteId: String): MutableLiveData<Note?> {
 
@@ -91,9 +118,6 @@ object NoteRemoteDataSource : DataSource {
         return liveData
     }
 
-    override suspend fun getCoauthoringNotes() {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult> {
         if (!isInternetConnected()) {
@@ -104,8 +128,8 @@ object NoteRemoteDataSource : DataSource {
             // this will run on a thread managed by Retrofit
             val listResult = YouTubeApi.retrofitService.getVideoInfo(id)
 
-            listResult.error?.let {
-                return Result.Fail(it)
+            if (listResult.items.isEmpty()) {
+                return Result.Fail(getString(R.string.video_not_available))
             }
             Result.Success(listResult)
         } catch (e: Exception) {
@@ -114,7 +138,43 @@ object NoteRemoteDataSource : DataSource {
         }
     }
 
-    override suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<String> =
+    override suspend fun checkIfNoteAlreadyExists(source: String, sourceId: String): Result<Note?> =
+        suspendCoroutine { continuation ->
+
+            val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
+
+            notes
+                .whereEqualTo("source", source)
+                .whereEqualTo("sourceId", sourceId)
+                .whereEqualTo("ownerId", UserManager.userId)
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val querySnapshot: QuerySnapshot? = task.result
+                        if (querySnapshot!!.isEmpty) {
+                            continuation.resume(Result.Success(null))
+                        } else {
+                            val result = mutableListOf<Note>()
+                            for (note in task.result) {
+                                val item = note.toObject(Note::class.java)
+                                result.add(item)
+                            }
+                            continuation.resume(Result.Success(result[0]))
+                        }
+
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error finding documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(
+                            R.string.unknown_error)))
+                    }
+
+                }
+        }
+
+    override suspend fun createNote(source: String, sourceId: String, note: Note): Result<Note> =
         suspendCoroutine { continuation ->
 
             val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
@@ -122,15 +182,17 @@ object NoteRemoteDataSource : DataSource {
 
             note.id = doc.id
 
+            note.source = source
+
             note.lastEditTime = Calendar.getInstance().timeInMillis
 
             doc
                 .set(note)
-                .addOnCompleteListener { task2 ->
-                    if (task2.isSuccessful) {
-                        continuation.resume(Result.Success(doc.id))
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success(note))
                     } else {
-                        task2.exception?.let {
+                        task.exception?.let {
                             Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
                             continuation.resume(Result.Error(it))
                         }
@@ -141,13 +203,11 @@ object NoteRemoteDataSource : DataSource {
                 }
         }
 
-    override suspend fun updateYouTubeInfo(noteId: String, note: Note): Result<String> =
+    override suspend fun updateNoteInfoFromSourceApi(noteId: String, note: Note): Result<String> =
         suspendCoroutine { continuation ->
 
             val notes = FirebaseFirestore.getInstance().collection(PATH_NOTES)
             val doc = notes.document(noteId)
-
-            note.lastEditTime = Calendar.getInstance().timeInMillis
 
             doc
                 .update(
@@ -155,11 +215,11 @@ object NoteRemoteDataSource : DataSource {
                     "title", note.title,
                     "thumbnail", note.thumbnail
                 )
-                .addOnCompleteListener { task2 ->
-                    if (task2.isSuccessful) {
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
                         continuation.resume(Result.Success(doc.id))
                     } else {
-                        task2.exception?.let {
+                        task.exception?.let {
                             Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
                             continuation.resume(Result.Error(it))
                         }
@@ -168,7 +228,7 @@ object NoteRemoteDataSource : DataSource {
                     }
 
                 }
-    }
+        }
 
 
     override fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>> {
@@ -216,7 +276,6 @@ object NoteRemoteDataSource : DataSource {
                 .set(timeItem)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Timber.i("[${this::class.simpleName}] time items: $timeItem ")
                         continuation.resume(Result.Success(doc.id))
                     } else {
                         task.exception?.let {
@@ -342,8 +401,170 @@ object NoteRemoteDataSource : DataSource {
         }
 
 
-    override suspend fun addUser(token: String) {
-        TODO("Not yet implemented")
+    override suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo): Result<UserInfo> =
+        suspendCoroutine { continuation ->
+            // Create a new user (or update info) of current signed in google account to users collection
+            val doc =
+                FirebaseFirestore.getInstance().collection(PATH_USERS).document(firebaseUser.uid)
+
+            user.id = firebaseUser.uid
+
+            doc
+                .set(user)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        UserManager.userId = user.id
+                        continuation.resume(Result.Success(user))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error adding user document. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+
+        }
+
+    override suspend fun getCurrentUser(): Result<UserInfo?> = suspendCoroutine { continuation ->
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        UserManager.userId = currentUserUid
+
+        Timber.d("UserManager.userId = $currentUserUid")
+        if (null == currentUserUid) {
+            continuation.resume(Result.Success(null))
+        } else {
+            val doc =
+                FirebaseFirestore.getInstance().collection(PATH_USERS).document(currentUserUid)
+
+            doc.get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val userInfo = task.result.toObject(UserInfo::class.java)
+                        UserManager.userId = userInfo?.id
+                        UserManager.userEmail = userInfo?.email
+                        UserManager.userName = userInfo?.name
+                        UserManager.userPic = userInfo?.pic
+                        Timber.d("UserInfo: ${UserManager.userId},${UserManager.userName},${UserManager.userEmail},${UserManager.userPic}")
+
+                        continuation.resume(Result.Success(userInfo))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error getting user document. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+        }
     }
 
+    override suspend fun findUserByEmail(query: String): Result<UserInfo?> =
+        suspendCoroutine { continuation ->
+
+            val user = FirebaseFirestore.getInstance().collection(PATH_USERS)
+
+            user
+                .whereEqualTo("email", query)
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val querySnapshot: QuerySnapshot? = task.result
+                        if (querySnapshot!!.isEmpty) {
+                            continuation.resume(Result.Success(null))
+                        } else {
+                            val result = mutableListOf<UserInfo>()
+                            for (user in task.result) {
+                                val user = user.toObject(UserInfo::class.java)
+                                result.add(user)
+                            }
+
+                            if (result.isEmpty()) {
+                                continuation.resume(Result.Fail(getString(R.string.user_not_found)))
+                            } else {
+                                continuation.resume(Result.Success(result[0]))
+                            }
+                        }
+
+                    } else {
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(
+                            R.string.unknown_error)))
+                    }
+
+                }
+        }
+
+    override suspend fun updateNoteAuthors(noteId: String, authors: Set<String>): Result<Boolean> =
+        suspendCoroutine { continuation ->
+
+            val doc = FirebaseFirestore.getInstance().collection(PATH_NOTES).document(noteId)
+
+            doc
+                .update("authors", authors.toList())
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success(true))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error updating document. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+
+        }
+
+    override fun getLiveCoauthorsInfoOfTheNote(note: Note): MutableLiveData<List<UserInfo>> {
+        val liveData = MutableLiveData<List<UserInfo>>()
+
+        FirebaseFirestore.getInstance()
+            .collection(PATH_USERS)
+            .whereIn("id", note.authors)
+            .whereNotEqualTo("id", note.ownerId)
+            .addSnapshotListener { snapshot, error ->
+                    Timber.i("addSnapshotListener detect")
+
+                    error?.let {
+                        Timber.w("[${this::class.simpleName}] Error getting documents. ${it.message}")
+                    }
+
+                    val list = mutableListOf<UserInfo>()
+                    if (snapshot != null) {
+                        for (doc in snapshot) {
+                            Timber.d(doc.id + " => " + doc.data)
+                            val user = doc.toObject(UserInfo::class.java)
+                            list.add(user)
+                        }
+                    }
+                    liveData.value = list
+                }
+        return liveData
+    }
+
+    override suspend fun getUserInfoById(id: String): Result<UserInfo> = suspendCoroutine { continuation ->
+
+        FirebaseFirestore.getInstance()
+            .collection(PATH_USERS)
+            .document(id)
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = task.result.toObject(UserInfo::class.java)
+                    Timber.d("$user")
+                    continuation.resume(Result.Success(user!!))
+                } else {
+                    task.exception?.let {
+                        Timber.w("[${this::class.simpleName}] Error getting document. ${it.message}\"")
+                        continuation.resume(Result.Error(it))
+                        return@addOnCompleteListener
+                    }
+                    continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                }
+            }
+
+    }
 }

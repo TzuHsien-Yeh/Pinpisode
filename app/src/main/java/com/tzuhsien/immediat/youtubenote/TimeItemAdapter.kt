@@ -1,6 +1,8 @@
 package com.tzuhsien.immediat.youtubenote
 
 import android.graphics.Typeface
+import android.text.InputType
+import android.text.InputType.TYPE_NULL
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -107,25 +109,22 @@ class TimeItemAdapter(
                 resetDeleteBtnStatus()
             }
 
-            // TODO:　SET content/title.inputType = TYPE_NULL if (!authorList.contains(UserManager.userId))
+            /** Disable edit functions only if the viewer is one of the authors **/
+            titleView.isEnabled = uiState.canEdit
+            contentView.isEnabled = uiState.canEdit
 
-//            var editTextState = 0
-//            content.setOnClickListener {
-//                when (editTextState) {
-//                    0 -> {
-//                        content.setBackgroundColor(context.getColor(R.color.colorPrimaryVariant))
-//                        editTextState = 1
-//                    }
-//                    1 -> {
-//                        binding.editTextInputText.inputType = InputType.TYPE_CLASS_TEXT
-//                        editTextState = 1
-//                    }
-//                    2 -> {
-//                        binding.editTextInputText.inputType = TYPE_NULL
-//                        editTextState = 0
-//                    }
-//                }
-//            }
+            if (uiState.canEdit) {
+                contentView.visibility = View.VISIBLE
+                contentView.hint = context.getString(R.string.add_some_notes)
+            } else {
+                if (timeItem.text.isEmpty()) {
+                    contentView.visibility = View.GONE
+                } else {
+                    contentView.visibility = View.VISIBLE
+                }
+            }
+            binding.deleteTimeItem.visibility = if (uiState.canEdit) View.VISIBLE else View.GONE
+
         }
     }
 

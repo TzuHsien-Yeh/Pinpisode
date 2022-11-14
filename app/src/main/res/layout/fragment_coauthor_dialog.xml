@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_gravity="center"
+    android:background="@drawable/bg_dialog"
+    tools:context=".coauthor.CoauthorDialogFragment">
+
+    <TextView
+        android:id="@+id/text_note_owner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:text="@string/note_owner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/img_owner_pic"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="4dp"
+        app:shapeAppearanceOverlay="@style/circle"
+        app:layout_constraintTop_toBottomOf="@+id/text_note_owner"
+        app:layout_constraintStart_toStartOf="@+id/text_note_owner"
+        app:layout_constraintEnd_toEndOf="@+id/text_note_owner"/>
+
+    <TextView
+        android:id="@+id/text_coauthors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="20dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/text_note_owner"
+        android:text="@string/coauthor"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview_authors"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal"
+        tools:listitem="@layout/item_author"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintTop_toBottomOf="@+id/text_coauthors"
+        app:layout_constraintStart_toStartOf="@id/text_coauthors"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/text_add_coauthors"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:text="@string/add_coauthors"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/img_owner_pic"
+        app:layout_constraintStart_toStartOf="parent"/>
+    <SearchView
+        android:id="@+id/search_user_by_email"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:queryHint="Find user by email"
+        android:iconifiedByDefault="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_add_coauthors"
+        app:layout_constraintBottom_toTopOf="@+id/view_group_user_search_result"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/view_group_user_search_result"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/search_user_by_email"
+        app:layout_constraintEnd_toEndOf="@+id/search_user_by_email"
+        app:layout_constraintTop_toBottomOf="@+id/search_user_by_email">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/img_search_result_pic"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="16dp"
+            app:shapeAppearanceOverlay="@style/circle"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+        <TextView
+            android:id="@+id/text_search_result_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            app:layout_constraintStart_toEndOf="@id/img_search_result_pic"
+            app:layout_constraintTop_toTopOf="@+id/img_search_result_pic"/>
+
+        <TextView
+            android:id="@+id/text_search_result_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            app:layout_constraintStart_toEndOf="@+id/img_search_result_pic"
+            app:layout_constraintBottom_toBottomOf="@+id/img_search_result_pic"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/text_only_owner_can_invite_coauthors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/img_owner_pic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="@string/only_note_owner_can_invite_user_to_coauthor"/>
+
+    <TextView
+        android:id="@+id/text_not_found"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="48dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_user_by_email"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="@string/user_not_found"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

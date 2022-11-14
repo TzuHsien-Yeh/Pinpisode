@@ -1,9 +1,11 @@
 package com.tzuhsien.immediat.data.source
 
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.auth.FirebaseUser
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.TimeItem
 import com.tzuhsien.immediat.data.model.Note
+import com.tzuhsien.immediat.data.model.TimeItem
+import com.tzuhsien.immediat.data.model.UserInfo
 import com.tzuhsien.immediat.data.model.YouTubeResult
 
 class DefaultRepository(private val noteRemoteDataSource: DataSource): Repository {
@@ -12,24 +14,28 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.getAllLiveNotes()
     }
 
-    override fun getLiveNoteById(noteId: String):  MutableLiveData<Note?>  {
-        return noteRemoteDataSource.getLiveNoteById(noteId)
+    override suspend fun getNoteInfoById(noteId: String): Result<Note> {
+        return noteRemoteDataSource.getNoteInfoById(noteId)
     }
 
-    override suspend fun getCoauthoringNotes() {
-        TODO("Not yet implemented")
+    override fun getLiveNoteById(noteId: String):  MutableLiveData<Note?>  {
+        return noteRemoteDataSource.getLiveNoteById(noteId)
     }
 
     override suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult> {
         return noteRemoteDataSource.getYouTubeVideoInfoById(id)
     }
 
-    override suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<String> {
-        return noteRemoteDataSource.createYouTubeVideoNote(videoId, note)
+    override suspend fun checkIfNoteAlreadyExists(source: String, sourceId: String): Result<Note?> {
+        return noteRemoteDataSource.checkIfNoteAlreadyExists(source, sourceId)
     }
 
-    override suspend fun updateYouTubeInfo(noteId: String, note: Note): Result<String> {
-        return noteRemoteDataSource.updateYouTubeInfo(noteId, note)
+    override suspend fun createNote(source: String, sourceId: String, note: Note): Result<Note> {
+        return noteRemoteDataSource.createNote(source, sourceId, note)
+    }
+
+    override suspend fun updateNoteInfoFromSourceApi(noteId: String, note: Note): Result<String> {
+        return noteRemoteDataSource.updateNoteInfoFromSourceApi(noteId, note)
     }
 
     override fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>> {
@@ -56,7 +62,27 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.updateTags(noteId, note)
     }
 
-    override suspend fun addUser(token: String) {
-        TODO("Not yet implemented")
+    override suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo): Result<UserInfo> {
+        return noteRemoteDataSource.updateUser(firebaseUser, user)
+    }
+
+    override suspend fun getCurrentUser(): Result<UserInfo?> {
+        return noteRemoteDataSource.getCurrentUser()
+    }
+
+    override suspend fun findUserByEmail(query: String): Result<UserInfo?> {
+        return noteRemoteDataSource.findUserByEmail(query)
+    }
+
+    override suspend fun updateNoteAuthors(noteId: String, authors: Set<String>): Result<Boolean> {
+        return noteRemoteDataSource.updateNoteAuthors(noteId, authors)
+    }
+
+    override fun getLiveCoauthorsInfoOfTheNote(note: Note): MutableLiveData<List<UserInfo>> {
+        return noteRemoteDataSource.getLiveCoauthorsInfoOfTheNote(note)
+    }
+
+    override suspend fun getUserInfoById(id: String): Result<UserInfo> {
+        return noteRemoteDataSource.getUserInfoById(id)
     }
 }

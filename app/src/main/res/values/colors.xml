@@ -15,15 +15,16 @@
     <color name="card_color">#FFFFFF</color>
 
 <!--    theme colors-->
-    <color name="color_primary">#e2c3cd</color>
+    <color name="color_primary">#fff8e6</color>
+    <color name="color_primary_variant">#ff4664</color>
+    <color name="color_on_primary">#FF000000</color>
 
-    <color name="color_primary_variant">#b0939c</color>
-    <color name="color_on_primary">#482928</color>
+    <color name="color_secondary">#ff4664</color>
+    <color name="color_secondary_variant">#ffebcf</color>
+    <color name="color_on_secondary">#fff8e6</color>
 
-    <color name="color_secondary">#f4d5b9</color>
-    <color name="color_secondary_variant">#ffffeb</color>
-    <color name="color_on_secondary">#c1a489</color>
-
+    <color name="selected_tag_background">#fff8e6</color>
+    <color name="tag_text_color">#FF000000</color>
 
     <color name="theme_medium"></color>
     

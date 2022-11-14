@@ -9,7 +9,14 @@
         android:id="@+id/noteListFragment"
         android:name="com.tzuhsien.immediat.notelist.NoteListFragment"
         android:label="fragment_note_list"
-        tools:layout="@layout/fragment_note_list" />
+        tools:layout="@layout/fragment_note_list" >
+        <action
+            android:id="@+id/action_noteListFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+        <action
+            android:id="@+id/action_noteListFragment_to_searchFragment"
+            app:destination="@id/searchFragment" />
+    </fragment>
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.tzuhsien.immediat.search.SearchFragment"
@@ -20,12 +27,20 @@
         android:name="com.tzuhsien.immediat.youtubenote.YouTubeNoteFragment"
         android:label="fragment_take_note"
         tools:layout="@layout/fragment_youtube_note">
-        <argument android:name="note_id_key"
+        <argument
+            android:name="note_id_key"
+            android:defaultValue="@null"
             app:argType="string"
-            app:nullable="false"/>
-        <argument android:name="video_id_key"
+            app:nullable="true" />
+        <argument
+            android:name="video_id_key"
             app:argType="string"
-            app:nullable="false"/>
+            app:nullable="false" />
+
+        <deepLink
+            android:autoVerify="true"
+            app:uri="http://pinpisode/youtube_note/{note_id_key}/{video_id_key}" />
+
         <action
             android:id="@+id/action_youTubeNoteFragment_to_noteListFragment"
             app:destination="@id/noteListFragment" />
@@ -33,6 +48,10 @@
             android:id="@+id/action_youTubeNoteFragment_pop"
             app:popUpTo="@id/youTubeNoteFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_youTubeNoteFragment_to_coauthorDialogFragment"
+            app:destination="@id/coauthorDialogFragment" />
+
     </fragment>
 
     <action android:id="@+id/action_global_YouTubeNoteFragment"
@@ -49,5 +68,49 @@
     </dialog>
 
     <action android:id="@+id/action_global_tagDialogFragment" app:destination="@id/tagDialogFragment" />
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="com.tzuhsien.immediat.signin.SignInFragment"
+        android:label="fragment_sign_in"
+        tools:layout="@layout/fragment_sign_in" /><action android:id="@+id/action_global_signInFragment" app:destination="@id/signInFragment"/>
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.tzuhsien.immediat.profile.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
+    <dialog
+        android:id="@+id/coauthorDialogFragment"
+        android:name="com.tzuhsien.immediat.coauthor.CoauthorDialogFragment"
+        android:label="fragment_coauthor_dialog"
+        tools:layout="@layout/fragment_coauthor_dialog" >
+
+        <argument android:name="note_key"
+            app:argType="com.tzuhsien.immediat.data.model.Note"
+            app:nullable="false"/>
+
+        <action
+            android:id="@+id/action_coauthorDialogFragment_to_youTubeNoteFragment"
+            app:destination="@id/youTubeNoteFragment" />
+    </dialog>
+    <fragment
+        android:id="@+id/spotifyNoteFragment"
+        android:name="com.tzuhsien.immediat.spotifynote.SpotifyNoteFragment"
+        android:label="fragment_spotify_note"
+        tools:layout="@layout/fragment_spotify_note">
+
+        <argument
+            android:name="note_id_key"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="source_id_key"
+            app:argType="string"
+            app:nullable="false" />
+
+    </fragment>
+
+
+    <action android:id="@+id/action_global_spotifyNoteFragment" app:destination="@id/spotifyNoteFragment"/>
 
 </navigation>

@@ -1,26 +1,54 @@
 package com.tzuhsien.immediat
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.findNavController
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.ActivityMainBinding
+import com.tzuhsien.immediat.ext.extractSpotifySourceId
+import com.tzuhsien.immediat.ext.extractYoutubeVideoId
+import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.notelist.NoteListFragmentDirections
+import com.tzuhsien.immediat.signin.SignInFragmentDirections
+import com.tzuhsien.immediat.spotifynote.SpotifyNoteFragmentDirections
+import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
 
 
 class MainActivity : AppCompatActivity() {
 
+    private val viewModel by viewModels<MainViewModel> { getVmFactory() }
     private lateinit var binding: ActivityMainBinding
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        /** Read intent data **/
+
+        Timber.d("onNewIntent CALLED")
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+
+        intent?.data?.let {
+            if (it.toString().contains("http://pinpisode/")) {
+                navController.handleDeepLink(intent)
+                Timber.d("[onNewIntent] handleDeepLink called")
+            }
+        }
+
+        intent?.extras?.let {
+            handleIntent(it)
+            Timber.d("[onNewIntent] handleIntent called")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,65 +58,88 @@ class MainActivity : AppCompatActivity() {
         // initialize timber
         Timber.plant(Timber.DebugTree())
 
-        val navView: BottomNavigationView = binding.bottomNavView
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
-        navView.setupWithNavController(navController) // make items show their status as selected
+
+        /** Read intent data if the activity has not been created when getting intent from other app **/
+
+        Timber.d("onCreate CALLED")
+        Timber.d("intent.data: ${intent.data}, ${intent.data?.host}, ${intent.data?.query}")
+        Timber.d("intent.extra: ${intent.extras?.getString(Intent.EXTRA_TEXT)}")
+
+        if (null != intent) {
+            intent.data?.let {
+                if (it.toString().contains("http://pinpisode/")) {
+                    navController.handleDeepLink(intent)
+                    Timber.d("[onCreate] handleDeepLink called")
+                }
+            }
+
+            intent.extras?.let {
+                handleIntent(it)
+                Timber.d("[onCreate] handleIntent called")
+            }
+        }
 
         val toolbar: Toolbar = binding.toolbar
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         binding.toolbar.visibility= View.VISIBLE
         binding.toolbar.navigationIcon = null
-        binding.toolbarText.text= "Pin your episodes!"
+        binding.toolbarText.text = getString(R.string.pin_your_episodes)
 
         navController.addOnDestinationChangedListener{controller, destination, arguments->
             when(destination.id){
 
-                R.id.youTubeNoteFragment -> {
-                    navView.visibility= View.GONE
-                    binding.toolbar.visibility= View.VISIBLE
+                R.id.noteListFragment -> {
+                    binding.toolbar.visibility = View.VISIBLE
+                    binding.toolbar.navigationIcon = null
+                    binding.toolbarText.text = getString(R.string.pin_your_episodes)
+                }
+
+                R.id.searchFragment -> {
+                    binding.toolbar.visibility = View.VISIBLE
                     binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
                     binding.toolbar.setNavigationOnClickListener {
                         navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
-                        binding.toolbar.navigationIcon = null
-                        binding.toolbarText.text= "Pin your episodes!"
-                        binding.bottomNavView.visibility = View.VISIBLE
                     }
-                    binding.toolbarText.text= "YouTube Note"
-                }
-            }
-        }
-
-        navView.setOnItemSelectedListener { item: MenuItem ->
-            when (item.itemId) {
-
-                R.id.navigation_note_list -> {
-                    navController.navigate(R.id.noteListFragment)
-                    binding.toolbar.navigationIcon = null
-                    binding.toolbarText.text= "Pin your episodes!"
-                    binding.bottomNavView.visibility = View.VISIBLE
-                    true
+                    binding.toolbarText.text = getString(R.string.find_your_episodes)
                 }
 
-                R.id.navigation_search -> {
-                    navController.navigate(R.id.searchFragment)
-                    binding.toolbar.visibility= View.VISIBLE
-                    binding.toolbar.navigationIcon = null
-                    binding.toolbarText.text= "Find your episodes"
-                    true
-                }
-
-                R.id.navigation_profile -> {
-                    // navigate to profile
+                R.id.profileFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.navigationIcon = null
-                    binding.toolbarText.text = "Profile"
-                    true
+                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationOnClickListener {
+                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                    }
+                    binding.toolbarText.text = getString(R.string.profile)
                 }
 
-                else -> false
+                R.id.youTubeNoteFragment -> {
+                    binding.toolbar.visibility = View.VISIBLE
+                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationOnClickListener {
+                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                    }
+                    binding.toolbarText.text = getString(R.string.youtube_note)
+                }
+
+                R.id.spotifyNoteFragment -> {
+                    binding.toolbar.visibility = View.VISIBLE
+                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationOnClickListener {
+                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                    }
+                    binding.toolbarText.text = getString(R.string.spotify_note)
+                }
+
+                R.id.signInFragment -> {
+                    binding.toolbar.visibility = View.GONE
+                    binding.toolbar.navigationIcon = null
+                }
+
             }
         }
+
     }
 
     /**
@@ -109,5 +160,49 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return super.dispatchTouchEvent(event)
+    }
+
+    private fun handleIntent(intentExtras: Bundle){
+
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+
+        /**
+         * Check and handle sign in status
+         * */
+        if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
+            Timber.d("[${this::class.simpleName}]: null == GoogleSignIn.getLastSignedInAccount(applicationContext)")
+            navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment())
+        } else {
+            viewModel.updateLocalUserId()
+        }
+
+        if (UserManager.userId != null) {
+            intentExtras.getString(Intent.EXTRA_TEXT)?.let {
+                if (it.contains("spotify")){
+                    // Handle Spotify intent
+                    val sourceId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
+                    if (null != sourceId){
+                        Timber.d("HANDLE spotify INTENT FUN intent extras : $sourceId")
+
+                        navController.navigate(
+                            SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(sourceIdKey = sourceId)
+                        )
+                    }
+
+                } else {
+                    // Handle YouTube intent
+                    val sourceId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
+                    if (null != sourceId){
+                        Timber.d("HANDLE youtube INTENT FUN intent extras : $sourceId")
+
+                        navController.navigate(
+                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = sourceId)
+                        )
+                    }
+                }
+            }
+
+        }
+
     }
 }

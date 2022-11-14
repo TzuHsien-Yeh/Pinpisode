@@ -1,9 +1,11 @@
 package com.tzuhsien.immediat.data.source
 
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.auth.FirebaseUser
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.TimeItem
+import com.tzuhsien.immediat.data.model.UserInfo
 import com.tzuhsien.immediat.data.model.YouTubeResult
 
 interface DataSource {
@@ -13,19 +15,20 @@ interface DataSource {
      * */
     fun getAllLiveNotes(): MutableLiveData<List<Note>>
 
-    // notes of which the user is not the owner
-    suspend fun getCoauthoringNotes()
-
     /**
      *  For the note (single source)
      */
+    suspend fun getNoteInfoById(noteId: String): Result<Note>
+
     fun getLiveNoteById(noteId: String): MutableLiveData<Note?>
 
     suspend fun getYouTubeVideoInfoById(id: String): Result<YouTubeResult>
 
-    suspend fun createYouTubeVideoNote(videoId: String, note: Note): Result<String>
+    suspend fun checkIfNoteAlreadyExists(source: String, sourceId: String): Result<Note?>
 
-    suspend fun updateYouTubeInfo(noteId: String, note: Note): Result<String>
+    suspend fun createNote(source: String, sourceId: String, note: Note): Result<Note>
+
+    suspend fun updateNoteInfoFromSourceApi(noteId: String, note: Note): Result<String>
 
     fun getLiveTimeItems(noteId: String): MutableLiveData<List<TimeItem>>
 
@@ -42,5 +45,15 @@ interface DataSource {
     /**
      *  User info (Login and Profile page method)
      * */
-    suspend fun addUser(token: String)
+    suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo) : Result<UserInfo>
+
+    suspend fun getCurrentUser(): Result<UserInfo?>
+
+    suspend fun findUserByEmail(query: String): Result<UserInfo?>
+
+    suspend fun updateNoteAuthors(noteId: String, authors: Set<String>): Result<Boolean>
+
+    fun getLiveCoauthorsInfoOfTheNote(note: Note): MutableLiveData<List<UserInfo>>
+
+    suspend fun getUserInfoById(id: String): Result<UserInfo>
 }

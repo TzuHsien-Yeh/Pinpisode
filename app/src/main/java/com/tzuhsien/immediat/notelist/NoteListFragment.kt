@@ -8,11 +8,18 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tzuhsien.immediat.data.model.Sort
+import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentNoteListBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseDuration
+import com.tzuhsien.immediat.signin.SignInFragmentDirections
+import com.tzuhsien.immediat.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
+import timber.log.Timber
+
 
 class NoteListFragment : Fragment() {
 
@@ -24,9 +31,35 @@ class NoteListFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
+        Timber.d("Timber[${this::class.simpleName}] NoteListFragment[onCreateView]: ${UserManager.userId}")
+
+        /**
+         * Check and handle sign in status
+         * */
+        if (null == GoogleSignIn.getLastSignedInAccount(requireContext())) {
+            findNavController().navigate(SignInFragmentDirections.actionGlobalSignInFragment())
+        } else {
+            viewModel.updateLocalUserId()
+        }
+
         binding = FragmentNoteListBinding.inflate(layoutInflater)
+
+        /**
+         *  Navigation Buttons
+         * */
+        Glide.with(binding.imgPicToProfile)
+            .load(UserManager.userPic)
+            .into(binding.imgPicToProfile)
+        binding.textUserName.text = UserManager.userName
+        binding.imgPicToProfile.setOnClickListener {
+            findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToProfileFragment())
+        }
+
+        binding.btnToSearchPage.setOnClickListener {
+            findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToSearchFragment())
+        }
 
         /**
          * Tag list
@@ -58,7 +91,7 @@ class NoteListFragment : Fragment() {
         binding.sortAsc.alpha = 1F
         binding.sortDesc.alpha = 0.5F
         binding.cardSortBy.setOnClickListener {
-            when(sortState) {
+            when (sortState) {
                 0 -> {
                     binding.textSortOptions.text = Sort.DURATION.VALUE
                     binding.sortAsc.alpha = 1F
@@ -86,7 +119,7 @@ class NoteListFragment : Fragment() {
             }
         }
         binding.btnSwitchDirection.setOnClickListener {
-            if(binding.sortAsc.alpha != 1F) {
+            if (binding.sortAsc.alpha != 1F) {
                 //change to DESC
                 viewModel.isAscending = false
                 viewModel.changeOrderDirection()
@@ -108,11 +141,13 @@ class NoteListFragment : Fragment() {
             viewModel.navigateToNotePage(it)
         })
         binding.recyclerviewNoteList.adapter = noteAdapter
-        viewModel.liveNoteList.observe(viewLifecycleOwner, Observer { list ->
+
+        viewModel.liveNoteList.observe(viewLifecycleOwner) { list ->
+            Timber.d("viewModel.liveNoteList.observe: $list")
             list?.let {
                 viewModel.getAllTags(list)
                 if (null != viewModel.selectedTag) {
-                    noteAdapter.submitList(list.filter { !it.tags.contains(viewModel.selectedTag) })
+                    noteAdapter.submitList(list.filter { it.tags.contains(viewModel.selectedTag) })
                 } else {
                     noteAdapter.submitList(list)
                 }
@@ -123,7 +158,7 @@ class NoteListFragment : Fragment() {
                     }
                 }
             }
-        })
+        }
 
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
             it?.let {
@@ -133,9 +168,21 @@ class NoteListFragment : Fragment() {
                         videoIdKey = it.sourceId
                     )
                 )
-                viewModel.doneNavigationToYtNote()
+                viewModel.doneNavigationToNote()
             }
         })
+
+        viewModel.navigateToSpotifyNote.observe(viewLifecycleOwner) {
+            it?.let {
+                findNavController().navigate(
+                    SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+                        noteIdKey = it.id,
+                        sourceIdKey = it.sourceId
+                    )
+                )
+                viewModel.doneNavigationToNote()
+            }
+        }
 
         return binding.root
     }

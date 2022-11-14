@@ -23,8 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="16dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="4dp">
+            android:paddingVertical="10dp">
 
             <TextView
                 android:id="@+id/text_time_start"
@@ -57,7 +56,7 @@
                 android:textSize="16sp"
                 android:maxLines="1"
                 android:maxLength="20"
-                android:hint="Moment"
+                android:hint="@string/moment"
                 android:background="@color/transparent"
                 android:textAlignment="textStart"
                 app:layout_constraintStart_toEndOf="@+id/text_time_end"
@@ -68,7 +67,7 @@
                 android:id="@+id/edit_text_input_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Add some notes"
+                android:hint="@string/add_some_notes"
                 android:maxLength="400"
                 android:textSize="15sp"
                 app:layout_constraintTop_toBottomOf="@+id/text_time_start"
@@ -78,7 +77,7 @@
                 android:id="@+id/delete_time_item"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Delete"
+                android:text="@string/delete"
                 android:textSize="10sp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>

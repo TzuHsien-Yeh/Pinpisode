@@ -16,3 +16,44 @@ fun String.utcToLocalTime(): String {
 fun Float.formatDuration(): String = DateUtils.formatElapsedTime(this.toLong())
 
 fun String.parseDuration(): Long? = Duration.parseIsoStringOrNull(this)?.inWholeMilliseconds
+
+
+fun String.extractYoutubeVideoId(): String {
+    val youtubeWatchUrl = "youtube.com/watch?v="
+    val youtubeShareLink = "youtu.be/"
+
+    val appShareLink = "http://pinpisode/youtube_note/"
+
+    return if (youtubeWatchUrl in this) {
+        this
+            .substringAfter(youtubeWatchUrl)
+            .substringBefore("&", this.substringAfter(youtubeWatchUrl))
+    } else {
+        if (youtubeShareLink in this) {
+            this.substringAfter(youtubeShareLink)
+        } else {
+            this.substringAfter(appShareLink)
+        }
+    }
+}
+
+fun String.extractSpotifySourceId(): String {
+    val spotifyShareLink = "https://open.spotify.com/"
+    val spotifyUri = "spotify:"
+
+    return if (spotifyShareLink in this) {
+        this.substringAfter(spotifyShareLink)
+            .substringBefore("?si=")
+            .replace("/", ":")
+
+    } else {
+        this.substringAfter(spotifyUri)
+    }
+}
+
+fun String.parseSpotifyImageUri(): String {
+    val spotifyImageUri = "spotify:image:"
+    val imgHttpsUri = "https://i.scdn.co/image/"
+
+    return imgHttpsUri + this.substringAfter(spotifyImageUri)
+}

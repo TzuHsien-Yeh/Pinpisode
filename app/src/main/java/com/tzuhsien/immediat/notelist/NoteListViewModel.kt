@@ -6,15 +6,18 @@ import androidx.lifecycle.ViewModel
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.*
+import com.tzuhsien.immediat.data.model.Note
+import com.tzuhsien.immediat.data.model.Sort
+import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.data.source.local.UserManager
-import com.tzuhsien.immediat.data.source.remote.NoteRemoteDataSource.updateNote
 import com.tzuhsien.immediat.ext.parseDuration
 import com.tzuhsien.immediat.network.LoadApiStatus
 import com.tzuhsien.immediat.util.Util
-import kotlinx.coroutines.*
-import org.checkerframework.checker.units.qual.s
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class NoteListViewModel(private val repository: Repository) : ViewModel() {
@@ -33,10 +36,6 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
     var isAscending: Boolean = true // 0: Ascending order; 1: Descending
 
-    private val _updatedYoutubeResult = MutableLiveData<YouTubeResult>()
-    val updatedYoutubeResult: LiveData<YouTubeResult>
-        get() = _updatedYoutubeResult
-
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
         get() = _status
@@ -52,7 +51,12 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     val navigateToYoutubeNote: LiveData<Note?>
         get() = _navigateToYoutubeNote
 
+    private val _navigateToSpotifyNote = MutableLiveData<Note?>(null)
+    val navigateToSpotifyNote: LiveData<Note?>
+        get() = _navigateToSpotifyNote
+
     init {
+        Timber.d("[Timber NoteListViewModel: ${UserManager.userId}, ${UserManager.userName}, ${UserManager.userEmail}")
         getAllLiveNotes()
         _tagSet.value = UserManager.tagSet
     }
@@ -104,7 +108,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.updateYouTubeInfo(
+            when (val result = repository.updateNoteInfoFromSourceApi(
                 noteId = noteId,
                 note = note
             )) {
@@ -145,9 +149,9 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                 _navigateToYoutubeNote.value = note
             }
 
-//            Source.SPOTIFY.source -> {
-//                _navigateToSpotifyNote.value = note
-//            }
+            Source.SPOTIFY.source -> {
+                _navigateToSpotifyNote.value = note
+            }
         }
 
     }
@@ -195,8 +199,42 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         _liveNoteList.value = _liveNoteList.value?.reversed()
     }
 
-    fun doneNavigationToYtNote() {
+    fun doneNavigationToNote() {
         _navigateToYoutubeNote.value = null
+        _navigateToSpotifyNote.value = null
+    }
+
+    fun updateLocalUserId() {
+
+        if (null == UserManager.userId) {
+            coroutineScope.launch {
+                _status.value = LoadApiStatus.LOADING
+
+                when(val currentUserResult = repository.getCurrentUser()) {
+                    is Result.Success -> {
+                        _error.value = null
+                        _status.value = LoadApiStatus.DONE
+                        UserManager.userId = currentUserResult.data?.id
+                        currentUserResult.data
+                    }
+                    is Result.Fail -> {
+                        _error.value = currentUserResult.error
+                        _status.value = LoadApiStatus.ERROR
+                        null
+                    }
+                    is Result.Error -> {
+                        _error.value = currentUserResult.exception.toString()
+                        _status.value = LoadApiStatus.ERROR
+                        null
+                    }
+                    else -> {
+                        _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                        _status.value = LoadApiStatus.ERROR
+                        null
+                    }
+                }
+            }
+        }
     }
 
 }

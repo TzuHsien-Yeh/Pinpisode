@@ -23,7 +23,8 @@
         android:layout_marginStart="26dp"
         android:layout_marginEnd="16dp"
         android:maxLength="60"
-        android:hint="Input video summary"
+        android:inputType="text"
+        android:hint="@string/input_video_summary"
         android:textSize="16sp"
         android:background="@color/transparent"
         app:layout_constraintTop_toBottomOf="@+id/youtube_player_view"
@@ -43,7 +44,9 @@
         android:layout_width="54dp"
         android:layout_height="54dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginVertical="8dp"
+        android:layout_marginBottom="12dp"
+        app:borderWidth="0dp"
+        android:backgroundTint="@color/color_primary_variant"
         android:src="@drawable/ic_pin"
         app:fabCustomSize="54dp"
         android:scaleX="-1"
@@ -55,7 +58,9 @@
         android:layout_width="54dp"
         android:layout_height="54dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="12dp"
+        app:borderWidth="0dp"
+        android:backgroundTint="@color/color_primary_variant"
         android:src="@drawable/ic_youtube_black"
         app:fabCustomSize="54dp"
         app:layout_constraintBottom_toTopOf="@id/btn_take_timestamp"
@@ -65,15 +70,15 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/note_page_bottom_options"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="48dp"
         android:paddingVertical="4dp"
-        android:background="@color/old_book_color"
+        android:background="@color/color_primary"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageView
             android:id="@+id/ic_share"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
+            android:layout_width="@dimen/note_bottom_ic_size"
+            android:layout_height="@dimen/note_bottom_ic_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ic_coauthoring"
             app:layout_constraintHorizontal_bias="0.5"
@@ -83,8 +88,8 @@
 
         <ImageView
             android:id="@+id/ic_coauthoring"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
+            android:layout_width="@dimen/note_bottom_ic_size"
+            android:layout_height="@dimen/note_bottom_ic_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ic_add_tag"
             app:layout_constraintHorizontal_bias="0.5"
@@ -94,26 +99,25 @@
 
         <ImageView
             android:id="@+id/ic_add_tag"
-            android:layout_width="26dp"
-            android:layout_height="20dp"
+            android:layout_width="@dimen/note_bottom_ic_size"
+            android:layout_height="@dimen/note_bottom_ic_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ic_time_item_display_options"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/ic_coauthoring"
             app:layout_constraintTop_toTopOf="parent"
-            android:src="@drawable/ic_tag"
-            android:rotation="90"/>
+            android:src="@drawable/ic_tag"/>
 
         <ImageView
             android:id="@+id/ic_time_item_display_options"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
+            android:layout_width="@dimen/note_bottom_ic_size"
+            android:layout_height="@dimen/note_bottom_ic_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/ic_add_tag"
             app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/ic_pin"/>
+            tools:src="@drawable/ic_view_all"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
