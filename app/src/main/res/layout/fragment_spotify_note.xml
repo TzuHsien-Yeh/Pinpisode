@@ -92,6 +92,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:layout_marginStart="@dimen/standard"
+        tools:text="11:24"
         app:layout_constraintTop_toBottomOf="@id/seek_to"
         app:layout_constraintStart_toStartOf="@id/seek_to"/>
 
@@ -100,6 +102,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:layout_marginEnd="@dimen/standard"
+        tools:text="19:24"
         app:layout_constraintTop_toBottomOf="@id/seek_to"
         app:layout_constraintEnd_toEndOf="@id/seek_to"/>
 

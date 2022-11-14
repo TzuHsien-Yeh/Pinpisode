@@ -2,6 +2,7 @@ package com.tzuhsien.immediat
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.MotionEvent
@@ -134,6 +135,7 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.signInFragment -> {
                     binding.toolbar.visibility = View.GONE
+                    binding.toolbarText.text = null
                     binding.toolbar.navigationIcon = null
                 }
 
@@ -160,6 +162,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return super.dispatchTouchEvent(event)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.toolbar.visibility = View.GONE
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            binding.toolbar.visibility = View.VISIBLE
+        }
     }
 
     private fun handleIntent(intentExtras: Bundle){
