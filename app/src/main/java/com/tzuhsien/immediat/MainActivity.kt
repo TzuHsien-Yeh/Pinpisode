@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 
         intent?.extras?.let {
             handleIntent(it)
-            Timber.d("[onNewIntent] handleIntent called")
+            Timber.d("[onNewIntent] handleIntent called: extra = ${it.toString()}")
         }
     }
 

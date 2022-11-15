@@ -81,7 +81,6 @@ class SpotifyNoteFragment : Fragment() {
                         viewModel.pauseTrackingPosition()
                     }
 
-
                 }
 
             }
@@ -148,8 +147,6 @@ class SpotifyNoteFragment : Fragment() {
         }
         trackProgressBar =
             TrackProgressBar(binding.seekTo) { seekToPosition: Long -> seekTo(seekToPosition) }
-
-
 
 
         /**

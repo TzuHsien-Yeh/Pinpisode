@@ -160,15 +160,12 @@ class YouTubeNoteFragment : Fragment() {
                         when (viewModel.displayState) {
                             TimeItemDisplay.ALL -> {
                                 adapter.submitList(list)
-                                binding.recyclerViewTimeItems.scrollToPosition(-1)
                             }
                             TimeItemDisplay.TIMESTAMP -> {
                                 adapter.submitList(list.filter { it.endAt == null })
-                                binding.recyclerViewTimeItems.scrollToPosition(-1)
                             }
                             TimeItemDisplay.CLIP -> {
                                 adapter.submitList(list.filter { it.endAt != null })
-                                binding.recyclerViewTimeItems.scrollToPosition(-1)
                             }
                         }
                     }
