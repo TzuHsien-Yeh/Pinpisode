@@ -1,5 +1,6 @@
 package com.tzuhsien.immediat.spotifynote
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
@@ -9,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.spotify.protocol.types.PlayerState
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.model.Note
@@ -21,6 +23,7 @@ import com.tzuhsien.immediat.ext.parseSpotifyImageUri
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekBack
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekForward
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekTo
+import com.tzuhsien.immediat.tag.TagDialogFragmentDirections
 import timber.log.Timber
 
 class SpotifyNoteFragment : Fragment() {
@@ -330,6 +333,63 @@ class SpotifyNoteFragment : Fragment() {
             }
         }
 
+
+        /**
+         *  Buttons on the bottom of the page: Toggle the display of timeItems
+         * */
+        binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_all)
+        binding.icTimeItemDisplayOptions.setOnClickListener {
+            when (viewModel.displayState) {
+                TimeItemDisplay.ALL -> {
+                    // to display only timestamps
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_timestamps)
+                    viewModel.displayState = TimeItemDisplay.TIMESTAMP
+                    viewModel.notifyDisplayChange()
+                }
+                TimeItemDisplay.TIMESTAMP -> {
+                    // to display only clips
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_clips)
+                    viewModel.displayState = TimeItemDisplay.CLIP
+                    viewModel.notifyDisplayChange()
+                }
+                TimeItemDisplay.CLIP -> {
+                    binding.icTimeItemDisplayOptions.setImageResource(R.drawable.ic_view_all)
+                    viewModel.displayState = TimeItemDisplay.ALL
+                    viewModel.notifyDisplayChange()
+                }
+            }
+        }
+
+        /**
+         *  Buttons on the bottom of the page: Navigate to tag fragment
+         * */
+        binding.icAddTag.setOnClickListener {
+            findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(
+                viewModel.noteToBeUpdated!!))
+        }
+
+        /**
+         *  Buttons on the bottom of the page: Coauthoring
+         * */
+        binding.icCoauthoring.setOnClickListener {
+            findNavController().navigate(
+                SpotifyNoteFragmentDirections.actionSpotifyNoteFragmentToCoauthorDialogFragment(
+                    viewModel.noteToBeUpdated!!
+                )
+            )
+        }
+
+        /**
+         *  Buttons on the bottom of the page: Share this note
+         * */
+        binding.icShare.setOnClickListener {
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type="text/plain"
+                putExtra(Intent.EXTRA_TEXT, getString(R.string.spotify_note_uri, viewModel.noteId, viewModel.sourceId))
+            }
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
+        }
 
         return binding.root
     }
