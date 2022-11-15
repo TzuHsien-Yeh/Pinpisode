@@ -23,11 +23,10 @@
     <color name="color_secondary_variant">#ffebcf</color>
     <color name="color_on_secondary">#fff8e6</color>
 
-    <color name="selected_tag_background">#fff8e6</color>
+    <color name="selected_tag_background">#EDDBC0</color>
     <color name="tag_text_color">#FF000000</color>
-
-    <color name="theme_medium"></color>
     
-    <color name="old_book_color">#F3EFE6</color>
     <color name="note_bottom_options_bg">#EDDBC0</color>
+    
+    <color name="light_beige">#fff8e6</color>
 </resources>

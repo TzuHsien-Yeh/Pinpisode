@@ -3,10 +3,7 @@ package com.tzuhsien.immediat.data.source
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseUser
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.Note
-import com.tzuhsien.immediat.data.model.TimeItem
-import com.tzuhsien.immediat.data.model.UserInfo
-import com.tzuhsien.immediat.data.model.YouTubeResult
+import com.tzuhsien.immediat.data.model.*
 
 interface DataSource {
 
@@ -43,12 +40,15 @@ interface DataSource {
     suspend fun updateTags(noteId: String, note: Note): Result<String>
 
     /**
-     *  User info (Login and Profile page method)
+     *  User
      * */
     suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo) : Result<UserInfo>
 
     suspend fun getCurrentUser(): Result<UserInfo?>
 
+    /**
+     * Coauthor invitation
+     * */
     suspend fun findUserByEmail(query: String): Result<UserInfo?>
 
     suspend fun updateNoteAuthors(noteId: String, authors: Set<String>): Result<Boolean>
@@ -56,4 +56,12 @@ interface DataSource {
     fun getLiveCoauthorsInfoOfTheNote(note: Note): MutableLiveData<List<UserInfo>>
 
     suspend fun getUserInfoById(id: String): Result<UserInfo>
+
+    suspend fun sendCoauthorInvitation(note: Note, inviteeId: String): Result<Boolean>
+
+    fun getLiveIncomingCoauthorInvitations(): MutableLiveData<List<Invitation>>
+
+    suspend fun getUserInfoByIds(userIds: List<String>): Result<List<UserInfo>>
+
+    suspend fun deleteInvitation(invitationId: String): Result<Boolean>
 }

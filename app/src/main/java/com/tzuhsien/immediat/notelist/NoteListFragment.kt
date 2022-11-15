@@ -15,11 +15,11 @@ import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentNoteListBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseDuration
+import com.tzuhsien.immediat.notification.NotificationFragmentDirections
 import com.tzuhsien.immediat.signin.SignInFragmentDirections
 import com.tzuhsien.immediat.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
-
 
 class NoteListFragment : Fragment() {
 
@@ -184,6 +184,18 @@ class NoteListFragment : Fragment() {
                 viewModel.doneNavigationToNote()
             }
         }
+
+        /**
+         * Notification
+         * */
+        binding.btnNotificationBell.setOnClickListener {
+            findNavController().navigate(NotificationFragmentDirections.actionGlobalNotificationFragment())
+        }
+
+        viewModel.invitationList.observe(viewLifecycleOwner) {
+
+        }
+        // TODO: getLiveInvitationDATA and show badge on icon
 
         return binding.root
     }

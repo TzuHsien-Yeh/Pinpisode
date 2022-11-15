@@ -36,6 +36,9 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
     var isAscending: Boolean = true // 0: Ascending order; 1: Descending
 
+
+    var invitationList = repository.getLiveIncomingCoauthorInvitations()
+
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
         get() = _status

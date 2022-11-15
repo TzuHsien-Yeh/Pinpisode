@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
+import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentCoauthorDialogBinding
 import com.tzuhsien.immediat.ext.getVmFactory
@@ -89,14 +90,14 @@ class CoauthorDialogFragment : DialogFragment() {
         }
 
         binding.viewGroupUserSearchResult.setOnClickListener {
-            viewModel.addUserAsCoauthor()
+            viewModel.sendCoauthorInvitation()
             binding.viewGroupUserSearchResult.visibility = View.GONE
             viewModel.resetFoundUser()
         }
 
-        viewModel.addSuccess.observe(viewLifecycleOwner) {
+        viewModel.isInviteSuccess.observe(viewLifecycleOwner) {
             if (it) {
-                Toast.makeText(context, "Add Success", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.coauthor_invitation_sent), Toast.LENGTH_SHORT).show()
             }
         }
 

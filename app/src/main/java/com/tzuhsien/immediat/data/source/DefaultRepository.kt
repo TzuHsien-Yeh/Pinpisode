@@ -3,10 +3,7 @@ package com.tzuhsien.immediat.data.source
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseUser
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.Note
-import com.tzuhsien.immediat.data.model.TimeItem
-import com.tzuhsien.immediat.data.model.UserInfo
-import com.tzuhsien.immediat.data.model.YouTubeResult
+import com.tzuhsien.immediat.data.model.*
 
 class DefaultRepository(private val noteRemoteDataSource: DataSource): Repository {
 
@@ -84,5 +81,22 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
 
     override suspend fun getUserInfoById(id: String): Result<UserInfo> {
         return noteRemoteDataSource.getUserInfoById(id)
+    }
+
+    /**  Coauthor invitation  **/
+    override suspend fun sendCoauthorInvitation(note: Note, inviteeId: String): Result<Boolean> {
+        return noteRemoteDataSource.sendCoauthorInvitation(note, inviteeId)
+    }
+
+    override fun getLiveIncomingCoauthorInvitations(): MutableLiveData<List<Invitation>> {
+        return noteRemoteDataSource.getLiveIncomingCoauthorInvitations()
+    }
+
+    override suspend fun getUserInfoByIds(userIds: List<String>): Result<List<UserInfo>> {
+        return noteRemoteDataSource.getUserInfoByIds(userIds)
+    }
+
+    override suspend fun deleteInvitation(invitationId: String): Result<Boolean> {
+        return noteRemoteDataSource.deleteInvitation(invitationId)
     }
 }

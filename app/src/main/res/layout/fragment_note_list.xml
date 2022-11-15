@@ -32,6 +32,18 @@
             tools:text="YouTube" />
     </androidx.cardview.widget.CardView>
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/btn_notification_bell"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_margin="@dimen/standard"
+        android:src="@drawable/ic_notification"
+        android:background="@color/selected_tag_background"
+        app:contentPadding="8dp"
+        app:shapeAppearanceOverlay="@style/circle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_tag"
         android:layout_width="0dp"
@@ -45,25 +57,27 @@
         tools:listitem="@layout/item_tag"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/img_pic_to_profile"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_marginStart="@dimen/standard"
+        android:layout_marginVertical="@dimen/standard"
+        android:src="@drawable/app_icon"
+        app:layout_constraintBottom_toTopOf="@id/card_selected_tag"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/circle" />
+
     <TextView
         android:id="@+id/text_user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="6dp"
+        tools:text="hahaha oo"
         app:layout_constraintTop_toTopOf="@+id/img_pic_to_profile"
         app:layout_constraintBottom_toBottomOf="@+id/img_pic_to_profile"
-        app:layout_constraintEnd_toStartOf="@+id/img_pic_to_profile"/>
-
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/img_pic_to_profile"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginVertical="@dimen/standard"
-        android:layout_marginEnd="@dimen/standard"
-        app:shapeAppearanceOverlay="@style/circle"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/card_sort_by"/>
+        app:layout_constraintStart_toEndOf="@+id/img_pic_to_profile"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_sort_by"

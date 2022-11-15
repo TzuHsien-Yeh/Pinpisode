@@ -9,13 +9,11 @@ import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.UserInfo
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.network.LoadApiStatus
-import com.tzuhsien.immediat.util.ServiceLocator.repository
 import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class CoauthorViewModel(private val repository: Repository, val note: Note) : ViewModel() {
 
@@ -23,9 +21,9 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
     val foundUser: LiveData<UserInfo?>
         get() = _foundUser
 
-    private val _addSuccess = MutableLiveData<Boolean>(false)
-    val addSuccess: LiveData<Boolean>
-        get() = _addSuccess
+    private val _isInviteSuccess = MutableLiveData<Boolean>(false)
+    val isInviteSuccess: LiveData<Boolean>
+        get() = _isInviteSuccess
 
     var errorMsg: String? = null
 
@@ -123,21 +121,14 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
         }
     }
 
-    fun addUserAsCoauthor() {
-        val authorSet = mutableSetOf<String>()
-        authorSet.addAll(note.authors)
-
-        foundUser.value?.let {
-            authorSet.add(it.id)
-        }
-
+    fun sendCoauthorInvitation(){
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.updateNoteAuthors(note.id, authorSet)
+            val result = foundUser.value?.let { repository.sendCoauthorInvitation(note, it.id) }
 
-            _addSuccess.value = when (result) {
+            _isInviteSuccess.value = when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE

@@ -3,16 +3,14 @@ package com.tzuhsien.immediat.data.source.remote
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.Note
-import com.tzuhsien.immediat.data.model.TimeItem
-import com.tzuhsien.immediat.data.model.UserInfo
-import com.tzuhsien.immediat.data.model.YouTubeResult
+import com.tzuhsien.immediat.data.model.*
 import com.tzuhsien.immediat.data.source.DataSource
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.network.YouTubeApi
@@ -28,6 +26,7 @@ object NoteRemoteDataSource : DataSource {
 
     private const val PATH_NOTES = "notes"
     private const val PATH_USERS = "users"
+    private const val PATH_INVITATIONS = "invitations"
     private const val PATH_TIME_ITEMS = "timeItems"
     private const val KEY_START_AT = "startAt" // for orderBy()
     private const val KEY_LAST_EDIT_TIME = "lastEditTime" // for orderBy()
@@ -567,4 +566,113 @@ object NoteRemoteDataSource : DataSource {
             }
 
     }
+
+    override suspend fun sendCoauthorInvitation(note: Note, inviteeId: String): Result<Boolean> =
+        suspendCoroutine { continuation ->
+
+            val doc = FirebaseFirestore.getInstance().collection(PATH_INVITATIONS).document()
+
+            val newInvitation = Invitation(
+                id = doc.id,
+                note = note,
+                inviterId = note.ownerId,
+                inviteeId = inviteeId,
+                time = Calendar.getInstance().timeInMillis
+            )
+
+            doc
+                .set(newInvitation)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success(true))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("Error adding documents. ${it.message}")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+
+
+        }
+
+    override fun getLiveIncomingCoauthorInvitations(): MutableLiveData<List<Invitation>> {
+
+        val liveData = MutableLiveData<List<Invitation>>()
+
+        FirebaseFirestore.getInstance()
+            .collection(PATH_INVITATIONS)
+            .whereEqualTo("inviteeId", UserManager.userId)
+            .orderBy("time", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                Timber.i("addSnapshotListener detect")
+
+                error?.let {
+                    Timber.w("Error getting documents. ${it.message}")
+                }
+
+                val list = mutableListOf<Invitation>()
+                for (doc in snapshot!!) {
+                    Timber.d(doc.id + " => " + doc.data)
+                    val invite = doc.toObject(Invitation::class.java)
+                    list.add(invite)
+                }
+
+                liveData.value = list
+            }
+        return liveData
+
+        }
+
+    override suspend fun getUserInfoByIds(userIds: List<String>): Result<List<UserInfo>> =
+        suspendCoroutine { continuation ->
+
+        FirebaseFirestore.getInstance().collection(PATH_USERS)
+            .whereIn(FieldPath.documentId(), userIds)
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+
+                    val userInfoList = mutableListOf<UserInfo>()
+                    for (doc in task.result) {
+                        val user = doc.toObject(UserInfo::class.java)
+                        userInfoList.add(user)
+                    }
+
+                    continuation.resume(Result.Success(userInfoList))
+
+                } else {
+                    task.exception?.let {
+                        Timber.w("[${this::class.simpleName}] Error getting document. ${it.message}\"")
+                        continuation.resume(Result.Error(it))
+                        return@addOnCompleteListener
+                    }
+                    continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                }
+
+            }
+    }
+
+    override suspend fun deleteInvitation(invitationId: String): Result<Boolean> =
+        suspendCoroutine { continuation ->
+
+            FirebaseFirestore.getInstance().collection(PATH_INVITATIONS)
+                .document(invitationId)
+                .delete()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success(true))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+    }
+
 }

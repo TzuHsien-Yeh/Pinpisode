@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.tzuhsien.immediat.MainViewModel
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.notelist.NoteListViewModel
+import com.tzuhsien.immediat.notification.NotificationViewModel
 import com.tzuhsien.immediat.profile.ProfileViewModel
 import com.tzuhsien.immediat.search.SearchViewModel
 import com.tzuhsien.immediat.signin.SignInViewModel
@@ -31,6 +32,9 @@ class ViewModelFactory(
 
                 isAssignableFrom(ProfileViewModel::class.java) ->
                     ProfileViewModel(repository)
+
+                isAssignableFrom(NotificationViewModel::class.java) ->
+                    NotificationViewModel(repository)
 
                 else ->
                     throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

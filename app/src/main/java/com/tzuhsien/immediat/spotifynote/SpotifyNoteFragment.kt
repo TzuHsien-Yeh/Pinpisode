@@ -188,45 +188,6 @@ class SpotifyNoteFragment : Fragment() {
         /**
          *  Play the time items
          * **/
-//        viewModel.toPlay.observe(viewLifecycleOwner) { timeItem ->
-//            timeItem?.let { timeItem ->
-//
-//                timeItem[0]?.let {
-//                    SpotifyService.seekTo((it * 1000).toLong())
-//                    SpotifyService.resume()
-//                    Timber.d("viewModel.toPlay.observe: $it")
-//
-//                    viewModel.clearPlaying()
-//                }
-//
-//                timeItem[1]?.let { endAt ->
-//                    val clipLength = endAt.minus(timeItem[0]!!)
-//                    object : CountDownTimer( (clipLength * 1000).toLong(), 500) {
-//                        override fun onTick(millisUntilFinished: Long) {
-//
-////                            viewModel.clearPlayingMomentEnd()
-//                            Timber.d("countDownTimer onTick, clip length: $clipLength")
-//
-//                            viewModel.clearPlaying()
-//                            // cancel the countDownTimer once another time item clicked
-//                            if (null != timeItem[0]) {
-//                                cancel()
-//                            }
-//                        }
-//
-//                        // Callback function, fired when the time is up
-//                        override fun onFinish() {
-//                            SpotifyService.pause()
-//                        }
-//                    }.start()
-//
-//                }
-//
-//            }
-//
-//
-//        }
-
         viewModel.playStart.observe(viewLifecycleOwner) { startAt ->
             startAt?.let {
                 SpotifyService.seekTo((it * 1000).toLong())
