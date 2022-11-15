@@ -148,6 +148,7 @@ class NoteListFragment : Fragment() {
                 viewModel.getAllTags(list)
                 if (null != viewModel.selectedTag) {
                     noteAdapter.submitList(list.filter { it.tags.contains(viewModel.selectedTag) })
+
                 } else {
                     noteAdapter.submitList(list)
                 }

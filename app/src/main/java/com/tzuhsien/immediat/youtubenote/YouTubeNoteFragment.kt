@@ -140,6 +140,7 @@ class YouTubeNoteFragment : Fragment() {
                 binding.editDigest.hint = getString(R.string.input_video_summary)
             }
 
+            binding.icAddTag.isEnabled = it
             binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
             binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
         }
