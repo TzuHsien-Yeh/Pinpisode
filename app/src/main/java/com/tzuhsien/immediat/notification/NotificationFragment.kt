@@ -33,6 +33,7 @@ class NotificationFragment : Fragment() {
         binding.recyclerviewInvitation.adapter = adapter
         viewModel.fullInvitationData.observe(viewLifecycleOwner) {
             adapter.submitList(it)
+            adapter.notifyDataSetChanged()
         }
 
         return binding.root

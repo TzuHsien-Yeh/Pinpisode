@@ -14,7 +14,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class NotificationViewModel(private val repository: Repository): ViewModel() {
 
@@ -23,8 +22,6 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
     var invitationList = MutableLiveData<List<Invitation>>()
 
     private val idListAwaitQuery = mutableListOf<String>()
-
-    private var listToSubmit = mutableListOf<Invitation>()
 
     private var _fullInvitationData = MutableLiveData<List<Invitation>>()
     val fullInvitationData: LiveData<List<Invitation>>
@@ -66,24 +63,28 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
     }
 
     fun getInvitersInfo(invitations: List<Invitation>){
-
-        listToSubmit.addAll(invitations)
-
-        // Save a copy of inviter list from snapshot
+        // Save a copy of inviter list from snapshot, put only those were not in the map list
         for (invitation in invitations){
             inviterMap.putIfAbsent(invitation.inviterId, null)
         }
-        Timber.d("inviterMap.putIfAbsent() result: $inviterMap")
+
+        // update inviter info from inviterMap
+        for (inv in invitations) {
+            for (inviter in inviterMap){
+                if (inviter.key == inv.inviterId) {
+                    inv.inviter = inviter.value
+                }
+            }
+        }
 
         // List those inviters without userInfo. prepare to query their info
-        for(inviter in inviterMap.filterValues { it == null }) {
-            idListAwaitQuery.add(inviter.key)
+        for(inv in invitations.filter { it.inviter == null }) {
+            idListAwaitQuery.add(inv.inviterId)
         }
 
         // Limitation of Firebase whereIn query is for 10 userInfo at a time,
         // so chunk the list and query each of the chunked list
         val listForOneQuery = idListAwaitQuery.chunked(10)
-
 
         coroutineScope.launch {
 
@@ -104,7 +105,7 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
 
                         // mapping the livedata list with the result UserInfo map
                         for (user in inviterMap) {
-                            for (inv in listToSubmit) {
+                            for (inv in invitations) {
                                 if (inv.inviterId == user.key) {
                                     inv.inviter = user.value
                                 }
@@ -126,7 +127,8 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
                 }
             }
 
-            _fullInvitationData.value = listToSubmit
+            _fullInvitationData.value = invitations
+            idListAwaitQuery.clear()
         }
 
     }
