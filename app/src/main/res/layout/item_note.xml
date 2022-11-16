@@ -42,18 +42,10 @@
                 android:ellipsize="end"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toEndOf="@id/img_thumbnail"
-                app:layout_constraintEnd_toStartOf="@+id/ic_3_dots"
+                app:layout_constraintEnd_toEndOf="parent"
                 android:textStyle="bold"
                 android:textSize="14sp"
                 tools:text="xxxxxxxx"/>
-
-            <ImageView
-                android:id="@+id/ic_3_dots"
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:src="@drawable/ic_3_dots"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
 
             <TextView
                 android:id="@+id/text_digest"

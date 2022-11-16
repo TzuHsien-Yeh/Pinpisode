@@ -8,8 +8,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.data.model.Sort
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentNoteListBinding
@@ -137,10 +140,21 @@ class NoteListFragment : Fragment() {
         /**
          * Note list
          * */
-        val noteAdapter = NoteAdapter(onClickListener = NoteAdapter.OnNoteClickListener {
-            viewModel.navigateToNotePage(it)
-        })
+        val noteAdapter = NoteAdapter(uiState = viewModel.uiState)
         binding.recyclerviewNoteList.adapter = noteAdapter
+
+        // Swipe to delete
+        binding.recyclerviewNoteList.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(binding.recyclerviewNoteList) {
+            override fun instantiateUnderlayButton(position: Int): List<UnderlayButton> {
+                val deleteButton = deleteButton(position)
+                return listOf(deleteButton)
+            }
+        })
+
+        itemTouchHelper.attachToRecyclerView(binding.recyclerviewNoteList)
+
+
 
         viewModel.liveNoteList.observe(viewLifecycleOwner) { list ->
             Timber.d("viewModel.liveNoteList.observe: $list")
@@ -196,7 +210,24 @@ class NoteListFragment : Fragment() {
             binding.badgeNotificationNotEmpty.visibility = if (it.isNotEmpty()) View.VISIBLE else View.GONE
         }
 
+
         return binding.root
     }
+
+
+
+    fun deleteButton(position: Int) : SwipeHelper.UnderlayButton {
+        return SwipeHelper.UnderlayButton(
+            MyApplication.applicationContext(),
+            "Delete",
+            14.0f,
+            android.R.color.holo_red_light,
+            object : SwipeHelper.UnderlayButtonClickListener {
+                override fun onClick() {
+                    viewModel.deleteOrQuitCoauthoringNote(position)
+                }
+            })
+    }
+
 
 }

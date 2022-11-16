@@ -676,4 +676,46 @@ object NoteRemoteDataSource : DataSource {
                 }
     }
 
+    override suspend fun deleteUserFromAuthors(noteId: String, authors: List<String>): Result<String> =
+        suspendCoroutine { continuation ->
+            FirebaseFirestore.getInstance()
+                .collection(PATH_NOTES)
+                .document(noteId)
+                .update(
+                    "authors", authors,
+                    "lastEditTime", Calendar.getInstance().timeInMillis)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success("coauthor removed"))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+        }
+
+    override suspend fun deleteNote(noteId: String): Result<String> =
+        suspendCoroutine { continuation ->
+            FirebaseFirestore.getInstance()
+                .collection(PATH_NOTES)
+                .document(noteId)
+                .delete()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(Result.Success("Note deleted"))
+                    } else {
+                        task.exception?.let {
+                            Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")
+                            continuation.resume(Result.Error(it))
+                            return@addOnCompleteListener
+                        }
+                        continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
+                    }
+                }
+        }
+
 }
