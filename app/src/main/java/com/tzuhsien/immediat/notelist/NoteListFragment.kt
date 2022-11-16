@@ -193,9 +193,8 @@ class NoteListFragment : Fragment() {
         }
 
         viewModel.invitationList.observe(viewLifecycleOwner) {
-
+            binding.badgeNotificationNotEmpty.visibility = if (it.isNotEmpty()) View.VISIBLE else View.GONE
         }
-        // TODO: getLiveInvitationDATA and show badge on icon
 
         return binding.root
     }

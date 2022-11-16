@@ -34,8 +34,8 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/btn_notification_bell"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_margin="@dimen/standard"
         android:src="@drawable/ic_notification"
         android:background="@color/selected_tag_background"
@@ -43,6 +43,17 @@
         app:shapeAppearanceOverlay="@style/circle"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/badge_notification_not_empty"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_marginTop="11dp"
+        android:layout_marginEnd="12dp"
+        app:layout_constraintEnd_toEndOf="@+id/btn_notification_bell"
+        app:layout_constraintTop_toTopOf="@id/btn_notification_bell"
+        android:background="@color/color_primary_variant"
+        app:shapeAppearanceOverlay="@style/circle"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_tag"
