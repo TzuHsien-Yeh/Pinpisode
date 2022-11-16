@@ -10,6 +10,7 @@ import android.widget.SearchView
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
+import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentCoauthorDialogBinding
 import com.tzuhsien.immediat.ext.getVmFactory
@@ -42,6 +43,12 @@ class CoauthorDialogFragment : DialogFragment() {
                 .into(binding.imgOwnerPic)
         }
 
+        binding.textCoauthors.text = when (viewModel.note.authors.size) {
+            1 -> null
+            2 -> getString(R.string.coauthor)
+            else -> getString(R.string.coauthors)
+        }
+
         if (UserManager.userId == viewModel.note.ownerId) {
             binding.searchUserByEmail.visibility = View.VISIBLE
             binding.textInviteCoauthors.visibility = View.VISIBLE
@@ -56,7 +63,8 @@ class CoauthorDialogFragment : DialogFragment() {
             object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     query?.let {
-                        viewModel.findUserByEmail(query)
+                        // remove leading and trailing whitespace by .trim()
+                        viewModel.findUserByEmail(query.trim())
                     }
                     return false
                 }

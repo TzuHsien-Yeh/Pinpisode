@@ -18,6 +18,7 @@
     <string name="pin_your_episodes">Pin your episodes!</string>
     <string name="youtube_note">YouTube Note</string>
     <string name="spotify_note">Spotify Note</string>
+    <string name="coauthor_invitation">Coauthor invitation</string>
     <string name="find_your_episodes">Find your episodes</string>
     <string name="profile">Profile</string>
 
@@ -28,12 +29,10 @@
     <string name="note_owner">Owner</string>
     <string name="add_coauthors">Invite coauthors</string>
     <string name="coauthor">Coauthor</string>
+    <string name="coauthors">Coauthors</string>
     <string name="only_note_owner_can_invite_user_to_coauthor">Only note owner can invite others to coauthor</string>
     <string name="number_of_coauthors">%d coauthor</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="coauthor_invitation">Coauthor invitation</string>
-    <string name="invitation_content">%1s invited you to help edit the %2s note:</string>
+    <string name="invitation_content">%1s invited you to help edit a %2s note:</string>
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
     <string name="coauthor_invitation_sent">Coauthor invitation sent</string>

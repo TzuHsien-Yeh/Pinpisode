@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="center"
+    android:padding="@dimen/standard"
     android:background="@drawable/bg_dialog"
     tools:context=".coauthor.CoauthorDialogFragment">
 
@@ -12,8 +13,6 @@
         android:id="@+id/text_note_owner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
         android:text="@string/note_owner"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -32,7 +31,6 @@
         android:id="@+id/text_coauthors"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:layout_marginStart="20dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@+id/text_note_owner"
@@ -53,10 +51,9 @@
 
     <TextView
         android:id="@+id/text_invite_coauthors"
-        android:layout_width="320dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/add_coauthors"
-        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/img_owner_pic"
         app:layout_constraintStart_toStartOf="parent"/>
@@ -66,21 +63,17 @@
         android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="16dp"
         android:queryHint="Find user by email"
         android:iconifiedByDefault="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_invite_coauthors"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/text_invite_coauthors" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/view_group_user_search_result"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="16dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/search_user_by_email"
@@ -118,7 +111,8 @@
         android:id="@+id/text_only_owner_can_invite_coauthors"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginTop="@dimen/standard"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/img_owner_pic"
@@ -129,8 +123,7 @@
         android:id="@+id/text_result_msg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="40dp"
-        android:visibility="visible"
+        android:layout_marginVertical="@dimen/standard"
         android:textAlignment="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

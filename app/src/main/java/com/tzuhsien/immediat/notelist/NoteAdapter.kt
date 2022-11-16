@@ -1,6 +1,5 @@
 package com.tzuhsien.immediat.notelist
 
-import android.opengl.Visibility
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
@@ -28,9 +27,15 @@ class NoteAdapter (
             val timeAgo = DateUtils.getRelativeTimeSpanString(note.lastEditTime)
             binding.textLastEditTime.text = timeAgo
             binding.textNumberOfCoauthors.visibility = if (note.authors.size == 1) View.GONE else View.VISIBLE
-            binding.textNumberOfCoauthors.text = context.getString(
-                R.string.number_of_coauthors, (note.authors.size.minus(1))
-            )
+            binding.textNumberOfCoauthors.text = if (note.authors.size > 2) {
+                context.getString(
+                    R.string.number_of_coauthors, (note.authors.size.minus(1))
+                ) + "s"
+            } else {
+                context.getString(
+                    R.string.number_of_coauthors, (note.authors.size.minus(1))
+                )
+            }
 
             binding.ic3Dots.setOnClickListener {
                 // navigate to

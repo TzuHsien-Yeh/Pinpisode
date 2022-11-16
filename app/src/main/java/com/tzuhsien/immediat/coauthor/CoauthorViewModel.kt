@@ -100,13 +100,17 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
+
+                    if (null == result.data) {
+                        _resultMsg.value = MyApplication.applicationContext().getString(R.string.user_not_found)
+                    }
+
                     result.data
                 }
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
 
-                    _resultMsg.value = result.error
                     null
                 }
                 is Result.Error -> {

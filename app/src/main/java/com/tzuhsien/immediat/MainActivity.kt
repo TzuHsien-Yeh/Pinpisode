@@ -138,6 +138,15 @@ class MainActivity : AppCompatActivity() {
                     binding.toolbar.navigationIcon = null
                 }
 
+                R.id.notificationFragment -> {
+                    binding.toolbar.visibility = View.VISIBLE
+                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationOnClickListener {
+                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                    }
+                    binding.toolbarText.text = getString(R.string.coauthor_invitation)
+                }
+
             }
         }
 
