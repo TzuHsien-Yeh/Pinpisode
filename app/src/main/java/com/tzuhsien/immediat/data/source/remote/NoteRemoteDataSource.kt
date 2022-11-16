@@ -1,5 +1,6 @@
 package com.tzuhsien.immediat.data.source.remote
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -430,6 +431,7 @@ object NoteRemoteDataSource : DataSource {
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
         UserManager.userId = currentUserUid
 
+        Log.d("getCurrentUser", "UserManager.userId = $currentUserUid")
         Timber.d("UserManager.userId = $currentUserUid")
         if (null == currentUserUid) {
             continuation.resume(Result.Success(null))
@@ -476,8 +478,8 @@ object NoteRemoteDataSource : DataSource {
                         } else {
                             val result = mutableListOf<UserInfo>()
                             for (user in task.result) {
-                                val user = user.toObject(UserInfo::class.java)
-                                result.add(user)
+                                val userInfo = user.toObject(UserInfo::class.java)
+                                result.add(userInfo)
                             }
 
                             if (result.isEmpty()) {
@@ -594,7 +596,6 @@ object NoteRemoteDataSource : DataSource {
                         continuation.resume(Result.Fail(MyApplication.instance.getString(R.string.unknown_error)))
                     }
                 }
-
 
         }
 

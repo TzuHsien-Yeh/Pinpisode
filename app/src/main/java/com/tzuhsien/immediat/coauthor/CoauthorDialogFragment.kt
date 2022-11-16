@@ -7,11 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
-import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
-import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentCoauthorDialogBinding
 import com.tzuhsien.immediat.ext.getVmFactory
@@ -46,11 +44,11 @@ class CoauthorDialogFragment : DialogFragment() {
 
         if (UserManager.userId == viewModel.note.ownerId) {
             binding.searchUserByEmail.visibility = View.VISIBLE
-            binding.textAddCoauthors.visibility = View.VISIBLE
+            binding.textInviteCoauthors.visibility = View.VISIBLE
             binding.textOnlyOwnerCanInviteCoauthors.visibility = View.GONE
         } else {
             binding.searchUserByEmail.visibility = View.GONE
-            binding.textAddCoauthors.visibility = View.GONE
+            binding.textInviteCoauthors.visibility = View.GONE
             binding.textOnlyOwnerCanInviteCoauthors.visibility = View.VISIBLE
         }
 
@@ -69,36 +67,27 @@ class CoauthorDialogFragment : DialogFragment() {
             }
         )
 
-        binding.textNotFound.visibility = View.GONE
-        binding.viewGroupUserSearchResult.visibility = View.GONE
-
         viewModel.foundUser.observe(viewLifecycleOwner) {
-            if (null != it) {
+             it?.let {
                 binding.viewGroupUserSearchResult.visibility = View.VISIBLE
-                binding.textNotFound.visibility = View.GONE
                 binding.textSearchResultName.text = it.name
                 binding.textSearchResultEmail.text = it.email
-
                 Glide.with(binding.imgSearchResultPic)
                     .load(it.pic)
                     .into(binding.imgSearchResultPic)
 
-            } else {
-                binding.textNotFound.visibility = View.VISIBLE
-                binding.viewGroupUserSearchResult.visibility = View.GONE
+                 binding.textResultMsg.visibility = View.GONE
             }
         }
 
         binding.viewGroupUserSearchResult.setOnClickListener {
             viewModel.sendCoauthorInvitation()
             binding.viewGroupUserSearchResult.visibility = View.GONE
-            viewModel.resetFoundUser()
         }
 
-        viewModel.isInviteSuccess.observe(viewLifecycleOwner) {
-            if (it) {
-                Toast.makeText(context, getString(R.string.coauthor_invitation_sent), Toast.LENGTH_SHORT).show()
-            }
+        viewModel.resultMsg.observe(viewLifecycleOwner) {
+            binding.textResultMsg.visibility = if (null != it) View.VISIBLE else View.GONE
+            it.let { binding.textResultMsg.text = it }
         }
 
         return binding.root

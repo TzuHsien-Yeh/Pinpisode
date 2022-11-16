@@ -30,6 +30,10 @@ class InvitationAdapter (private val uiState: NotificationUiState) :
                     )
 
                 binding.textNoteSourceTitle.text = invitation.note.title
+                Glide.with(binding.imgNoteThumbnail)
+                    .load(invitation.note.thumbnail)
+                    .into(binding.imgNoteThumbnail)
+
 
                 val timeAgo = DateUtils.getRelativeTimeSpanString(invitation.time)
                 binding.textNotifReceivedTime.text = timeAgo

@@ -22,7 +22,9 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
 
     var invitationList = MutableLiveData<List<Invitation>>()
 
-    private val listAwaitQuery = mutableListOf<String>()
+    private val idListAwaitQuery = mutableListOf<String>()
+
+    private var listToSubmit = mutableListOf<Invitation>()
 
     private var _fullInvitationData = MutableLiveData<List<Invitation>>()
     val fullInvitationData: LiveData<List<Invitation>>
@@ -33,7 +35,7 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
             addInviteeToCoauthors(item)
         },
         onDeclineClicked = { item ->
-            declineInvitation(item)
+            deleteInvitation(item)
         }
     )
 
@@ -61,29 +63,33 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
     private fun getLiveIncomingCoauthorInvitations(){
         _status.value = LoadApiStatus.DONE
         invitationList = repository.getLiveIncomingCoauthorInvitations()
-
-        invitationList.value?.let {
-            for (invitation in it){
-                inviterMap.putIfAbsent(invitation.inviterId, null)
-            }
-
-            Timber.d("inviterMap.putIfAbsent() result: $inviterMap")
-        }
-
     }
 
     fun getInvitersInfo(invitations: List<Invitation>){
 
+        listToSubmit.addAll(invitations)
+
+        // Save a copy of inviter list from snapshot
+        for (invitation in invitations){
+            inviterMap.putIfAbsent(invitation.inviterId, null)
+        }
+        Timber.d("inviterMap.putIfAbsent() result: $inviterMap")
+
+        // List those inviters without userInfo. prepare to query their info
         for(inviter in inviterMap.filterValues { it == null }) {
-            listAwaitQuery.add(inviter.key)
+            idListAwaitQuery.add(inviter.key)
         }
 
-        val listForOneQuery = listAwaitQuery.chunked(10)
+        // Limitation of Firebase whereIn query is for 10 userInfo at a time,
+        // so chunk the list and query each of the chunked list
+        val listForOneQuery = idListAwaitQuery.chunked(10)
 
-        for (list in listForOneQuery) {
-            coroutineScope.launch {
 
-                _status.value = LoadApiStatus.LOADING
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            for (list in listForOneQuery) {
 
                 when (val result = repository.getUserInfoByIds(list)) {
 
@@ -98,14 +104,12 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
 
                         // mapping the livedata list with the result UserInfo map
                         for (user in inviterMap) {
-                            for (inv in invitations) {
+                            for (inv in listToSubmit) {
                                 if (inv.inviterId == user.key) {
                                     inv.inviter = user.value
                                 }
                             }
                         }
-                        _fullInvitationData.value = invitations
-
                     }
                     is Result.Fail -> {
                         _error.value = result.error
@@ -121,6 +125,8 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
                     }
                 }
             }
+
+            _fullInvitationData.value = listToSubmit
         }
 
     }
@@ -140,6 +146,9 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
+
+                    // delete invitation item once it's accepted and the invitee is successfully added to authors
+                    deleteInvitation(item)
                     result.data
                 }
                 is Result.Fail -> {
@@ -161,7 +170,7 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
         }
     }
 
-    private fun declineInvitation(item: Invitation) {
+    private fun deleteInvitation(item: Invitation) {
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
@@ -187,9 +196,9 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
         }
     }
 
-
-
-
+    fun emptyFullInvitationData() {
+        _fullInvitationData.value = listOf()
+    }
 }
 
 data class NotificationUiState(

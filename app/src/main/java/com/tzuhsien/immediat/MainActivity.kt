@@ -62,7 +62,6 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
         /** Read intent data if the activity has not been created when getting intent from other app **/
-
         Timber.d("onCreate CALLED")
         Timber.d("intent.data: ${intent.data}, ${intent.data?.host}, ${intent.data?.query}")
         Timber.d("intent.extra: ${intent.extras?.getString(Intent.EXTRA_TEXT)}")

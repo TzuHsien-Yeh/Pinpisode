@@ -3,6 +3,7 @@ package com.tzuhsien.immediat.coauthor
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.Note
@@ -25,7 +26,9 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
     val isInviteSuccess: LiveData<Boolean>
         get() = _isInviteSuccess
 
-    var errorMsg: String? = null
+    private val _resultMsg = MutableLiveData<String?>(null)
+    val resultMsg: LiveData<String?>
+        get() = _resultMsg
 
     private val _noteOwner = MutableLiveData<UserInfo>()
     val noteOwner: LiveData<UserInfo>
@@ -67,7 +70,6 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
-                    errorMsg = result.error
                     null
                 }
                 is Result.Error -> {
@@ -103,13 +105,13 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
-                    errorMsg = result.error
+
+                    _resultMsg.value = result.error
                     null
                 }
                 is Result.Error -> {
                     _error.value = result.exception.toString()
                     _status.value = LoadApiStatus.ERROR
-
                     null
                 }
                 else -> {
@@ -132,6 +134,9 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
+
+                    resetFoundUser()
+                    _resultMsg.value = MyApplication.applicationContext().getString(R.string.coauthor_invitation_sent)
                     result.data
                 }
                 is Result.Fail -> {
@@ -153,7 +158,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
         }
     }
 
-    fun resetFoundUser() {
+    private fun resetFoundUser() {
         _foundUser.value = null
     }
 

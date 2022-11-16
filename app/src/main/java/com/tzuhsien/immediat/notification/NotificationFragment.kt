@@ -22,7 +22,11 @@ class NotificationFragment : Fragment() {
         binding = FragmentNotificationBinding.inflate(layoutInflater)
 
         viewModel.invitationList.observe(viewLifecycleOwner) {
-            viewModel.getInvitersInfo(it)
+            if (it.isNotEmpty()) {
+                viewModel.getInvitersInfo(it)
+            } else {
+                viewModel.emptyFullInvitationData()
+            }
         }
 
         val adapter = InvitationAdapter(viewModel.uiState)

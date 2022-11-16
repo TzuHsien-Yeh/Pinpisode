@@ -48,9 +48,6 @@
             android:id="@+id/action_youTubeNoteFragment_pop"
             app:popUpTo="@id/youTubeNoteFragment"
             app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_youTubeNoteFragment_to_coauthorDialogFragment"
-            app:destination="@id/coauthorDialogFragment" />
 
     </fragment>
 
@@ -88,9 +85,6 @@
             app:argType="com.tzuhsien.immediat.data.model.Note"
             app:nullable="false"/>
 
-        <action
-            android:id="@+id/action_coauthorDialogFragment_to_youTubeNoteFragment"
-            app:destination="@id/youTubeNoteFragment" />
     </dialog>
     <fragment
         android:id="@+id/spotifyNoteFragment"
@@ -112,10 +106,6 @@
             android:autoVerify="true"
             app:uri="http://pinpisode/spotify_note/{note_id_key}/{source_id_key}" />
 
-        <action
-            android:id="@+id/action_spotifyNoteFragment_to_coauthorDialogFragment"
-            app:destination="@id/coauthorDialogFragment" />
-
     </fragment>
 
 
@@ -125,5 +115,6 @@
         android:name="com.tzuhsien.immediat.notification.NotificationFragment"
         android:label="fragment_notification"
         tools:layout="@layout/fragment_notification" /><action android:id="@+id/action_global_notificationFragment" app:destination="@id/notificationFragment"/>
+    <action android:id="@+id/action_global_coauthorDialogFragment" app:destination="@id/coauthorDialogFragment" />
 
 </navigation>

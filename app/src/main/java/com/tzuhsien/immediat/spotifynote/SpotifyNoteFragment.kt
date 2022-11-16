@@ -13,6 +13,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.spotify.protocol.types.PlayerState
 import com.tzuhsien.immediat.R
+import com.tzuhsien.immediat.coauthor.CoauthorDialogFragmentDirections
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
@@ -331,7 +332,7 @@ class SpotifyNoteFragment : Fragment() {
          * */
         binding.icCoauthoring.setOnClickListener {
             findNavController().navigate(
-                SpotifyNoteFragmentDirections.actionSpotifyNoteFragmentToCoauthorDialogFragment(
+                CoauthorDialogFragmentDirections.actionGlobalCoauthorDialogFragment(
                     viewModel.noteToBeUpdated!!
                 )
             )
