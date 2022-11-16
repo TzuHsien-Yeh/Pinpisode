@@ -686,7 +686,7 @@ object NoteRemoteDataSource : DataSource {
                     "lastEditTime", Calendar.getInstance().timeInMillis)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        continuation.resume(Result.Success("coauthor removed"))
+                        continuation.resume(Result.Success("Quit coauthoring success"))
                     } else {
                         task.exception?.let {
                             Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")

@@ -17,11 +17,13 @@
             android:id="@+id/action_noteListFragment_to_searchFragment"
             app:destination="@id/searchFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.tzuhsien.immediat.search.SearchFragment"
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" />
+
     <fragment
         android:id="@+id/youTubeNoteFragment"
         android:name="com.tzuhsien.immediat.youtubenote.YouTubeNoteFragment"
@@ -48,12 +50,9 @@
             android:id="@+id/action_youTubeNoteFragment_pop"
             app:popUpTo="@id/youTubeNoteFragment"
             app:popUpToInclusive="true" />
-
     </fragment>
 
-    <action android:id="@+id/action_global_YouTubeNoteFragment"
-        app:destination="@id/youTubeNoteFragment" />
-    <action android:id="@+id/action_global_noteListFragment" app:destination="@id/noteListFragment" />
+
     <dialog
         android:id="@+id/tagDialogFragment"
         android:name="com.tzuhsien.immediat.tag.TagDialogFragment"
@@ -114,7 +113,13 @@
         android:id="@+id/notificationFragment"
         android:name="com.tzuhsien.immediat.notification.NotificationFragment"
         android:label="fragment_notification"
-        tools:layout="@layout/fragment_notification" /><action android:id="@+id/action_global_notificationFragment" app:destination="@id/notificationFragment"/>
-    <action android:id="@+id/action_global_coauthorDialogFragment" app:destination="@id/coauthorDialogFragment" />
+        tools:layout="@layout/fragment_notification" />
 
+    <action android:id="@+id/action_global_notificationFragment" app:destination="@id/notificationFragment"/>
+    <action android:id="@+id/action_global_coauthorDialogFragment" app:destination="@id/coauthorDialogFragment" />
+    <action android:id="@+id/action_global_YouTubeNoteFragment"
+        app:destination="@id/youTubeNoteFragment" />
+
+    <action android:id="@+id/action_global_noteListFragment"
+        app:destination="@id/noteListFragment" />
 </navigation>

@@ -9,6 +9,7 @@ import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.UserInfo
 import com.tzuhsien.immediat.data.source.Repository
+import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.network.LoadApiStatus
 import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
@@ -33,6 +34,12 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
     private val _noteOwner = MutableLiveData<UserInfo>()
     val noteOwner: LiveData<UserInfo>
             get() = _noteOwner
+
+    private val _quitCoauthoringResult = MutableLiveData<String>(null)
+    val quitCoauthoringResult: LiveData<String>
+        get() = _quitCoauthoringResult
+
+
 
     private var _liveCoauthorInfo = MutableLiveData<List<UserInfo>>()
     val liveCoauthorInfo: LiveData<List<UserInfo>>
@@ -164,6 +171,40 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
 
     private fun resetFoundUser() {
         _foundUser.value = null
+    }
+
+    fun quitCoauthoringTheNote() {
+        val newAuthorList = mutableListOf<String>()
+        newAuthorList.addAll(note.authors)
+        newAuthorList.remove(UserManager.userId)
+
+        coroutineScope.launch {
+            _status.value = LoadApiStatus.LOADING
+
+            when(val result = repository.deleteUserFromAuthors(
+                noteId = note.id,
+                authors = newAuthorList
+            )) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+
+                    _quitCoauthoringResult.value = result.data
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
     }
 
 }

@@ -31,7 +31,7 @@
     <string name="add_coauthors">Invite coauthors</string>
     <string name="coauthor">Coauthor</string>
     <string name="coauthors">Coauthors</string>
-    <string name="only_note_owner_can_invite_user_to_coauthor">Only note owner can invite others to coauthor</string>
+    <string name="quit_coauthoring">Quit coauthoring</string>
     <string name="number_of_coauthors">%d coauthor</string>
     <string name="invitation_content">%1s invited you to help edit a %2s note:</string>
     <string name="accept">Accept</string>
