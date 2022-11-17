@@ -72,7 +72,7 @@ class SearchFragment : Fragment() {
                        .into(binding.imgThumbnail)
                    binding.textChannelName.text = item.snippet.channelTitle
                    binding.textPublishedTime.text = item.snippet.publishedAt.utcToLocalTime()
-                   viewModel.setYoutubeNoteData(item) // including video sourceId
+                   viewModel.ytSingleResultId = item.id // including video sourceId
                } else {
                    binding.cardSingleVideoResult.visibility = View.GONE
                }
@@ -80,14 +80,25 @@ class SearchFragment : Fragment() {
         })
 
         binding.cardSingleVideoResult.setOnClickListener {
-            viewModel.navigateToYoutubeNote()
+            viewModel.navigateToYoutubeNote(viewModel.ytSingleResultId!!)
+        }
+
+        // Display search result
+        viewModel.youTubeSearchResult.observe(viewLifecycleOwner) {
+            binding.recyclerviewSearchResult.visibility = if (null == it) View.GONE else View.VISIBLE
+        }
+
+        val resultAdapter = SearchResultAdapter(viewModel.uiState)
+        binding.recyclerviewSearchResult.adapter = resultAdapter
+
+        viewModel.searchResultList.observe(viewLifecycleOwner) {
+            resultAdapter.submitList(it)
         }
 
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
             it?.let {
                 findNavController().navigate(
                     YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
-//                        noteIdKey = null,
                         videoIdKey = it
                     )
                 )

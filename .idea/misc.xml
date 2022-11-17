@@ -36,10 +36,11 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_youtube_note.xml" value="0.16666666666666666" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_author.xml" value="0.21666666666666667" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_invitation.xml" value="0.4244791666666667" />
-        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_note.xml" value="0.3838582677165354" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_note.xml" value="0.24705882352941178" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_tag.xml" value="0.22" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_time_card.xml" value="0.1" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_timestamp_card.xml" value="0.22135416666666666" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_yt_search_result.xml" value="0.21041666666666667" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/menu/bottom_nav_menu.xml" value="0.3625" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1" />
       </map>

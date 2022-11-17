@@ -68,4 +68,6 @@ interface DataSource {
     suspend fun deleteUserFromAuthors(noteId: String, authors: List<String>): Result<String>
 
     suspend fun deleteNote(noteId: String): Result<String>
+
+    suspend fun searchOnYouTube(query: String): Result<YouTubeSearchResult>
 }

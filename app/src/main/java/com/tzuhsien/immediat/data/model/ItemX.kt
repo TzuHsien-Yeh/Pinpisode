@@ -1,8 +1,8 @@
 package com.tzuhsien.immediat.data.model
 
-data class YouTubeResult(
+data class ItemX(
     val etag: String,
-    val items: List<Item>,
+    val id: Id,
     val kind: String,
-    val pageInfo: PageInfo
+    val snippet: Snippet
 )

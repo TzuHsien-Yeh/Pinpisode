@@ -67,4 +67,9 @@ interface Repository {
     suspend fun deleteUserFromAuthors(noteId: String, authors: List<String>): Result<String>
 
     suspend fun deleteNote(noteId: String): Result<String>
+
+    /**
+     * Search api
+     * */
+    suspend fun searchOnYouTube(query: String): Result<YouTubeSearchResult>
 }

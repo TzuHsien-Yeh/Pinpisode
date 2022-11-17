@@ -2,6 +2,7 @@ package com.tzuhsien.immediat.network
 
 import com.tzuhsien.immediat.BuildConfig
 import com.tzuhsien.immediat.data.model.YouTubeResult
+import com.tzuhsien.immediat.data.model.YouTubeSearchResult
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -25,7 +26,6 @@ val client = OkHttpClient.Builder()
             .url
             .newBuilder()
             .addQueryParameter("key", BuildConfig.YOUTUBE_API_KEY)
-            .addQueryParameter("part", "snippet, contentDetails")
             .build()
         chain.proceed(chain.request().newBuilder().url(url).build())
     }
@@ -43,8 +43,17 @@ private val retrofit = Retrofit.Builder()
 interface YouTubeApiService {
     @GET("videos")
     suspend fun getVideoInfo(
+        @Query("part") part: String,
         @Query("id") id: String
     ): YouTubeResult
+
+    @GET("search")
+    suspend fun getYouTubeSearchResult(
+        @Query("part") part: String,
+        @Query("type") type: String,
+        @Query("maxResults") maxResult: Int?,
+        @Query("q") query: String?
+    ): YouTubeSearchResult
 }
 
 /**

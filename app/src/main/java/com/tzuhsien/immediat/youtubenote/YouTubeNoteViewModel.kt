@@ -67,13 +67,13 @@ class YouTubeNoteViewModel(
     val liveTimeItemList: LiveData<List<TimeItem>>
         get() = _liveTimeItemList
 
-    private var _timeItemLiveDataReassigned = MutableLiveData<Boolean>(false)
+    private var _timeItemLiveDataReassigned = MutableLiveData(false)
     val timeItemLiveDataReassigned: LiveData<Boolean>
         get() = _timeItemLiveDataReassigned
 
 
     /** Decide whether the viewer can edit the note **/
-    private var _canEdit = MutableLiveData<Boolean>(false)
+    private var _canEdit = MutableLiveData(false)
     val canEdit: LiveData<Boolean>
         get() = _canEdit
 
@@ -444,17 +444,14 @@ class YouTubeNoteViewModel(
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
                 is Result.Error -> {
                     _error.value = result.exception.toString()
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
                 else -> {
                     _error.value = Util.getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
             }
         }

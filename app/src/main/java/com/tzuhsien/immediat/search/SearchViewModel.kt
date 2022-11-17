@@ -3,15 +3,13 @@ package com.tzuhsien.immediat.search
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.Item
-import com.tzuhsien.immediat.data.model.Note
-import com.tzuhsien.immediat.data.model.Source
+import com.tzuhsien.immediat.data.model.ItemX
 import com.tzuhsien.immediat.data.model.YouTubeResult
+import com.tzuhsien.immediat.data.model.YouTubeSearchResult
 import com.tzuhsien.immediat.data.source.Repository
-import com.tzuhsien.immediat.data.source.local.UserManager
+import com.tzuhsien.immediat.ext.extractSpotifySourceId
 import com.tzuhsien.immediat.ext.extractYoutubeVideoId
 import com.tzuhsien.immediat.network.LoadApiStatus
 import com.tzuhsien.immediat.util.Util
@@ -24,11 +22,27 @@ import timber.log.Timber
 
 class SearchViewModel(private val repository: Repository) : ViewModel() {
 
-    lateinit var ytInfoNote: Note
+//    lateinit var ytInfoNote: Note
+
+    var ytSingleResultId: String? = null
 
     private val _ytVideoData = MutableLiveData<YouTubeResult?>(null)
     val ytVideoData: LiveData<YouTubeResult?>
         get() = _ytVideoData
+
+    private val _youtubeSearchResult = MutableLiveData<YouTubeSearchResult>(null)
+    val youTubeSearchResult: LiveData<YouTubeSearchResult>
+        get() = _youtubeSearchResult
+
+    private val _searchResultList = MutableLiveData<List<ItemX>>()
+    val searchResultList: LiveData<List<ItemX>>
+        get() = _searchResultList
+
+    val uiState = SearchUiState(
+        onItemClick = { item ->
+            navigateToYoutubeNote(item.id.videoId)
+        }
+    )
 
     // status: The internal MutableLiveData that stores the status of the most recent request
     private val _status = MutableLiveData<LoadApiStatus>()
@@ -51,8 +65,11 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     val navigateToYoutubeNote: LiveData<String?>
         get() = _navigateToYoutubeNote
 
-    val youtubeWatchUrl = "youtube.com/watch?v="
-    val youtubeShareLink = "youtu.be/"
+    private val youtubeWatchUrl = "youtube.com/watch?v="
+    private val youtubeShareLink = "youtu.be/"
+
+    private val spotifyShareLink = "https://open.spotify.com/"
+    private val spotifyUri = "spotify:"
 
     fun findMediaSource(query: String) {
 
@@ -61,15 +78,21 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             val videoId = query.extractYoutubeVideoId()
             if (videoId.isNotEmpty()) {
                 getYoutubeVideoInfoById(videoId)
-                // TODO: else -> prepare to call YT search api
+            }
+        } else if (query.contains(spotifyShareLink) || query.contains(spotifyUri)){
+            val sourceId = query.extractSpotifySourceId()
+            if (sourceId.isNotEmpty()) {
+                // TODO:  get spotify info by source id + endpoint type?
             }
         } else {
+            // TODO: search on spotify
+            //  use coroutine { two child coroutine } wait for both to responses to continue
 
-            // TODO: if (query is a spotify url) { get spotify resource id } else
-
+            searchOnYouTube(query)
         }
 
     }
+
 
     private fun getYoutubeVideoInfoById(videoId: String) {
         coroutineScope.launch {
@@ -109,21 +132,66 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun setYoutubeNoteData(videoItem: Item) {
-        ytInfoNote = Note(
-            sourceId = videoItem.id,
-            source = Source.YOUTUBE.source,
-            ownerId = UserManager.userId!!,
-            authors = listOf(UserManager.userId!!),
-            tags = listOf(Source.YOUTUBE.source),
-            thumbnail = videoItem.snippet.thumbnails.high.url,
-            title = videoItem.snippet.title,
-            duration = videoItem.contentDetails.duration
-        )
+//    fun setYoutubeNoteData(videoItem: Item) {
+//        ytInfoNote = Note(
+//            sourceId = videoItem.id,
+//            source = Source.YOUTUBE.source,
+//            ownerId = UserManager.userId!!,
+//            authors = listOf(UserManager.userId!!),
+//            tags = listOf(Source.YOUTUBE.source),
+//            thumbnail = videoItem.snippet.thumbnails.high.url,
+//            title = videoItem.snippet.title,
+//            duration = videoItem.contentDetails.duration
+//        )
+//    }
+
+    private fun searchOnYouTube(query: String) {
+
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            val result = repository.searchOnYouTube(query)
+
+            _youtubeSearchResult.value = when (result) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+
+                    Timber.d("youtubeSearchResults: ${result.data}")
+
+                    putYtResultToItemList(result.data)
+                    result.data
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                else -> {
+                    _error.value = Util.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+            }
+        }
     }
 
-    fun navigateToYoutubeNote() {
-        _navigateToYoutubeNote.value = ytInfoNote.sourceId
+    private fun putYtResultToItemList(ytResult: YouTubeSearchResult) {
+        val list = mutableListOf<ItemX>()
+        for (item in ytResult.items) {
+            list.add(item)
+        }
+        _searchResultList.value = list
+    }
+
+    fun navigateToYoutubeNote(videoId: String) {
+        _navigateToYoutubeNote.value = videoId
     }
 
     fun doneNavigateToTakeNote() {
@@ -139,3 +207,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         viewModelJob.cancel()
     }
 }
+
+data class SearchUiState(
+    val onItemClick: (ItemX) -> Unit
+)

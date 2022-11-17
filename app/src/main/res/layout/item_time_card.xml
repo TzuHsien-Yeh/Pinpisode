@@ -13,9 +13,9 @@
         android:layout_marginVertical="8dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:cardElevation="4dp"
-        app:cardCornerRadius="20dp"
-        app:cardMaxElevation="2dp"
+        app:cardElevation="@dimen/card_view_elevation"
+        app:cardCornerRadius="16dp"
+        app:cardMaxElevation="@dimen/card_view_elevation"
         app:cardPreventCornerOverlap="true"
         app:cardUseCompatPadding="false">
 
@@ -69,9 +69,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/add_some_notes"
-                android:maxLength="400"
+                android:maxLength="800"
                 android:textSize="15sp"
-                android:inputType="text"
                 app:layout_constraintTop_toBottomOf="@+id/text_time_start"
                 app:layout_constraintStart_toStartOf="parent"/>
 

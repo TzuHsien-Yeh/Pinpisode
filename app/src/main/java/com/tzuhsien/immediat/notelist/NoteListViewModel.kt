@@ -84,9 +84,9 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
-                    if (result.data.items[0].contentDetails.duration != note.duration) {
+                    if (result.data.items[0].contentDetails?.duration != note.duration) {
                         val noteToUpdate = Note()
-                        noteToUpdate.duration = result.data.items[0].contentDetails.duration
+                        noteToUpdate.duration = result.data.items[0].contentDetails!!.duration
                         noteToUpdate.thumbnail = result.data.items[0].snippet.thumbnails.high.url
                         noteToUpdate.title = result.data.items[0].snippet.title
                         updateYouTubeInfo(noteId, noteToUpdate)

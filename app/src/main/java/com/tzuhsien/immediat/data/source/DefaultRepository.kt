@@ -100,14 +100,15 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.deleteInvitation(invitationId)
     }
 
-    override suspend fun deleteUserFromAuthors(
-        noteId: String,
-        authors: List<String>,
-    ): Result<String> {
+    override suspend fun deleteUserFromAuthors(noteId: String, authors: List<String>): Result<String> {
         return noteRemoteDataSource.deleteUserFromAuthors(noteId, authors)
     }
 
     override suspend fun deleteNote(noteId: String): Result<String> {
         return noteRemoteDataSource.deleteNote(noteId)
+    }
+
+    override suspend fun searchOnYouTube(query: String): Result<YouTubeSearchResult> {
+        return noteRemoteDataSource.searchOnYouTube(query)
     }
 }
