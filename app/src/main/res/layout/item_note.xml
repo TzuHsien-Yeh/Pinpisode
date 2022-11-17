@@ -39,11 +39,12 @@
                 android:layout_marginEnd="4dp"
                 android:ellipsize="end"
                 android:maxLines="3"
+                android:lineSpacingMultiplier="0.92"
                 style="@style/source_title_style"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/img_thumbnail"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="xxxxxxxx" />
+                tools:text="xxxxxxxxdsvigdvasssshgdggggggggggggggggggggg" />
 
             <TextView
                 android:id="@+id/text_digest"

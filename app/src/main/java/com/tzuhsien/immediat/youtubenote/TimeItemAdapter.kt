@@ -66,6 +66,9 @@ class TimeItemAdapter(
             binding.textTimeEnd.setOnClickListener {
                 uiState.onTimeClick(timeItem)
             }
+            binding.extraSpaceForClickToPlay.setOnClickListener {
+                uiState.onTimeClick(timeItem)
+            }
 
             /** Disable edit functions only if the viewer is one of the authors **/
             titleView.isEnabled = uiState.canEdit

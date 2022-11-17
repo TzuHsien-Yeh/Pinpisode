@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tzuhsien.immediat.MyApplication
+import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.model.Sort
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentNoteListBinding
@@ -220,7 +221,7 @@ class NoteListFragment : Fragment() {
     fun deleteButton(position: Int) : SwipeHelper.UnderlayButton {
         return SwipeHelper.UnderlayButton(
             MyApplication.applicationContext(),
-            "Delete",
+            getString(R.string.quit),
             14.0f,
             android.R.color.holo_red_light,
             object : SwipeHelper.UnderlayButtonClickListener {

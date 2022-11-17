@@ -20,7 +20,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/standard">
+            android:paddingVertical="6dp"
+            android:paddingHorizontal="16dp">
 
             <TextView
                 android:id="@+id/text_time_start"
@@ -28,16 +29,14 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                android:textStyle="bold"
-                android:textSize="16sp"
+                style="@style/timestamp_title_style"
                 tools:text="00:24"/>
 
             <TextView
                 android:id="@+id/text_time_end"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="16sp"
+                style="@style/timestamp_title_style"
                 android:layout_marginStart="4dp"
                 app:layout_constraintStart_toEndOf="@id/text_time_start"
                 app:layout_constraintTop_toTopOf="parent"
@@ -45,29 +44,37 @@
 
             <EditText
                 android:id="@+id/edit_text_item_title"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="4dp"
                 android:inputType="text"
-                android:textStyle="bold"
-                android:textSize="16sp"
+                style="@style/timestamp_title_style"
                 android:maxLines="1"
                 android:maxLength="20"
                 android:hint="@string/moment"
                 android:background="@color/transparent"
                 android:textAlignment="textStart"
                 app:layout_constraintStart_toEndOf="@+id/text_time_end"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/extra_space_for_click_to_play"
                 app:layout_constraintTop_toTopOf="parent"/>
+
+            <View
+                android:id="@+id/extra_space_for_click_to_play"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintStart_toEndOf="@+id/edit_text_item_title"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
             <EditText
                 android:id="@+id/edit_text_input_text"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/add_some_notes"
-                android:maxLength="800"
-                android:textSize="15sp"
+                android:maxLength="600"
+                style="@style/description_text_style"
                 app:layout_constraintTop_toBottomOf="@+id/text_time_start"
                 app:layout_constraintStart_toStartOf="parent"/>
 

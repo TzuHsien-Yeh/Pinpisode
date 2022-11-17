@@ -270,7 +270,7 @@ class YouTubeNoteFragment : Fragment() {
     fun deleteButton(position: Int) : SwipeHelper.UnderlayButton {
         return SwipeHelper.UnderlayButton(
             MyApplication.applicationContext(),
-            "Delete",
+            getString(R.string.delete),
             14.0f,
             android.R.color.holo_red_light,
             object : SwipeHelper.UnderlayButtonClickListener {
