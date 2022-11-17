@@ -49,9 +49,6 @@ class YouTubeNoteViewModel(
         onItemContentChanged = { item ->
             updateTimeItem(item)
         },
-        onItemToDelete = { item ->
-            deleteTimeItem(item)
-        },
         onTimeClick = { item ->
             playTimeItem(item)
         }
@@ -350,9 +347,11 @@ class YouTubeNoteViewModel(
 
     }
 
-    private fun deleteTimeItem(timeItem: TimeItem) {
+    fun deleteTimeItem(timeItemIndex: Int) {
+        val timeItemToDelete = liveTimeItemList.value?.get(timeItemIndex)
+
         coroutineScope.launch {
-            when (val result = repository.deleteTimeItem(noteId!!, timeItem)) {
+            when (val result = repository.deleteTimeItem(noteId!!, timeItemToDelete!!)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -493,7 +492,6 @@ class YouTubeNoteViewModel(
 data class YouTubeNoteUiState(
     var onItemTitleChanged: (TimeItem) -> Unit,
     var onItemContentChanged: (TimeItem) -> Unit,
-    var onItemToDelete: (TimeItem) -> Unit,
     val onTimeClick: (TimeItem) -> Unit,
     var canEdit: Boolean = false
 )

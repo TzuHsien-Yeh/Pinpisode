@@ -100,9 +100,6 @@ class SpotifyNoteViewModel(
         onItemContentChanged = { item ->
             updateTimeItem(item)
         },
-        onItemToDelete = { item ->
-            deleteTimeItem(item)
-        },
         onTimeClick = { item ->
             playTimeItem(item)
         }
@@ -372,9 +369,11 @@ class SpotifyNoteViewModel(
 
     }
 
-    private fun deleteTimeItem(timeItem: TimeItem) {
+    fun deleteTimeItem(timeItemIndex: Int) {
         coroutineScope.launch {
-            when (val result = repository.deleteTimeItem(noteId!!, timeItem)) {
+            val timeItemToDelete = liveTimeItemList.value?.get(timeItemIndex)
+
+            when (val result = repository.deleteTimeItem(noteId!!, timeItemToDelete!!)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -481,7 +480,6 @@ class SpotifyNoteViewModel(
 data class SpotifyNoteUiState(
     var onItemTitleChanged: (TimeItem) -> Unit,
     var onItemContentChanged: (TimeItem) -> Unit,
-    var onItemToDelete: (TimeItem) -> Unit,
     val onTimeClick: (TimeItem) -> Unit,
     var canEdit: Boolean = false
 )

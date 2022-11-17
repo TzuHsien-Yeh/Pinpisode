@@ -1,4 +1,4 @@
-package com.tzuhsien.immediat.notelist
+package com.tzuhsien.immediat.util
 
 import android.annotation.SuppressLint
 import android.content.Context

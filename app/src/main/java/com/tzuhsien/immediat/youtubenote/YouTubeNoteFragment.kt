@@ -11,9 +11,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.coauthor.CoauthorDialogFragmentDirections
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
@@ -21,6 +24,7 @@ import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseDuration
 import com.tzuhsien.immediat.tag.TagDialogFragmentDirections
+import com.tzuhsien.immediat.util.SwipeHelper
 import timber.log.Timber
 
 
@@ -149,6 +153,17 @@ class YouTubeNoteFragment : Fragment() {
         /**
          *  RecyclerView views
          * */
+        // Swipe to delete
+        binding.recyclerViewTimeItems.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(binding.recyclerViewTimeItems) {
+            override fun instantiateUnderlayButton(position: Int): List<UnderlayButton> {
+                val deleteButton = deleteButton(position)
+                return listOf(deleteButton)
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
+
+
         val adapter = TimeItemAdapter(
             uiState = viewModel.uiState
         )
@@ -251,4 +266,18 @@ class YouTubeNoteFragment : Fragment() {
             binding.notePageBottomOptions.visibility = View.VISIBLE
         }
     }
+
+    fun deleteButton(position: Int) : SwipeHelper.UnderlayButton {
+        return SwipeHelper.UnderlayButton(
+            MyApplication.applicationContext(),
+            "Delete",
+            14.0f,
+            android.R.color.holo_red_light,
+            object : SwipeHelper.UnderlayButtonClickListener {
+                override fun onClick() {
+                    viewModel.deleteTimeItem(position)
+                }
+            })
+    }
+
 }

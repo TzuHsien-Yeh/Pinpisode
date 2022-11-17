@@ -21,6 +21,7 @@ import com.tzuhsien.immediat.ext.parseDuration
 import com.tzuhsien.immediat.notification.NotificationFragmentDirections
 import com.tzuhsien.immediat.signin.SignInFragmentDirections
 import com.tzuhsien.immediat.spotifynote.SpotifyNoteFragmentDirections
+import com.tzuhsien.immediat.util.SwipeHelper
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
 

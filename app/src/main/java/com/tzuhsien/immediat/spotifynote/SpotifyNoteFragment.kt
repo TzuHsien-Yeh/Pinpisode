@@ -11,7 +11,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import com.spotify.protocol.types.PlayerState
+import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.coauthor.CoauthorDialogFragmentDirections
 import com.tzuhsien.immediat.data.model.Note
@@ -25,6 +28,7 @@ import com.tzuhsien.immediat.spotifynote.SpotifyService.seekBack
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekForward
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekTo
 import com.tzuhsien.immediat.tag.TagDialogFragmentDirections
+import com.tzuhsien.immediat.util.SwipeHelper
 import timber.log.Timber
 
 class SpotifyNoteFragment : Fragment() {
@@ -266,6 +270,16 @@ class SpotifyNoteFragment : Fragment() {
         /**
          *  RecyclerView views
          * */
+        // Swipe to delete
+        binding.recyclerViewTimeItems.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(binding.recyclerViewTimeItems) {
+            override fun instantiateUnderlayButton(position: Int): List<UnderlayButton> {
+                val deleteButton = deleteButton(position)
+                return listOf(deleteButton)
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
+
         val adapter = SpotifyTimeItemAdapter(
             uiState = viewModel.uiState
         )
@@ -379,27 +393,18 @@ class SpotifyNoteFragment : Fragment() {
         }
     }
 
-    /**
-     *  Get player position every 0.5 sec
-     * **/
-    ///
-//    private val timer = Timer()
-//
-//    fun startTick(){
-//        timer.scheduleAtFixedRate(timerTask {
-//            viewModel.currentSecond += 500L
-//            SpotifyService.pause()
-//            SpotifyService.resume()
-//        }, 0, 500)
-//    }
-//
-//    fun pauseTick(){
-//        timer.cancel()
-//    }
-//
-//    fun updateCurrentPositionFromPlayer(playerState: PlayerState){
-//        viewModel.currentSecond = playerState.playbackPosition
-//    }
+    fun deleteButton(position: Int) : SwipeHelper.UnderlayButton {
+        return SwipeHelper.UnderlayButton(
+            MyApplication.applicationContext(),
+            "Delete",
+            14.0f,
+            android.R.color.holo_red_light,
+            object : SwipeHelper.UnderlayButtonClickListener {
+                override fun onClick() {
+                    viewModel.deleteTimeItem(position)
+                }
+            })
+    }
 
 
 }
