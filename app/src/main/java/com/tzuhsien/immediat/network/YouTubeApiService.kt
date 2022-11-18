@@ -11,6 +11,8 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 private const val BASE_URL = "https://www.googleapis.com/youtube/v3/"
+private const val ENDPOINT_VIDEOS = "videos"
+private const val ENDPOINT_SEARCH = "search"
 
 val loggingInterceptor =
     HttpLoggingInterceptor().setLevel(
@@ -41,13 +43,13 @@ private val retrofit = Retrofit.Builder()
     .build()
 
 interface YouTubeApiService {
-    @GET("videos")
+    @GET(ENDPOINT_VIDEOS)
     suspend fun getVideoInfo(
         @Query("part") part: String,
         @Query("id") id: String
     ): YouTubeResult
 
-    @GET("search")
+    @GET(ENDPOINT_SEARCH)
     suspend fun getYouTubeSearchResult(
         @Query("part") part: String,
         @Query("type") type: String,
@@ -55,7 +57,7 @@ interface YouTubeApiService {
         @Query("q") query: String?
     ): YouTubeSearchResult
 
-    @GET("videos")
+    @GET(ENDPOINT_VIDEOS)
     suspend fun getTrendingVideos(
         @Query("part") part: String,
         @Query("chart") chart: String,

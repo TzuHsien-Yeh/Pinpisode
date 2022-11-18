@@ -14,6 +14,7 @@ import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.*
 import com.tzuhsien.immediat.data.source.DataSource
 import com.tzuhsien.immediat.data.source.local.UserManager
+import com.tzuhsien.immediat.network.SpotifyApi
 import com.tzuhsien.immediat.network.YouTubeApi
 import com.tzuhsien.immediat.util.Util.getString
 import com.tzuhsien.immediat.util.Util.isInternetConnected
@@ -25,6 +26,7 @@ import kotlin.coroutines.suspendCoroutine
 
 object NoteRemoteDataSource : DataSource {
 
+    // Firebase
     private const val PATH_NOTES = "notes"
     private const val PATH_USERS = "users"
     private const val PATH_INVITATIONS = "invitations"
@@ -37,11 +39,15 @@ object NoteRemoteDataSource : DataSource {
     private const val KEY_SOURCE_ID = "sourceId"
     private const val KEY_OWNER_ID = "ownerId"
 
-
+    // Youtube
     private const val YT_VIDEO_PARAM_PART = "snippet, contentDetails"
     private const val YT_SEARCH_PARAM_PART = "snippet"
     private const val YT_SEARCH_PARAM_TYPE = "video"
     private const val YT_VIDEO_PARAM_CHART = "mostPopular"
+
+    // Spotify
+    private const val SPOTIFY_BEARER = "Bearer "
+    private const val SPOTIFY_PARAM_TYPE_EPISODE = "episode"
 
     override fun getAllLiveNotes(): MutableLiveData<List<Note>> {
         val liveData = MutableLiveData<List<Note>>()
@@ -774,5 +780,24 @@ object NoteRemoteDataSource : DataSource {
         }
     }
 
+    override suspend fun searchOnSpotify(query: String, limit: Int, authToken: String): Result<SpotifySearchResult> {
+        if (!isInternetConnected()) {
+            return Result.Fail(getString(R.string.internet_not_connected))
+        }
+
+        return try {
+            val result = SpotifyApi.retrofitService.searchOnSpotify(
+                bearerWithToken = SPOTIFY_BEARER + authToken,
+                type = SPOTIFY_PARAM_TYPE_EPISODE,
+                limit = 20,
+                query = query
+            )
+            Result.Success(result)
+
+        } catch (e: Exception) {
+            Timber.w(" exception=${e.message}")
+            Result.Error(e)
+        }
+    }
 
 }

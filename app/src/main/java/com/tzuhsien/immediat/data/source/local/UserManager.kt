@@ -65,4 +65,7 @@ object UserManager {
 
     // Get all tags
     var tagSet = mutableSetOf<String>()
+
+    // Spotify authorization token
+    var userSpotifyAuthToken = ""
 }

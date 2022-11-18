@@ -18,6 +18,9 @@ android {
         versionName "1.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Spotify auth redirect
+        manifestPlaceholders = [redirectSchemeName: 'pinpisode', redirectHostName: 'callback']
     }
 
     buildTypes {
@@ -94,8 +97,7 @@ dependencies {
     implementation project(':spotify-app-remote')
 
     // Spotify auth
-//    implementation 'com.spotify.android:auth:2.0.2' // Maven dependency
-//    implementation 'androidx.browser:browser:1.4.0'
+    implementation 'com.spotify.android:auth:2.0.2'
 
     // Glide
     implementation "com.github.bumptech.glide:glide:$version_glide"
