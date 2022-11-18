@@ -5,10 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
-import com.tzuhsien.immediat.data.model.Item
-import com.tzuhsien.immediat.data.model.ItemX
-import com.tzuhsien.immediat.data.model.YouTubeResult
-import com.tzuhsien.immediat.data.model.YouTubeSearchResult
+import com.tzuhsien.immediat.data.model.*
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.ext.extractSpotifySourceId
 import com.tzuhsien.immediat.ext.extractYoutubeVideoId
@@ -25,11 +22,18 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
 //    lateinit var ytInfoNote: Note
 
+    var userSpotifyAuthToken: String? = null
+
+    var spotifySingleResultId: String? = null
     var ytSingleResultId: String? = null
 
     private val _ytVideoData = MutableLiveData<YouTubeResult?>(null)
     val ytVideoData: LiveData<YouTubeResult?>
         get() = _ytVideoData
+
+    private val _spotifyEpisodeData = MutableLiveData<EpisodeResult?>(null)
+    val spotifyEpisodeData: LiveData<EpisodeResult?>
+        get() = _spotifyEpisodeData
 
     private val _youtubeSearchResult = MutableLiveData<YouTubeSearchResult>(null)
     val youTubeSearchResult: LiveData<YouTubeSearchResult>
@@ -73,6 +77,10 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     private val _navigateToYoutubeNote = MutableLiveData<String?>()
     val navigateToYoutubeNote: LiveData<String?>
         get() = _navigateToYoutubeNote
+
+    private val _navigateToSpotifyNote = MutableLiveData<String?>()
+    val navigateToSpotifyNote: LiveData<String?>
+        get() = _navigateToSpotifyNote
 
     private val youtubeWatchUrl = "youtube.com/watch?v="
     private val youtubeShareLink = "youtu.be/"
@@ -131,6 +139,8 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
     fun findMediaSource(query: String) {
 
+        Timber.d("findMediaSource")
+
         // Check if the query is a YouTube url
         if (query.contains(youtubeWatchUrl) || query.contains(youtubeShareLink)) {
             val videoId = query.extractYoutubeVideoId()
@@ -138,9 +148,16 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                 getYoutubeVideoInfoById(videoId)
             }
         } else if (query.contains(spotifyShareLink) || query.contains(spotifyUri)){
+            // Spotify
+
+            Timber.d("Spotify link")
             val sourceId = query.extractSpotifySourceId()
             if (sourceId.isNotEmpty()) {
-                // TODO:  get spotify info by source id + endpoint type?
+                if (sourceId.contains("episode:")) {
+                    getEpisodeInfoById(sourceId.substringAfter("episode:"))
+                } else if (sourceId.contains("track:")) {
+                    getTrackInfoById(sourceId.substringAfter("track"))
+                }
             }
         } else {
             // TODO: search on spotify
@@ -151,6 +168,52 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
     }
 
+    private fun getEpisodeInfoById(id: String) {
+
+        if (null != userSpotifyAuthToken) {
+            coroutineScope.launch {
+
+                _status.value = LoadApiStatus.LOADING
+
+                val result = repository.getSpotifyEpisodeInfo(id, userSpotifyAuthToken!!)
+
+                _spotifyEpisodeData.value = when (result) {
+                    is Result.Success -> {
+                        _error.value = null
+                        _status.value = LoadApiStatus.DONE
+
+                        result.data
+                    }
+                    is Result.Fail -> {
+                        _error.value = result.error
+                        _status.value = LoadApiStatus.ERROR
+
+                        // Show msg if source not found (result list is empty)
+                        _showMsg.value = result.error
+                        null
+                    }
+                    is Result.Error -> {
+                        _error.value = result.exception.toString()
+                        _status.value = LoadApiStatus.ERROR
+                        null
+                    }
+                    else -> {
+                        _error.value = Util.getString(R.string.unknown_error)
+                        _status.value = LoadApiStatus.ERROR
+                        null
+                    }
+                }
+            }
+        } else {
+
+            // TODO: PROMPT TO AUTH
+        }
+
+    }
+
+    private fun getTrackInfoById(id: String) {
+
+    }
 
     private fun getYoutubeVideoInfoById(videoId: String) {
         coroutineScope.launch {
@@ -189,19 +252,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             }
         }
     }
-
-//    fun setYoutubeNoteData(videoItem: Item) {
-//        ytInfoNote = Note(
-//            sourceId = videoItem.id,
-//            source = Source.YOUTUBE.source,
-//            ownerId = UserManager.userId!!,
-//            authors = listOf(UserManager.userId!!),
-//            tags = listOf(Source.YOUTUBE.source),
-//            thumbnail = videoItem.snippet.thumbnails.high.url,
-//            title = videoItem.snippet.title,
-//            duration = videoItem.contentDetails.duration
-//        )
-//    }
 
     private fun searchOnYouTube(query: String) {
 
@@ -253,8 +303,13 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         _navigateToYoutubeNote.value = videoId
     }
 
+    fun navigateToSpotifyNote(spotifyId: String) {
+        _navigateToSpotifyNote.value = spotifyId
+    }
+
     fun doneNavigateToTakeNote() {
         _navigateToYoutubeNote.value = null
+        _navigateToSpotifyNote.value = null
     }
 
     fun resetMsg() {
@@ -265,6 +320,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         super.onCleared()
         viewModelJob.cancel()
     }
+
 }
 
 data class SearchUiState(

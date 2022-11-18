@@ -1,9 +1,9 @@
 package com.tzuhsien.immediat.data.model
 
-data class ItemXX(
-    val audioPreviewUrl: String,
+data class Show(
+    val availableMarkets: List<String>,
+    val copyrights: List<Any>,
     val description: String,
-    val durationMs: Int,
     val explicit: Boolean,
     val externalUrls: ExternalUrls,
     val href: String,
@@ -11,13 +11,11 @@ data class ItemXX(
     val id: String,
     val images: List<Image>,
     val isExternallyHosted: Boolean,
-    val isPlayable: Boolean,
-    val language: String,
     val languages: List<String>,
+    val mediaType: String,
     val name: String,
-    val releaseDate: String,
-    val releaseDatePrecision: String,
-    val resumePoint: ResumePoint,
+    val publisher: String,
+    val totalEpisodes: Int,
     val type: String,
     val uri: String
 )

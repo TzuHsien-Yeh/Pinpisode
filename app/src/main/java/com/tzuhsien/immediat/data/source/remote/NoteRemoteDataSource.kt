@@ -47,7 +47,7 @@ object NoteRemoteDataSource : DataSource {
 
     // Spotify
     private const val SPOTIFY_BEARER = "Bearer "
-    private const val SPOTIFY_PARAM_TYPE_EPISODE = "episode"
+    private const val SPOTIFY_PARAM_TYPE = "episode, track"
 
     override fun getAllLiveNotes(): MutableLiveData<List<Note>> {
         val liveData = MutableLiveData<List<Note>>()
@@ -780,7 +780,28 @@ object NoteRemoteDataSource : DataSource {
         }
     }
 
-    override suspend fun searchOnSpotify(query: String, limit: Int, authToken: String): Result<SpotifySearchResult> {
+    override suspend fun getSpotifyEpisodeInfo(id: String, authToken: String): Result<EpisodeResult> {
+        if (!isInternetConnected()) {
+            return Result.Fail(getString(R.string.internet_not_connected))
+        }
+
+        return try {
+            val result = SpotifyApi.retrofitService.getPodcastInfo(
+                id = id,
+                bearerWithToken = SPOTIFY_BEARER + authToken
+            )
+
+            Timber.d("getSpotifyEpisodeInfo: $result")
+
+            Result.Success(result)
+
+        } catch (e: Exception) {
+            Timber.w(" exception=${e.message}")
+            Result.Error(e)
+        }
+    }
+
+    override suspend fun searchOnSpotify(query: String, authToken: String): Result<SpotifySearchResult> {
         if (!isInternetConnected()) {
             return Result.Fail(getString(R.string.internet_not_connected))
         }
@@ -788,7 +809,7 @@ object NoteRemoteDataSource : DataSource {
         return try {
             val result = SpotifyApi.retrofitService.searchOnSpotify(
                 bearerWithToken = SPOTIFY_BEARER + authToken,
-                type = SPOTIFY_PARAM_TYPE_EPISODE,
+                type = SPOTIFY_PARAM_TYPE,
                 limit = 20,
                 query = query
             )

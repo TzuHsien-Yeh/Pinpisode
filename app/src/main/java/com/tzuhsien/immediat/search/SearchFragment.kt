@@ -19,8 +19,10 @@ import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentSearchBinding
+import com.tzuhsien.immediat.ext.extractSpotifySourceId
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.utcToLocalTime
+import com.tzuhsien.immediat.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
 import java.security.MessageDigest
@@ -41,6 +43,7 @@ class SearchFragment : Fragment() {
         binding.searchviewSearch.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
+                    Timber.d("onQueryTextSubmit: QUERY = $query")
                     query?.let {
                         viewModel.findMediaSource(query)
                     }
@@ -83,14 +86,38 @@ class SearchFragment : Fragment() {
                    binding.textChannelName.text = item.snippet.channelTitle
                    binding.textPublishedTime.text = item.snippet.publishedAt.utcToLocalTime()
                    viewModel.ytSingleResultId = item.id // including video sourceId
+
+                   binding.textTrendingOnYoutube.visibility = View.GONE
+                   binding.recyclerviewYtTrending.visibility = View.GONE
                } else {
                    binding.cardSingleVideoResult.visibility = View.GONE
                }
            }
         })
-
         binding.cardSingleVideoResult.setOnClickListener {
             viewModel.navigateToYoutubeNote(viewModel.ytSingleResultId!!)
+        }
+
+        viewModel.spotifyEpisodeData.observe(viewLifecycleOwner) {
+            it?.let {
+                binding.textSearchResult.visibility = View.VISIBLE
+                binding.cardSingleSpotifyResult.visibility = View.VISIBLE
+                binding.textSpotifySourceTitle.text = it.name
+                binding.textSpotifyShow.text = it.show.name
+                binding.textSpotifyPublisher.text = it.show.publisher
+                Glide.with(binding.imgSpotifySource)
+                    .load(it.images[0].url)
+                    .into(binding.imgSpotifySource)
+
+                viewModel.spotifySingleResultId = it.uri.extractSpotifySourceId()
+
+                binding.textTrendingOnYoutube.visibility = View.GONE
+                binding.recyclerviewYtTrending.visibility = View.GONE
+                }
+        }
+
+        binding.cardSingleSpotifyResult.setOnClickListener {
+            viewModel.navigateToSpotifyNote(viewModel.spotifySingleResultId!!)
         }
 
         // Display search result
@@ -123,6 +150,17 @@ class SearchFragment : Fragment() {
                 viewModel.doneNavigateToTakeNote()
             }
         })
+
+        viewModel.navigateToSpotifyNote.observe(viewLifecycleOwner) {
+            it?.let {
+                findNavController().navigate(
+                    SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+                        sourceIdKey = it
+                    )
+                )
+                viewModel.doneNavigateToTakeNote()
+            }
+        }
 
 
         binding.btnSpotifyAuth.setOnClickListener {
@@ -222,7 +260,7 @@ class SearchFragment : Fragment() {
                 Timber.d("showLoginActivityToken : ${authorizationResponse.accessToken}")
 
                 UserManager.userSpotifyAuthToken = authorizationResponse.accessToken
-
+                viewModel.userSpotifyAuthToken = authorizationResponse.accessToken
             }
             AuthorizationResponse.Type.ERROR -> {
                 Timber.d("showLoginActivityToken : AuthorizationResponse.Type.ERROR")

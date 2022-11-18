@@ -3,7 +3,7 @@
     <string name="internet_not_connected">您尚未連接 Internet</string>
     <string name="unknown_error">Unknown error</string>
     <string name="video_not_available">This video is not available anymore.</string>
-    <string name="click_to_take_notes">Click on the video to start taking notes!</string>
+    <string name="click_to_take_notes">Click to start taking notes!</string>
     <string name="end_time_format">&#x20;-&#x20;%s</string>
     <string name="manage_tags_for_this_note">Manage tags for this note</string>
     <string name="id_edit_add_tag">edit_add_tag</string>

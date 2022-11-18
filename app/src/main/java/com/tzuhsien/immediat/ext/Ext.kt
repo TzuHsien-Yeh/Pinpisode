@@ -45,7 +45,7 @@ fun String.extractSpotifySourceId(): String {
 
     return if (spotifyShareLink in this) {
         this.substringAfter(spotifyShareLink)
-            .substringBefore("?si=")
+            .substringBefore("?si=", this.substringAfter(spotifyShareLink))
             .replace("/", ":")
 
     } else {

@@ -74,4 +74,8 @@ interface Repository {
     suspend fun searchOnYouTube(query: String): Result<YouTubeSearchResult>
 
     suspend fun getTrendingVideosOnYouTube(): Result<YouTubeResult>
+
+    suspend fun getSpotifyEpisodeInfo(id: String, authToken: String): Result<EpisodeResult>
+
+    suspend fun searchOnSpotify(query: String, authToken: String): Result<SpotifySearchResult>
 }
