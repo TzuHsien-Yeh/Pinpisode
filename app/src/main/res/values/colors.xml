@@ -16,10 +16,10 @@
 
 <!--    theme colors-->
     <color name="color_primary">#fff8e6</color>
-    <color name="color_primary_variant">#ff4664</color>
+    <color name="color_primary_variant">#F1576F</color>
     <color name="color_on_primary">#FF000000</color>
 
-    <color name="color_secondary">#ff4664</color>
+    <color name="color_secondary">#F1576F</color>
     <color name="color_secondary_variant">#ffebcf</color>
     <color name="color_on_secondary">#fff8e6</color>
 

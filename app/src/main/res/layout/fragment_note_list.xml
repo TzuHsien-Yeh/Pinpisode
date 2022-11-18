@@ -161,10 +161,11 @@
         android:layout_height="60dp"
         android:layout_margin="24dp"
         android:src="@drawable/ic_search"
-        app:fabCustomSize="57dp"
+        app:fabCustomSize="58dp"
         app:maxImageSize="52dp"
         app:tint="@color/color_primary"
         app:borderWidth="0dp"
+        app:elevation="2dp"
         android:backgroundTint="@color/color_primary_variant"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>

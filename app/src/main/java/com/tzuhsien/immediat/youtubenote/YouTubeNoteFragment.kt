@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -88,20 +89,25 @@ class YouTubeNoteFragment : Fragment() {
                     viewModel.createTimeItem(second, null)
                 }
 
+                val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
+
                 binding.btnClip.setOnClickListener {
                     when (viewModel.startOrStopToggle) {
                         0 -> {
                             viewModel.startAt = second
                             viewModel.startOrStopToggle = 1
-                            binding.btnClip.setImageResource(R.drawable.ic_square)
+                            binding.btnClip.apply {
+                                setImageResource(R.drawable.ic_clipping_stop)
+                                startAnimation(animation)
+                            }
                             Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
                         }
                         1 -> {
                             viewModel.endAt = second
                             Timber.d("btnClip second time clicked, viewModel.endAt = ${viewModel.endAt}")
 
-                            binding.btnClip.setImageResource(R.drawable.ic_youtube_black)
-//                            binding.btnClip.setImageResource(R.drawable.ic_end_clipping)
+                            binding.btnClip.setImageResource(R.drawable.ic_clip)
+                            binding.btnClip.animation = null
                             viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
                             viewModel.startOrStopToggle = 0
                         }

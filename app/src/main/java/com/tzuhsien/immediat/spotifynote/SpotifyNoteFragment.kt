@@ -8,6 +8,7 @@ import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -170,12 +171,18 @@ class SpotifyNoteFragment : Fragment() {
                 Timber.d("binding.btnTakeTimestamp.setOnClickListener clicked")
                 viewModel.createTimeItem((currentSec/1000).toFloat(), null)
             }
+
+            val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
+
             binding.btnClip.setOnClickListener {
                 when (viewModel.startOrStopToggle) {
                     0 -> {
                         viewModel.startAt = (currentSec/1000).toFloat()
                         viewModel.startOrStopToggle = 1
-                        binding.btnClip.setImageResource(R.drawable.ic_clipping_stop)
+                        binding.btnClip.apply {
+                            setImageResource(R.drawable.ic_clipping_stop)
+                            startAnimation(animation)
+                        }
                         Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
                     }
                     1 -> {
@@ -183,6 +190,7 @@ class SpotifyNoteFragment : Fragment() {
                         Timber.d("btnClip second time clicked, viewModel.endAt = ${viewModel.endAt}")
 
                         binding.btnClip.setImageResource(R.drawable.ic_clip)
+                        binding.btnClip.animation = null
                         viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
                         viewModel.startOrStopToggle = 0
                     }
