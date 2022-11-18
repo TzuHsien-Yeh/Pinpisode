@@ -72,4 +72,6 @@ interface Repository {
      * Search api
      * */
     suspend fun searchOnYouTube(query: String): Result<YouTubeSearchResult>
+
+    suspend fun getTrendingVideosOnYouTube(): Result<YouTubeResult>
 }

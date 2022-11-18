@@ -86,13 +86,21 @@ class SearchFragment : Fragment() {
         // Display search result
         viewModel.youTubeSearchResult.observe(viewLifecycleOwner) {
             binding.recyclerviewSearchResult.visibility = if (null == it) View.GONE else View.VISIBLE
+            binding.recyclerviewYtTrending.visibility = if (null == it) View.VISIBLE else View.GONE
         }
 
         val resultAdapter = SearchResultAdapter(viewModel.uiState)
         binding.recyclerviewSearchResult.adapter = resultAdapter
-
         viewModel.searchResultList.observe(viewLifecycleOwner) {
             resultAdapter.submitList(it)
+        }
+
+        val ytTrendingAdapter = YtTrendingAdapter(viewModel.uiState)
+        binding.recyclerviewYtTrending.adapter = ytTrendingAdapter
+        viewModel.ytTrendingList.observe(viewLifecycleOwner) {
+            ytTrendingAdapter.submitList(it)
+
+            Timber.d("_ytTrendingList.value = $it")
         }
 
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {

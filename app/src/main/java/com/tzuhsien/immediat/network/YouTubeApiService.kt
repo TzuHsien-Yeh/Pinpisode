@@ -54,6 +54,15 @@ interface YouTubeApiService {
         @Query("maxResults") maxResult: Int?,
         @Query("q") query: String?
     ): YouTubeSearchResult
+
+    @GET("videos")
+    suspend fun getTrendingVideos(
+        @Query("part") part: String,
+        @Query("chart") chart: String,
+        @Query("regionCode") regionCode: String?,
+        @Query("maxResults") maxResult: Int?
+    ): YouTubeResult
+
 }
 
 /**

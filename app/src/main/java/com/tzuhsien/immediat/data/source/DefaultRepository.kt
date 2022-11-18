@@ -111,4 +111,8 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
     override suspend fun searchOnYouTube(query: String): Result<YouTubeSearchResult> {
         return noteRemoteDataSource.searchOnYouTube(query)
     }
+
+    override suspend fun getTrendingVideosOnYouTube(): Result<YouTubeResult> {
+        return noteRemoteDataSource.getTrendingVideosOnYouTube()
+    }
 }

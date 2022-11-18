@@ -41,6 +41,7 @@ object NoteRemoteDataSource : DataSource {
     private const val YT_VIDEO_PARAM_PART = "snippet, contentDetails"
     private const val YT_SEARCH_PARAM_PART = "snippet"
     private const val YT_SEARCH_PARAM_TYPE = "video"
+    private const val YT_VIDEO_PARAM_CHART = "mostPopular"
 
     override fun getAllLiveNotes(): MutableLiveData<List<Note>> {
         val liveData = MutableLiveData<List<Note>>()
@@ -752,5 +753,26 @@ object NoteRemoteDataSource : DataSource {
             Result.Error(e)
         }
     }
+
+    override suspend fun getTrendingVideosOnYouTube(): Result<YouTubeResult> {
+        if (!isInternetConnected()) {
+            return Result.Fail(getString(R.string.internet_not_connected))
+        }
+
+        return try {
+            val result = YouTubeApi.retrofitService.getTrendingVideos(
+                part = YT_SEARCH_PARAM_PART,
+                chart = YT_VIDEO_PARAM_CHART,
+                maxResult = 10,
+                regionCode = Locale.getDefault().country
+            )
+            Result.Success(result)
+
+        } catch (e: Exception) {
+            Timber.w(" exception=${e.message}")
+            Result.Error(e)
+        }
+    }
+
 
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
+import com.tzuhsien.immediat.data.model.Item
 import com.tzuhsien.immediat.data.model.ItemX
 import com.tzuhsien.immediat.data.model.YouTubeResult
 import com.tzuhsien.immediat.data.model.YouTubeSearchResult
@@ -38,9 +39,17 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     val searchResultList: LiveData<List<ItemX>>
         get() = _searchResultList
 
+    private val _ytTrendingList = MutableLiveData<List<Item>>()
+    val ytTrendingList: LiveData<List<Item>>
+        get() = _ytTrendingList
+
+
     val uiState = SearchUiState(
         onItemClick = { item ->
             navigateToYoutubeNote(item.id.videoId)
+        },
+        onTrendingVideoClick = { item ->
+            navigateToYoutubeNote(item.id)
         }
     )
 
@@ -70,6 +79,55 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
     private val spotifyShareLink = "https://open.spotify.com/"
     private val spotifyUri = "spotify:"
+
+    init {
+        getYoutubeTrendingVideos()
+    }
+
+    private fun getYoutubeTrendingVideos() {
+
+        coroutineScope.launch {
+
+            _status.value = LoadApiStatus.LOADING
+
+            val result = repository.getTrendingVideosOnYouTube()
+
+            when (result) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+
+                    putToItemList(result.data)
+                    result.data
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+                else -> {
+                    _error.value = Util.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                    null
+                }
+            }
+        }
+    }
+
+    private fun putToItemList(data: YouTubeResult) {
+        val list = mutableListOf<Item>()
+        for (item in data.items) {
+            list.add(item)
+        }
+
+        _ytTrendingList.value = list
+        Timber.d("_ytTrendingList.value = $list")
+    }
 
     fun findMediaSource(query: String) {
 
@@ -187,6 +245,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         for (item in ytResult.items) {
             list.add(item)
         }
+
         _searchResultList.value = list
     }
 
@@ -209,5 +268,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 }
 
 data class SearchUiState(
-    val onItemClick: (ItemX) -> Unit
+    val onItemClick: (ItemX) -> Unit,
+    val onTrendingVideoClick: (Item) -> Unit
 )

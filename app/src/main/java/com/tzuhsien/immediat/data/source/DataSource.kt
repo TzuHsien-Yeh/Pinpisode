@@ -70,4 +70,6 @@ interface DataSource {
     suspend fun deleteNote(noteId: String): Result<String>
 
     suspend fun searchOnYouTube(query: String): Result<YouTubeSearchResult>
+
+    suspend fun getTrendingVideosOnYouTube(): Result<YouTubeResult>
 }
