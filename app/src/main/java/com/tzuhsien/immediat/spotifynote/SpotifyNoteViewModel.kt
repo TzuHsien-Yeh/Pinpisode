@@ -51,6 +51,10 @@ class SpotifyNoteViewModel(
     val liveNoteData: LiveData<Note?>
         get() = _liveNoteData
 
+    private var _liveNoteDataReassigned = MutableLiveData(false)
+    val liveNoteDataReassigned: LiveData<Boolean>
+        get() = _liveNoteDataReassigned
+
     private var _liveTimeItemList = MutableLiveData<List<TimeItem>>()
     val liveTimeItemList: LiveData<List<TimeItem>>
         get() = _liveTimeItemList
@@ -188,6 +192,8 @@ class SpotifyNoteViewModel(
     private fun getLiveNoteById(noteId: String) {
         _liveNoteData = repository.getLiveNoteById(noteId)
         _status.value = LoadApiStatus.DONE
+
+        _liveNoteDataReassigned.value = true
     }
 
     private fun getLiveTimeItemsResult(noteId: String) {

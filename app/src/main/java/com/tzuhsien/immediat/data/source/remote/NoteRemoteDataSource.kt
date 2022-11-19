@@ -38,6 +38,8 @@ object NoteRemoteDataSource : DataSource {
     private const val KEY_SOURCE = "source"
     private const val KEY_SOURCE_ID = "sourceId"
     private const val KEY_OWNER_ID = "ownerId"
+    private const val KEY_LAST_TIME_STAMP = "lastTimestamp"
+    private const val KEY_DIGEST = "digest"
 
     // Youtube
     private const val YT_VIDEO_PARAM_PART = "snippet, contentDetails"
@@ -372,13 +374,14 @@ object NoteRemoteDataSource : DataSource {
 
             doc
                 .update(
-                    "digest", note.digest,
-                    "lastTimestamp", note.lastTimestamp,
+                    KEY_DIGEST, note.digest,
+                    KEY_LAST_TIME_STAMP, note.lastTimestamp,
                     KEY_LAST_EDIT_TIME, note.lastEditTime
                 )
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        continuation.resume(Result.Success(""))
+                        Timber.d("updateNote: digest = ${note.digest}")
+                        continuation.resume(Result.Success("Updated"))
                     } else {
                         task.exception?.let {
                             Timber.w("[${this::class.simpleName}] Error adding documents. ${it.message}\"")

@@ -74,6 +74,14 @@ class SpotifyNoteFragment : Fragment() {
                         binding.imgCoverArt.setImageBitmap(it)
                     }
                     binding.textSourceTitle.text = state.track.name
+                    Timber.d("state.track: ${state.track}")
+                    binding.textPublisher.text = if (state.track.isPodcast) {
+                        state.track.album.name
+                    } else {
+                        state.track.artist.name
+                    }
+
+
                     binding.textTotalTime.text = state.track.duration.formatDuration()
 
                     if (!state.isPaused) {
@@ -242,19 +250,22 @@ class SpotifyNoteFragment : Fragment() {
         /**
          * Digest of the video (editText)
          * */
-        binding.editDigest.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                viewModel.noteToBeUpdated?.digest = binding.editDigest.text.toString()
-                viewModel.updateNote()
+        viewModel.liveNoteDataReassigned.observe(viewLifecycleOwner) {
+            if (it) {
+                viewModel.liveNoteData.observe(viewLifecycleOwner) { note ->
+                    note?.let {
+                        binding.editDigest.setText(note.digest)
+                        viewModel.noteToBeUpdated = note
+                    }
+                }
+                binding.editDigest.setOnFocusChangeListener { _, hasFocus ->
+                    if (!hasFocus) {
+                        viewModel.noteToBeUpdated?.digest = binding.editDigest.text.toString()
+                        viewModel.updateNote()
+                    }
+                }
             }
         }
-        viewModel.liveNoteData.observe(viewLifecycleOwner) { note ->
-            note?.let {
-                binding.editDigest.setText(note.digest)
-                viewModel.noteToBeUpdated = note
-            }
-        }
-
         /**
          *  Edit or read only mode
          * */

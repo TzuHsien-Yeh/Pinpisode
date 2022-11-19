@@ -1,5 +1,6 @@
 package com.tzuhsien.immediat.youtubenote
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,8 +39,8 @@ class TimeItemAdapter(
             val titleView = binding.editTextItemTitle
             val contentView = binding.editTextInputText
 
-            titleView.setBackgroundColor(context.getColor(R.color.transparent))
-            contentView.setBackgroundColor(context.getColor(R.color.transparent))
+            titleView.setBackgroundColor(Color.TRANSPARENT)
+            contentView.setBackgroundColor(Color.TRANSPARENT)
 
             titleView.setText(timeItem.title)
             contentView.setText(timeItem.text)

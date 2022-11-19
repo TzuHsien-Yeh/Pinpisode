@@ -2,6 +2,7 @@ package com.tzuhsien.immediat.youtubenote
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -119,22 +120,29 @@ class YouTubeNoteFragment : Fragment() {
         /**
          * Digest of the video (editText)
          * */
-        binding.editDigest.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                viewModel.noteToBeUpdated?.digest = binding.editDigest.text.toString()
-                viewModel.updateNote()
-            }
-        }
-        viewModel.liveNoteData.observe(viewLifecycleOwner, Observer { note ->
-            note?.let {
-                binding.editDigest.setText(note.digest)
-                viewModel.noteToBeUpdated = note
+        binding.editDigest.setBackgroundColor(Color.TRANSPARENT)
 
-                if (note.duration.parseDuration() == 0L) {
-                    viewModel.updateInfoFromYouTube(note)
+        viewModel.liveNoteDataReassigned.observe(viewLifecycleOwner) {
+            if (it) {
+                viewModel.liveNoteData.observe(viewLifecycleOwner) { note ->
+                    note?.let {
+                        binding.editDigest.setText(note.digest)
+                        viewModel.noteToBeUpdated = note
+
+                        if (note.duration.parseDuration() == 0L) {
+                            viewModel.updateInfoFromYouTube(note)
+                        }
+                    }
+                }
+                binding.editDigest.setOnFocusChangeListener { _, hasFocus ->
+                    if (!hasFocus) {
+                        viewModel.noteToBeUpdated?.digest = binding.editDigest.text.toString()
+                        viewModel.updateNote()
+                    }
                 }
             }
-        })
+        }
+
 
         /**
          *  Edit or read only mode
