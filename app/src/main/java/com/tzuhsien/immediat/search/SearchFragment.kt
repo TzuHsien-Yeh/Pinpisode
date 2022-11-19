@@ -71,6 +71,9 @@ class SearchFragment : Fragment() {
         binding.cardSingleVideoResult.visibility = View.GONE
         binding.textSearchResult.visibility = View.GONE
 
+        /**
+         * Search result of url (specified sourceId)
+         * */
         viewModel.ytVideoData.observe(viewLifecycleOwner, Observer {
            it?.let {
                if (it.items.isNotEmpty()) {
@@ -87,6 +90,7 @@ class SearchFragment : Fragment() {
                    binding.textPublishedTime.text = item.snippet.publishedAt.utcToLocalTime()
                    viewModel.ytSingleResultId = item.id // including video sourceId
 
+                   binding.icYoutube.visibility = View.GONE
                    binding.textTrendingOnYoutube.visibility = View.GONE
                    binding.recyclerviewYtTrending.visibility = View.GONE
                } else {
@@ -98,21 +102,25 @@ class SearchFragment : Fragment() {
             viewModel.navigateToYoutubeNote(viewModel.ytSingleResultId!!)
         }
 
+        // Spotify episode url search
         viewModel.spotifyEpisodeData.observe(viewLifecycleOwner) {
             it?.let {
                 binding.textSearchResult.visibility = View.VISIBLE
                 binding.cardSingleSpotifyResult.visibility = View.VISIBLE
                 binding.textSpotifySourceTitle.text = it.name
-                binding.textSpotifyShow.text = it.show.name
-                binding.textSpotifyPublisher.text = it.show.publisher
+                binding.textSpotifyShow.text = it.show?.name
+                binding.textSpotifyPublisher.text = it.show?.publisher
                 Glide.with(binding.imgSpotifySource)
                     .load(it.images[0].url)
                     .into(binding.imgSpotifySource)
 
                 viewModel.spotifySingleResultId = it.uri.extractSpotifySourceId()
 
+                binding.icYoutube.visibility = View.GONE
                 binding.textTrendingOnYoutube.visibility = View.GONE
                 binding.recyclerviewYtTrending.visibility = View.GONE
+                binding.textNewOnSpotify.visibility = View.GONE
+                binding.recyclerviewSpLatestContent.visibility = View.GONE
                 }
         }
 
@@ -120,24 +128,59 @@ class SearchFragment : Fragment() {
             viewModel.navigateToSpotifyNote(viewModel.spotifySingleResultId!!)
         }
 
+        /**
+         * Search results of key word
+         * */
         // Display search result
         viewModel.youTubeSearchResult.observe(viewLifecycleOwner) {
             binding.recyclerviewSearchResult.visibility = if (null == it) View.GONE else View.VISIBLE
+            binding.icYoutube.visibility = if (null == it) View.VISIBLE else View.GONE
+            binding.textTrendingOnYoutube.visibility = if (null == it) View.VISIBLE else View.GONE
             binding.recyclerviewYtTrending.visibility = if (null == it) View.VISIBLE else View.GONE
+
+            binding.icSpotify.visibility = if (null == it) View.VISIBLE else View.GONE
+            binding.textNewOnSpotify.visibility = if (null == it) View.VISIBLE else View.GONE
+            binding.recyclerviewSpLatestContent.visibility = if (null == it) View.VISIBLE else View.GONE
         }
 
-        val resultAdapter = SearchResultAdapter(viewModel.uiState)
+        val resultAdapter = YtSearchResultAdapter(viewModel.uiState)
         binding.recyclerviewSearchResult.adapter = resultAdapter
-        viewModel.searchResultList.observe(viewLifecycleOwner) {
+        viewModel.ytSearchResultList.observe(viewLifecycleOwner) {
             resultAdapter.submitList(it)
         }
 
+        /**
+         * Recommendations
+         * */
         val ytTrendingAdapter = YtTrendingAdapter(viewModel.uiState)
         binding.recyclerviewYtTrending.adapter = ytTrendingAdapter
         viewModel.ytTrendingList.observe(viewLifecycleOwner) {
             ytTrendingAdapter.submitList(it)
 
             Timber.d("_ytTrendingList.value = $it")
+        }
+
+        // Cover the content if not authorized
+        viewModel.isAuthRequired.observe(viewLifecycleOwner) {
+            if (it) {
+                showLoginActivityCode.launch(getLoginActivityCodeIntent())
+                viewModel.doneRequestSpotifyAuthToken()
+            }
+            binding.btnSpotifyAuth.visibility = if (it) View.VISIBLE else View.GONE
+            binding.imgViewCoverSpotifyContent.visibility = if (it) View.VISIBLE else View.GONE
+            binding.recyclerviewSpLatestContent.alpha = if (it) 0.5F else 1F
+        }
+        binding.btnSpotifyAuth.setOnClickListener {
+            showLoginActivityCode.launch(getLoginActivityCodeIntent())
+            viewModel.doneRequestSpotifyAuthToken()
+            viewModel.getSpotifySavedShowLatestEpisodes()
+        }
+
+        val spLatestContentAdapter = SpContentAdapter(viewModel.uiState)
+        binding.recyclerviewSpLatestContent.adapter = spLatestContentAdapter
+        viewModel.spotifyLatestEpisodesList.observe(viewLifecycleOwner) {
+            Timber.d("viewModel.spotifyLatestEpisodesList.observe: $it")
+            spLatestContentAdapter.submitList(it)
         }
 
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
@@ -147,7 +190,7 @@ class SearchFragment : Fragment() {
                         videoIdKey = it
                     )
                 )
-                viewModel.doneNavigateToTakeNote()
+                viewModel.doneNavigation()
             }
         })
 
@@ -158,13 +201,8 @@ class SearchFragment : Fragment() {
                         sourceIdKey = it
                     )
                 )
-                viewModel.doneNavigateToTakeNote()
+                viewModel.doneNavigation()
             }
-        }
-
-
-        binding.btnSpotifyAuth.setOnClickListener {
-            showLoginActivityCode.launch(getLoginActivityCodeIntent())
         }
 
         return binding.root
@@ -204,8 +242,24 @@ class SearchFragment : Fragment() {
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-                        "user-library-read", "user-library-modify",
-                        "app-remote-control", "user-read-currently-playing"
+                        "ugc-image-upload",
+                                "user-read-playback-state",
+                                "user-modify-playback-state",
+                                "user-read-currently-playing",
+                                "app-remote-control",
+                        "playlist-read-private",
+                                "playlist-read-collaborative",
+                                "playlist-modify-private",
+                                "playlist-modify-public",
+                                "user-follow-modify",
+                                "user-follow-read",
+                                "user-read-playback-position",
+                                "user-top-read",
+                                "user-read-recently-played",
+                                "user-library-modify",
+                                "user-library-read",
+                                "user-read-email",
+                                "user-read-private"
                     )
                 )
                 .setCustomParam("code_challenge_method", "S256")
@@ -257,10 +311,9 @@ class SearchFragment : Fragment() {
                 // Here You can get access to the authorization token
                 // with authorizationResponse.token
 
-                Timber.d("showLoginActivityToken : ${authorizationResponse.accessToken}")
-
+                Timber.d("showLoginActivityToken authorizationResponse.expiresIn: ${authorizationResponse.expiresIn}")
                 UserManager.userSpotifyAuthToken = authorizationResponse.accessToken
-                viewModel.userSpotifyAuthToken = authorizationResponse.accessToken
+                viewModel.getSpotifySavedShowLatestEpisodes()
             }
             AuthorizationResponse.Type.ERROR -> {
                 Timber.d("showLoginActivityToken : AuthorizationResponse.Type.ERROR")

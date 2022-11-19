@@ -1,7 +1,9 @@
 package com.tzuhsien.immediat.network
 
-import com.tzuhsien.immediat.data.model.EpisodeResult
+import com.tzuhsien.immediat.data.model.Episodes
+import com.tzuhsien.immediat.data.model.SpotifyItem
 import com.tzuhsien.immediat.data.model.SpotifySearchResult
+import com.tzuhsien.immediat.data.model.SpotifyShowResult
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -13,6 +15,8 @@ import retrofit2.http.Query
 private const val SPOTIFY_BASE_URL = "https://api.spotify.com/v1/"
 private const val ENDPOINT_SEARCH = "search"
 private const val ENDPOINT_EPISODES = "episodes"
+private const val ENDPOINT_ME = "me"
+private const val ENDPOINT_SHOWS = "shows"
 
 val spotifyClient = OkHttpClient.Builder()
     .addInterceptor(loggingInterceptor)
@@ -40,7 +44,20 @@ interface SpotifyApiService {
     suspend fun getPodcastInfo(
         @Path("id") id: String,
         @Header("Authorization") bearerWithToken: String
-    ): EpisodeResult
+    ): SpotifyItem
+
+    @GET("$ENDPOINT_ME/$ENDPOINT_SHOWS")
+    suspend fun getUserSavedShows(
+        @Header("Authorization") bearerWithToken: String,
+        @Query("limit") limit: Int
+    ): SpotifyShowResult
+
+    @GET("$ENDPOINT_SHOWS/{id}/$ENDPOINT_EPISODES")
+    suspend fun getShowEpisodes(
+        @Header("Authorization") bearerWithToken: String,
+        @Query("limit") limit: Int,
+        @Path("id") id: String
+    ): Episodes
 
     @GET(ENDPOINT_SEARCH)
     suspend fun searchOnSpotify(

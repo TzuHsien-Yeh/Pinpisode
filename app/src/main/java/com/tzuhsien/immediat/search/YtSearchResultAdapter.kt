@@ -10,9 +10,9 @@ import com.tzuhsien.immediat.data.model.ItemX
 import com.tzuhsien.immediat.databinding.ItemYtSearchResultBinding
 import com.tzuhsien.immediat.ext.utcToLocalTime
 
-class SearchResultAdapter(
+class YtSearchResultAdapter(
     private val uiState: SearchUiState
-): ListAdapter<ItemX, SearchResultAdapter.YtResultViewHolder>(DiffCallback) {
+): ListAdapter<ItemX, YtSearchResultAdapter.YtResultViewHolder>(DiffCallback) {
     class YtResultViewHolder(private val binding: ItemYtSearchResultBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(resultItem: ItemX, uiState: SearchUiState){
 
@@ -48,7 +48,7 @@ class SearchResultAdapter(
     override fun onBindViewHolder(holder: YtResultViewHolder, position: Int) {
         val item = getItem(position)
         holder.itemView.setOnClickListener {
-            uiState.onItemClick(item)
+            uiState.onYoutubeItemClick(item)
         }
         holder.bind(item, uiState)
     }

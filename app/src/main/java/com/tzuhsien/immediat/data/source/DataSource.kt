@@ -73,7 +73,11 @@ interface DataSource {
 
     suspend fun getTrendingVideosOnYouTube(): Result<YouTubeResult>
 
-    suspend fun getSpotifyEpisodeInfo(id: String, authToken: String): Result<EpisodeResult>
+    suspend fun getSpotifyEpisodeInfo(id: String, authToken: String): Result<SpotifyItem>
 
     suspend fun searchOnSpotify(query: String, authToken: String): Result<SpotifySearchResult>
+
+    suspend fun getUserSavedShows(authToken: String): Result<SpotifyShowResult>
+
+    suspend fun getShowEpisodes(showId: String, authToken: String): Result<Episodes>
 }

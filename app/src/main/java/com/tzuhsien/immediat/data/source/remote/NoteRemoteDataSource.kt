@@ -49,7 +49,7 @@ object NoteRemoteDataSource : DataSource {
 
     // Spotify
     private const val SPOTIFY_BEARER = "Bearer "
-    private const val SPOTIFY_PARAM_TYPE = "episode, track"
+    private const val SPOTIFY_PARAM_TYPE = "episode,track"
 
     override fun getAllLiveNotes(): MutableLiveData<List<Note>> {
         val liveData = MutableLiveData<List<Note>>()
@@ -783,7 +783,7 @@ object NoteRemoteDataSource : DataSource {
         }
     }
 
-    override suspend fun getSpotifyEpisodeInfo(id: String, authToken: String): Result<EpisodeResult> {
+    override suspend fun getSpotifyEpisodeInfo(id: String, authToken: String): Result<SpotifyItem> {
         if (!isInternetConnected()) {
             return Result.Fail(getString(R.string.internet_not_connected))
         }
@@ -815,6 +815,43 @@ object NoteRemoteDataSource : DataSource {
                 type = SPOTIFY_PARAM_TYPE,
                 limit = 20,
                 query = query
+            )
+            Result.Success(result)
+
+        } catch (e: Exception) {
+            Timber.w(" exception=${e.message}")
+            Result.Error(e)
+        }
+    }
+
+    override suspend fun getUserSavedShows(authToken: String): Result<SpotifyShowResult> {
+        if (!isInternetConnected()) {
+            return Result.Fail(getString(R.string.internet_not_connected))
+        }
+
+        return try {
+            val result = SpotifyApi.retrofitService.getUserSavedShows(
+                bearerWithToken = SPOTIFY_BEARER + authToken,
+                limit = 8
+            )
+            Result.Success(result)
+
+        } catch (e: Exception) {
+            Timber.w(" exception=${e.message}")
+            Result.Error(e)
+        }
+    }
+
+    override suspend fun getShowEpisodes(showId: String, authToken: String): Result<Episodes> {
+        if (!isInternetConnected()) {
+            return Result.Fail(getString(R.string.internet_not_connected))
+        }
+
+        return try {
+            val result = SpotifyApi.retrofitService.getShowEpisodes(
+                bearerWithToken = SPOTIFY_BEARER + authToken,
+                limit = 1,
+                id = showId
             )
             Result.Success(result)
 

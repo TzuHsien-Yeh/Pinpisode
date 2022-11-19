@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".search.SearchFragment">
 
     <SearchView
@@ -11,52 +11,120 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_margin="16dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:queryHint="Search or paste url"
         android:iconifiedByDefault="false"
-        />
+        style="@style/yt_bold_17sp"
+        android:queryHint="Search or paste url"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/text_search_result"
+        style="@style/source_title_style"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
         android:layout_marginHorizontal="16dp"
-        android:textSize="18sp"
+        android:layout_marginTop="24dp"
+        android:text="@string/click_to_take_notes"
         android:textAlignment="center"
-        style="@style/source_title_style"
-        app:layout_constraintTop_toBottomOf="@id/searchview_search"
-        android:text="@string/click_to_take_notes"/>
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/searchview_search" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_search_result"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/text_search_result"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_yt_search_result"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_search_result"
+        tools:listitem="@layout/item_yt_search_result" />
 
+<!--    video/spotify recommendation (trending)-->
+    <ImageView
+        android:id="@+id/ic_youtube"
+        android:layout_width="32dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/standard"
+        app:layout_constraintTop_toTopOf="@id/text_trending_on_youtube"
+        app:layout_constraintBottom_toBottomOf="@+id/text_trending_on_youtube"
+        app:layout_constraintStart_toStartOf="parent"
+        android:src="@drawable/ic_youtube"/>
     <TextView
         android:id="@+id/text_trending_on_youtube"
+        style="@style/yt_bold_20sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/standard"
-        app:layout_constraintTop_toBottomOf="@id/searchview_search"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="4dp"
         android:text="@string/trending_on_youtube"
-        style="@style/source_title_style"/>
+        app:layout_constraintStart_toEndOf="@id/ic_youtube"
+        app:layout_constraintTop_toBottomOf="@id/searchview_search" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_yt_trending"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintTop_toBottomOf="@id/text_trending_on_youtube"
+        android:layout_marginStart="12dp"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_yt_trending"/>
+        app:layout_constraintTop_toBottomOf="@id/text_trending_on_youtube"
+        tools:listitem="@layout/item_yt_trending" />
+
+    <ImageView
+        android:id="@+id/ic_spotify"
+        android:layout_width="32dp"
+        android:layout_height="26dp"
+        android:layout_marginStart="@dimen/standard"
+        app:layout_constraintTop_toTopOf="@id/text_new_on_spotify"
+        app:layout_constraintBottom_toBottomOf="@+id/text_new_on_spotify"
+        app:layout_constraintStart_toStartOf="parent"
+        android:src="@drawable/ic_spotify"/>
+
+    <TextView
+        android:id="@+id/text_new_on_spotify"
+        style="@style/yt_bold_20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="4dp"
+        android:text="@string/trending_on_spotify"
+        app:layout_constraintStart_toEndOf="@id/ic_youtube"
+        app:layout_constraintTop_toBottomOf="@id/recyclerview_yt_trending" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview_sp_latest_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="24dp"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintTop_toBottomOf="@id/text_new_on_spotify"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:listitem="@layout/item_spotify_latest_content" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/img_view_cover_spotify_content"
+        android:layout_width="500dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/recyclerview_sp_latest_content"
+        app:layout_constraintBottom_toBottomOf="@+id/recyclerview_sp_latest_content"
+        app:shapeAppearanceOverlay="@style/rounded_corner"
+        android:background="@color/translucent"/>
+
+    <Button
+        android:id="@+id/btn_spotify_auth"
+        android:layout_width="200dp"
+        android:layout_height="62dp"
+        android:textAllCaps="false"
+        style="@style/yt_medium_14sp_text"
+        app:layout_constraintTop_toTopOf="@+id/recyclerview_sp_latest_content"
+        app:layout_constraintBottom_toBottomOf="@+id/recyclerview_sp_latest_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Authorize to explore more on Spotify"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_single_video_result"
@@ -64,14 +132,13 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/text_search_result"
-        app:cardElevation="@dimen/card_view_elevation"
-        app:cardCornerRadius="16dp"
-        android:layout_margin="16dp"
         app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="@dimen/card_view_elevation"
         app:cardMaxElevation="@dimen/card_view_elevation"
         app:cardPreventCornerOverlap="true"
-        app:cardUseCompatPadding="false">
+        app:cardUseCompatPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/text_search_result">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -83,8 +150,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="16dp"
-                app:shapeAppearanceOverlay="@style/rounded_corner"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/rounded_corner" />
 
             <TextView
                 android:id="@+id/text_title"
@@ -105,15 +172,16 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_title"
                 tools:text="channal title" />
+
             <TextView
                 android:id="@+id/text_published_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingBottom="16dp"
                 android:layout_marginTop="8dp"
-                tools:text="published at (locale date time)"
+                android:paddingBottom="16dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_channel_name"/>
+                app:layout_constraintTop_toBottomOf="@+id/text_channel_name"
+                tools:text="published at (locale date time)" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>
@@ -122,16 +190,16 @@
         android:id="@+id/card_single_spotify_result"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
         android:layout_marginHorizontal="16dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/text_search_result"
-        app:cardElevation="@dimen/card_view_elevation"
-        app:cardCornerRadius="16dp"
-        android:layout_margin="16dp"
         app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="@dimen/card_view_elevation"
         app:cardMaxElevation="@dimen/card_view_elevation"
         app:cardPreventCornerOverlap="true"
-        app:cardUseCompatPadding="false">
+        app:cardUseCompatPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/text_search_result">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -143,8 +211,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="16dp"
-                app:shapeAppearanceOverlay="@style/rounded_corner"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/rounded_corner" />
 
             <TextView
                 android:id="@+id/text_spotify_source_title"
@@ -165,15 +233,16 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_spotify_source_title"
                 tools:text="channel title" />
+
             <TextView
                 android:id="@+id/text_spotify_publisher"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingBottom="16dp"
                 android:layout_marginTop="8dp"
-                tools:text="published at (locale date time)"
+                android:paddingBottom="16dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_spotify_show"/>
+                app:layout_constraintTop_toBottomOf="@+id/text_spotify_show"
+                tools:text="published at (locale date time)" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>
@@ -185,15 +254,8 @@
         android:layout_margin="50dp"
         android:textAlignment="center"
         android:textSize="20sp"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/searchview_search"/>
-
-    <Button
-        android:id="@+id/btn_spotify_auth"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="200dp"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchview_search" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
