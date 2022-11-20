@@ -36,16 +36,27 @@ class SearchResultFragment : Fragment() {
         binding = FragmentSearchResultBinding.inflate(layoutInflater)
 
         viewModel.source = requireArguments().getSerializable("sourceKey") as Source
-        // Receive query string from Search Fragment
-        requireActivity().supportFragmentManager.setFragmentResultListener(
-            "requestKey",
-            this
-        ) { requestKey, bundle ->
 
-            Timber.d("setFragmentResultListener: ${bundle.getString("query")}")
-            viewModel.search(bundle.getString("query")!!)
+        if (viewModel.source == Source.YOUTUBE) {
+            // Receive query string from Search Fragment
+            requireActivity().supportFragmentManager.setFragmentResultListener(
+                "requestKey1",
+                this
+            ) { _, bundle ->
+                viewModel.searchOnYouTube(bundle.getString("query"))
+                Timber.d("setFragmentResultListener: ${bundle.getString("query")}")
+            }
+        } else {
+            // Receive query string from Search Fragment
+            requireActivity().supportFragmentManager.setFragmentResultListener(
+                "requestKey2",
+                this
+            ) { _, bundle ->
+                viewModel.searchOnSpotify(bundle.getString("query"))
+                viewModel.queryKeyword = bundle.getString("query")
+                Timber.d("setFragmentResultListener: ${bundle.getString("query")}")
+            }
         }
-
 
         binding.recyclerviewYtSearchResult.visibility =
             if (viewModel.source == Source.YOUTUBE) View.VISIBLE else View.GONE
@@ -80,19 +91,9 @@ class SearchResultFragment : Fragment() {
             binding.btnSpotifyAuth.visibility = if (it) View.VISIBLE else View.GONE
 
             if (!it) {
-                viewModel.searchOnSpotify()
+                viewModel.searchOnSpotify(viewModel.queryKeyword)
             }
         }
-//
-//            binding.btnSpotifyAuth.visibility =
-//                if (viewModel.source == Source.SPOTIFY && it) {
-//                    Timber.d("binding.btnSpotifyAuth.visibility visible")
-//                    View.VISIBLE
-//                } else {
-//                    View.GONE
-//                }
-//        }
-
 
             viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner) {
                 it?.let {

@@ -17,14 +17,18 @@ class SpotifySearchResultAdapter(
     class SpResultViewHolder(private val binding: ItemSpotifySearchResultBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(resultItem: SpotifyItem){
 
-            Glide.with(binding.imgThumbnail)
-                .load(resultItem.images[0].url)
-                .apply(
-                    RequestOptions
-                        .placeholderOf(R.drawable.app_icon)
-                        .error(R.drawable.app_icon)
-                )
-                .into(binding.imgThumbnail)
+            if (resultItem.images.isNotEmpty()) {
+                Glide.with(binding.imgThumbnail)
+                    .load(resultItem.images[0].url)
+                    .apply(
+                        RequestOptions
+                            .placeholderOf(R.drawable.app_icon)
+                            .error(R.drawable.app_icon)
+                    )
+                    .into(binding.imgThumbnail)
+            } else {
+                binding.imgThumbnail.setImageResource(R.drawable.app_icon)
+            }
 
             binding.textTitle.text = resultItem.name
             binding.textShowName.text = if (null != resultItem.show) {

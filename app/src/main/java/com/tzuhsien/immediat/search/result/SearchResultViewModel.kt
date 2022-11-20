@@ -18,8 +18,8 @@ import timber.log.Timber
 
 class SearchResultViewModel(private val repository: Repository) : ViewModel() {
 
-    var source: Source? = null
     var queryKeyword: String? = null
+    var source: Source? = null
 
     private val _needSpotifyAuth = MutableLiveData<Boolean>()
     val needSpotifyAuth: LiveData<Boolean>
@@ -38,7 +38,11 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
             _navigateToYoutubeNote.value = item.id.videoId
         },
         onSpotifyItemClick = { spotifyItem ->
-            _navigateToSpotifyNote.value = spotifyItem.id
+            _navigateToSpotifyNote.value = if (spotifyItem.type == "episode") {
+                "episode:" + spotifyItem.id
+            } else {
+                "track:" + spotifyItem.id
+            }
         }
     )
 
@@ -63,38 +67,19 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
     val navigateToSpotifyNote: LiveData<String?>
         get() = _navigateToSpotifyNote
 
-    init {
-        when (source) {
-            Source.YOUTUBE -> {
-                searchOnYouTube()
-            }
-            Source.SPOTIFY -> {
-                Timber.d("Source.SPOTIFY")
-                if (UserManager.userSpotifyAuthToken.isEmpty()) {
-                    _needSpotifyAuth.value = true
-                } else {
-                    searchOnSpotify()
-                }
-            }
-            else -> {}
-        }
-    }
-
-    fun search(query: String) {
+    fun search(query: String?) {
         Timber.d("search()")
 
         when (source) {
             Source.YOUTUBE -> {
-                queryKeyword = query
-                searchOnYouTube()
+                searchOnYouTube(query)
             }
             Source.SPOTIFY -> {
                 Timber.d("Source.SPOTIFY")
                 if (UserManager.userSpotifyAuthToken.isEmpty()) {
                     _needSpotifyAuth.value = true
                 } else {
-                    queryKeyword = query
-                    searchOnSpotify()
+                    searchOnSpotify(query)
                 }
             }
             else -> {}
@@ -102,13 +87,13 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
 
     }
 
-    private fun searchOnYouTube() {
+    fun searchOnYouTube(query: String?) {
 
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = queryKeyword?.let { repository.searchOnYouTube(it) }
+            val result = query?.let { repository.searchOnYouTube(it) }
 
             when (result) {
                 is Result.Success -> {
@@ -144,15 +129,20 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
         _ytSearchResultList.value = list
     }
 
-    fun searchOnSpotify() {
+    fun searchOnSpotify(query: String?) {
 
         Timber.d("searchOnSpotify")
+        if (UserManager.userSpotifyAuthToken.isEmpty()) {
+            _needSpotifyAuth.value = true
+        } else {
+            coroutineScope.launch {
 
-        coroutineScope.launch {
+                _status.value = LoadApiStatus.LOADING
 
-            _status.value = LoadApiStatus.LOADING
-
-            val result = queryKeyword?.let { repository.searchOnSpotify(it, authToken = UserManager.userSpotifyAuthToken) }
+                val result = queryKeyword?.let {
+                    repository.searchOnSpotify(it,
+                        authToken = UserManager.userSpotifyAuthToken)
+                }
 
                 when (result) {
                     is Result.Success -> {
@@ -161,7 +151,7 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
 
                         Timber.d("spotifySearchResults: ${result.data}")
 
-                    putSpResultToItemList(result.data)
+                        putSpResultToItemList(result.data)
 
                     }
                     is Result.Fail -> {
@@ -177,6 +167,7 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
                         _status.value = LoadApiStatus.ERROR
                     }
                 }
+            }
         }
     }
 

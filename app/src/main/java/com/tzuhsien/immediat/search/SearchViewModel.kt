@@ -254,13 +254,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             }
         } else {
             _searchQuery.value = query
-//            // search on spotify use coroutine { two child coroutine } wait for both to responses to continue
-//            if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
-//                searchOnSpotify(query)
-//            } else {
-//                _isAuthRequired.value = true
-//            }
-//            searchOnYouTube(query)
         }
 
     }

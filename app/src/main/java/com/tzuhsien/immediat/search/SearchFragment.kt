@@ -61,7 +61,6 @@ class SearchFragment : Fragment() {
             }
         )
 
-
         viewModel.showMsg.observe(viewLifecycleOwner, Observer {
             if (null != it) {
                 binding.textResourceNotFound.text = it
@@ -142,7 +141,8 @@ class SearchFragment : Fragment() {
         viewModel.searchQuery.observe(viewLifecycleOwner) {
             it?.let {
                 Timber.d("query = $it, parentFragmentManager.setFragmentResult")
-                requireActivity().supportFragmentManager.setFragmentResult("requestKey", bundleOf("query" to it))
+                requireActivity().supportFragmentManager.setFragmentResult("requestKey1", bundleOf("query" to it))
+                requireActivity().supportFragmentManager.setFragmentResult("requestKey2", bundleOf("query" to it))
             }
 
             binding.tabLayoutSearchResults.visibility = if (null != it) View.VISIBLE else View.GONE
