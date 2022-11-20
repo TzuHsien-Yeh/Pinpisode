@@ -9,10 +9,9 @@ import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.PlayerState
 import com.spotify.protocol.types.Track
 import com.tzuhsien.immediat.MyApplication
+import com.tzuhsien.immediat.data.Result
 import timber.log.Timber
-import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 
@@ -34,19 +33,19 @@ object SpotifyService {
     private var playerStateSubscription: Subscription<PlayerState>? = null
 
 
-    suspend fun connectToAppRemote(): SpotifyAppRemote =
-        suspendCoroutine { cont: Continuation<SpotifyAppRemote> ->
+    suspend fun connectToAppRemote(): Result<SpotifyAppRemote> =
+        suspendCoroutine { cont ->
             SpotifyAppRemote.connect(
                 MyApplication.applicationContext(),
                 connectionParams,
                 object : Connector.ConnectionListener {
                     override fun onConnected(spotifyAppRemote: SpotifyAppRemote) {
                         this@SpotifyService.spotifyAppRemote = spotifyAppRemote
-                        cont.resume(spotifyAppRemote)
+                        cont.resume(Result.Success(spotifyAppRemote))
                     }
 
                     override fun onFailure(error: Throwable) {
-                        cont.resumeWithException(error)
+                        cont.resume(Result.Fail(error.message!!))
                     }
                 })
         }

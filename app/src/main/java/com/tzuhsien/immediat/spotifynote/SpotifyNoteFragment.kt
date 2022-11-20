@@ -5,22 +5,29 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.spotify.protocol.types.PlayerState
+import com.spotify.sdk.android.auth.AuthorizationClient
+import com.spotify.sdk.android.auth.AuthorizationRequest
+import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.coauthor.CoauthorDialogFragmentDirections
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
+import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentSpotifyNoteBinding
 import com.tzuhsien.immediat.ext.formatDuration
 import com.tzuhsien.immediat.ext.getVmFactory
@@ -31,6 +38,8 @@ import com.tzuhsien.immediat.spotifynote.SpotifyService.seekTo
 import com.tzuhsien.immediat.tag.TagDialogFragmentDirections
 import com.tzuhsien.immediat.util.SwipeHelper
 import timber.log.Timber
+import java.security.MessageDigest
+import java.security.SecureRandom
 
 class SpotifyNoteFragment : Fragment() {
     private val viewModel by viewModels<SpotifyNoteViewModel> {
@@ -53,6 +62,12 @@ class SpotifyNoteFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         binding = FragmentSpotifyNoteBinding.inflate(layoutInflater)
+
+        viewModel.isSpotifyNeedLogin.observe(viewLifecycleOwner) {
+            if (it) {
+                showLoginActivityCode.launch(getLoginActivityCodeIntent())
+            }
+        }
 
         viewModel.isSpotifyConnected.observe(viewLifecycleOwner) { it ->
             binding.playPauseButton.isEnabled = it
@@ -425,5 +440,124 @@ class SpotifyNoteFragment : Fragment() {
             })
     }
 
+
+    /**
+     *  Spotify Auth flow
+     * */
+    companion object {
+        const val CLIENT_ID = "f6095c97a1ab4a7fb88b5ac5f2ba606d"
+        const val REDIRECT_URI = "pinpisode://callback"
+
+        val CODE_VERIFIER = getCodeVerifier()
+
+        private fun getCodeVerifier(): String {
+            val secureRandom = SecureRandom()
+            val code = ByteArray(64)
+            secureRandom.nextBytes(code)
+            return Base64.encodeToString(
+                code,
+                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
+            )
+        }
+
+        fun getCodeChallenge(verifier: String): String {
+            val bytes = verifier.toByteArray()
+            val messageDigest = MessageDigest.getInstance("SHA-256")
+            messageDigest.update(bytes, 0, bytes.size)
+            val digest = messageDigest.digest()
+            return Base64.encodeToString(
+                digest,
+                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
+            )
+        }
+    }
+
+    fun getLoginActivityCodeIntent(): Intent =
+        AuthorizationClient.createLoginActivityIntent(
+            activity,
+            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
+                .setScopes(
+                    arrayOf(
+//                        "ugc-image-upload",
+//                        "user-read-playback-state",
+//                        "user-modify-playback-state",
+                        "user-read-currently-playing",
+                        "app-remote-control",
+//                        "playlist-read-private",
+//                        "playlist-read-collaborative",
+//                        "playlist-modify-private",
+//                        "playlist-modify-public",
+//                        "user-follow-modify",
+                        "user-follow-read",
+                        "user-read-playback-position",
+//                        "user-top-read",
+//                        "user-read-recently-played",
+//                        "user-library-modify",
+                        "user-library-read",
+//                        "user-read-email",
+//                        "user-read-private"
+                    )
+                )
+                .setCustomParam("code_challenge_method", "S256")
+                .setCustomParam("code_challenge", getCodeChallenge(CODE_VERIFIER))
+                .build()
+        )
+
+    private val showLoginActivityCode = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+
+        val authorizationResponse = AuthorizationClient.getResponse(result.resultCode, result.data)
+
+        when (authorizationResponse.type) {
+            AuthorizationResponse.Type.CODE -> {
+                // Here You will get the authorization code which you
+                // can get with authorizationResponse.code
+
+                showLoginActivityToken.launch(getLoginActivityTokenIntent(authorizationResponse.code))
+            }
+            AuthorizationResponse.Type.ERROR -> {
+                Timber.d("AuthorizationResponse.Type.ERROR")
+            }
+            // Handle the Error
+
+            else -> {}
+            // Probably interruption
+        }
+    }
+
+    fun getLoginActivityTokenIntent(code: String): Intent =
+        AuthorizationClient.createLoginActivityIntent(
+            activity,
+            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
+                .setCustomParam("grant_type", "authorization_code")
+                .setCustomParam("code", code)
+                .setCustomParam("code_verifier", CODE_VERIFIER)
+                .build()
+        )
+
+    private val showLoginActivityToken = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+
+        val authorizationResponse = AuthorizationClient.getResponse(result.resultCode, result.data)
+
+        when (authorizationResponse.type) {
+            AuthorizationResponse.Type.TOKEN -> {
+                // Here You can get access to the authorization token
+                // with authorizationResponse.token
+
+                Timber.d("showLoginActivityToken authorizationResponse.expiresIn: ${authorizationResponse.expiresIn}")
+                Timber.d("authorizationResponse.accessToken = ${authorizationResponse.accessToken}")
+                UserManager.userSpotifyAuthToken = authorizationResponse.accessToken
+            }
+            AuthorizationResponse.Type.ERROR -> {
+                Timber.d("showLoginActivityToken : AuthorizationResponse.Type.ERROR")
+            }
+            // Handle Error
+            else -> {}
+            // Probably interruption
+        }
+    }
 
 }

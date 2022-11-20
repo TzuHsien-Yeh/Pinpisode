@@ -32,6 +32,10 @@ class SpotifyNoteViewModel(
 
     var playingState = PlayingState.STOPPED
 
+    private val _isSpotifyNeedLogin = MutableLiveData<Boolean>(false)
+    val isSpotifyNeedLogin: LiveData<Boolean>
+        get() = _isSpotifyNeedLogin
+
     private val _getInfoFromPlayerState = MutableLiveData<PlayerState?>(null)
     val getInfoFromPlayerState: LiveData<PlayerState?>
         get() = _getInfoFromPlayerState
@@ -141,12 +145,18 @@ class SpotifyNoteViewModel(
 
             val connectResult = SpotifyService.connectToAppRemote()
 
-            if (connectResult.isConnected) {
-                _status.value = LoadApiStatus.DONE
-                _isSpotifyConnected.value = true
-            } else {
-                _error.value = "Spotify is not connected"
+            when (connectResult) {
+                is Result.Success -> {
+                    _status.value = LoadApiStatus.DONE
+                    _isSpotifyConnected.value = true
+                }
+                is Result.Fail -> {
+                    _error.value = connectResult.error
+                    _isSpotifyNeedLogin.value = true
+                }
+                else -> {}
             }
+
 
         }
     }

@@ -19,8 +19,9 @@ import timber.log.Timber
 class SearchResultViewModel(private val repository: Repository) : ViewModel() {
 
     var source: Source? = null
+    var queryKeyword: String? = null
 
-    private val _needSpotifyAuth = MutableLiveData(false)
+    private val _needSpotifyAuth = MutableLiveData<Boolean>()
     val needSpotifyAuth: LiveData<Boolean>
         get() = _needSpotifyAuth
 
@@ -54,10 +55,6 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
-    private val _showMsg = MutableLiveData<String?>(null)
-    val showMsg: LiveData<String?>
-        get() = _showMsg
-
     private val _navigateToYoutubeNote = MutableLiveData<String?>()
     val navigateToYoutubeNote: LiveData<String?>
         get() = _navigateToYoutubeNote
@@ -66,17 +63,38 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
     val navigateToSpotifyNote: LiveData<String?>
         get() = _navigateToSpotifyNote
 
-    fun search(query: String) {
+    init {
         when (source) {
             Source.YOUTUBE -> {
-                searchOnYouTube(query)
+                searchOnYouTube()
             }
             Source.SPOTIFY -> {
                 Timber.d("Source.SPOTIFY")
                 if (UserManager.userSpotifyAuthToken.isEmpty()) {
                     _needSpotifyAuth.value = true
                 } else {
-                    searchOnSpotify(query)
+                    searchOnSpotify()
+                }
+            }
+            else -> {}
+        }
+    }
+
+    fun search(query: String) {
+        Timber.d("search()")
+
+        when (source) {
+            Source.YOUTUBE -> {
+                queryKeyword = query
+                searchOnYouTube()
+            }
+            Source.SPOTIFY -> {
+                Timber.d("Source.SPOTIFY")
+                if (UserManager.userSpotifyAuthToken.isEmpty()) {
+                    _needSpotifyAuth.value = true
+                } else {
+                    queryKeyword = query
+                    searchOnSpotify()
                 }
             }
             else -> {}
@@ -84,13 +102,13 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
 
     }
 
-    private fun searchOnYouTube(query: String) {
+    private fun searchOnYouTube() {
 
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.searchOnYouTube(query)
+            val result = queryKeyword?.let { repository.searchOnYouTube(it) }
 
             when (result) {
                 is Result.Success -> {
@@ -126,7 +144,7 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
         _ytSearchResultList.value = list
     }
 
-    private fun searchOnSpotify(query: String) {
+    fun searchOnSpotify() {
 
         Timber.d("searchOnSpotify")
 
@@ -134,7 +152,7 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.searchOnSpotify(query, authToken = UserManager.userSpotifyAuthToken)
+            val result = queryKeyword?.let { repository.searchOnSpotify(it, authToken = UserManager.userSpotifyAuthToken) }
 
                 when (result) {
                     is Result.Success -> {
@@ -149,17 +167,14 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
                     is Result.Fail -> {
                         _error.value = result.error
                         _status.value = LoadApiStatus.ERROR
-                        null
                     }
                     is Result.Error -> {
                         _error.value = result.exception.toString()
                         _status.value = LoadApiStatus.ERROR
-                        null
                     }
                     else -> {
                         _error.value = Util.getString(R.string.unknown_error)
                         _status.value = LoadApiStatus.ERROR
-                        null
                     }
                 }
         }
