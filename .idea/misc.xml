@@ -28,7 +28,8 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_option_dialog.xml" value="0.19791666666666666" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_paste_url.xml" value="0.3625" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_profile.xml" value="0.25679347826086957" />
-        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_search.xml" value="0.3333333333333333" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_search.xml" value="0.1" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_search_result.xml" value="0.3333333333333333" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_sign_in.xml" value="0.22" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_spotify_note.xml" value="0.22" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_tag_dialog_list_dialog.xml" value="0.2907801418439716" />
@@ -39,6 +40,7 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_note.xml" value="0.33" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_sp_trending.xml" value="0.23645833333333333" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_spotify_latest_content.xml" value="0.18614130434782608" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_spotify_search_result.xml" value="0.3333333333333333" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_tag.xml" value="0.22" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_time_card.xml" value="0.22" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_timestamp_card.xml" value="0.22135416666666666" />

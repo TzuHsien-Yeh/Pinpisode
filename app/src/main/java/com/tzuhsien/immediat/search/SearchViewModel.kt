@@ -23,7 +23,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
     var userSpotifyAuthToken: String? = null
 
-
     // Search by pasting url
     var spotifySingleResultId: String? = null
     var ytSingleResultId: String? = null
@@ -37,6 +36,10 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         get() = _spotifyEpisodeData
 
     // Search by keywords
+    private val _searchQuery = MutableLiveData<String>(null)
+    val searchQuery: LiveData<String>
+        get() = _searchQuery
+
     private val _youtubeSearchResult = MutableLiveData<YouTubeSearchResult>(null)
     val youTubeSearchResult: LiveData<YouTubeSearchResult>
         get() = _youtubeSearchResult
@@ -60,7 +63,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         get() = _spotifyLatestEpisodesList
 
 
-    private val _isAuthRequired = MutableLiveData(UserManager.userSpotifyAuthToken.isEmpty())
+    private val _isAuthRequired = MutableLiveData(false)
     val isAuthRequired: LiveData<Boolean>
         get() = _isAuthRequired
 
@@ -250,14 +253,14 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                 }
             }
         } else {
-            // TODO: search on spotify
-            //  use coroutine { two child coroutine } wait for both to responses to continue
-            if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
-                searchOnSpotify(query)
-            } else {
-                _isAuthRequired.value = true
-            }
-            searchOnYouTube(query)
+            _searchQuery.value = query
+//            // search on spotify use coroutine { two child coroutine } wait for both to responses to continue
+//            if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
+//                searchOnSpotify(query)
+//            } else {
+//                _isAuthRequired.value = true
+//            }
+//            searchOnYouTube(query)
         }
 
     }

@@ -25,7 +25,7 @@
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/img_thumbnail"
                 android:layout_width="match_parent"
-                android:layout_height="130dp"
+                android:layout_height="140dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/app_icon"
                 app:shapeAppearanceOverlay="@style/rounded_corner"
@@ -38,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:maxLines="2"
+                android:maxLines="3"
                 android:ellipsize="end"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/img_thumbnail"
@@ -55,15 +55,7 @@
                 android:ellipsize="end"
                 style="@style/description_text_style"
                 app:layout_constraintTop_toBottomOf="@+id/text_title"/>
-            <TextView
-                android:id="@+id/text_published_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                style="@style/small_text_style"
-                tools:text="published at (locale date time)"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>

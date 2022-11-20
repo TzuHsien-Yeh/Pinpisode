@@ -39,4 +39,6 @@
     <string name="coauthor_invitation_sent">Coauthor invitation sent</string>
     <string name="trending_on_youtube">Trending on YouTube</string>
     <string name="trending_on_spotify">What\'s new on Spotify</string>
+    <string name="youtube">YouTube</string>
+    <string name="spotify">Spotify</string>
 </resources>

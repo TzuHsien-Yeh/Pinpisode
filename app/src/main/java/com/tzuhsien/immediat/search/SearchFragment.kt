@@ -9,19 +9,23 @@ import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.android.material.tabs.TabLayoutMediator
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentSearchBinding
 import com.tzuhsien.immediat.ext.extractSpotifySourceId
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.utcToLocalTime
+import com.tzuhsien.immediat.search.result.ViewPagerAdapter
 import com.tzuhsien.immediat.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
@@ -56,6 +60,7 @@ class SearchFragment : Fragment() {
                 }
             }
         )
+
 
         viewModel.showMsg.observe(viewLifecycleOwner, Observer {
             if (null != it) {
@@ -132,8 +137,16 @@ class SearchFragment : Fragment() {
          * Search results of key word
          * */
         // Display search result
-        viewModel.youTubeSearchResult.observe(viewLifecycleOwner) {
-            binding.recyclerviewSearchResult.visibility = if (null == it) View.GONE else View.VISIBLE
+        setUpViewPager()
+        setUpTabLayout()
+        viewModel.searchQuery.observe(viewLifecycleOwner) {
+            it?.let {
+                Timber.d("query = $it, parentFragmentManager.setFragmentResult")
+                requireActivity().supportFragmentManager.setFragmentResult("requestKey", bundleOf("query" to it))
+            }
+
+            binding.tabLayoutSearchResults.visibility = if (null != it) View.VISIBLE else View.GONE
+
             binding.icYoutube.visibility = if (null == it) View.VISIBLE else View.GONE
             binding.textTrendingOnYoutube.visibility = if (null == it) View.VISIBLE else View.GONE
             binding.recyclerviewYtTrending.visibility = if (null == it) View.VISIBLE else View.GONE
@@ -141,13 +154,10 @@ class SearchFragment : Fragment() {
             binding.icSpotify.visibility = if (null == it) View.VISIBLE else View.GONE
             binding.textNewOnSpotify.visibility = if (null == it) View.VISIBLE else View.GONE
             binding.recyclerviewSpLatestContent.visibility = if (null == it) View.VISIBLE else View.GONE
+            binding.imgViewCoverSpotifyContent.visibility = if (null == it) View.VISIBLE else View.GONE
+            binding.btnSpotifyAuth.visibility = if (null == it) View.VISIBLE else View.GONE
         }
 
-        val resultAdapter = YtSearchResultAdapter(viewModel.uiState)
-        binding.recyclerviewSearchResult.adapter = resultAdapter
-        viewModel.ytSearchResultList.observe(viewLifecycleOwner) {
-            resultAdapter.submitList(it)
-        }
 
         /**
          * Recommendations
@@ -166,10 +176,8 @@ class SearchFragment : Fragment() {
                 showLoginActivityCode.launch(getLoginActivityCodeIntent())
                 viewModel.doneRequestSpotifyAuthToken()
             }
-            binding.btnSpotifyAuth.visibility = if (it) View.VISIBLE else View.GONE
-            binding.imgViewCoverSpotifyContent.visibility = if (it) View.VISIBLE else View.GONE
-            binding.recyclerviewSpLatestContent.alpha = if (it) 0.5F else 1F
         }
+
         binding.btnSpotifyAuth.setOnClickListener {
             showLoginActivityCode.launch(getLoginActivityCodeIntent())
             viewModel.doneRequestSpotifyAuthToken()
@@ -181,6 +189,10 @@ class SearchFragment : Fragment() {
         viewModel.spotifyLatestEpisodesList.observe(viewLifecycleOwner) {
             Timber.d("viewModel.spotifyLatestEpisodesList.observe: $it")
             spLatestContentAdapter.submitList(it)
+
+            binding.btnSpotifyAuth.visibility = if (it[0].id.isEmpty()) View.VISIBLE else View.GONE
+            binding.imgViewCoverSpotifyContent.visibility = if (it[0].id.isEmpty()) View.VISIBLE else View.GONE
+            binding.recyclerviewSpLatestContent.alpha = if (it[0].id.isEmpty()) 0.5F else 1F
         }
 
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
@@ -208,6 +220,26 @@ class SearchFragment : Fragment() {
         return binding.root
     }
 
+    private fun setUpTabLayout() {
+        TabLayoutMediator(
+            binding.tabLayoutSearchResults,
+            binding.viewPagerSearchResult
+        ) { tab, position ->
+            when (position) {
+                0 -> tab.text = Source.YOUTUBE.source
+                1 -> tab.text = Source.SPOTIFY.source
+            }
+        }.attach()
+    }
+
+    private fun setUpViewPager() {
+        val adapter = ViewPagerAdapter(this, 2)
+        binding.viewPagerSearchResult.adapter = adapter
+    }
+
+    /**
+     *  Spotify Auth flow
+     * */
     companion object {
         const val CLIENT_ID = "f6095c97a1ab4a7fb88b5ac5f2ba606d"
         const val REDIRECT_URI = "pinpisode://callback"
@@ -242,24 +274,24 @@ class SearchFragment : Fragment() {
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-                        "ugc-image-upload",
-                                "user-read-playback-state",
-                                "user-modify-playback-state",
-                                "user-read-currently-playing",
-                                "app-remote-control",
-                        "playlist-read-private",
-                                "playlist-read-collaborative",
-                                "playlist-modify-private",
-                                "playlist-modify-public",
-                                "user-follow-modify",
-                                "user-follow-read",
-                                "user-read-playback-position",
-                                "user-top-read",
-                                "user-read-recently-played",
-                                "user-library-modify",
-                                "user-library-read",
-                                "user-read-email",
-                                "user-read-private"
+//                        "ugc-image-upload",
+//                        "user-read-playback-state",
+//                        "user-modify-playback-state",
+                        "user-read-currently-playing",
+                        "app-remote-control",
+//                        "playlist-read-private",
+//                        "playlist-read-collaborative",
+//                        "playlist-modify-private",
+//                        "playlist-modify-public",
+//                        "user-follow-modify",
+                        "user-follow-read",
+                        "user-read-playback-position",
+//                        "user-top-read",
+//                        "user-read-recently-played",
+//                        "user-library-modify",
+                        "user-library-read",
+//                        "user-read-email",
+//                        "user-read-private"
                     )
                 )
                 .setCustomParam("code_challenge_method", "S256")
@@ -312,6 +344,7 @@ class SearchFragment : Fragment() {
                 // with authorizationResponse.token
 
                 Timber.d("showLoginActivityToken authorizationResponse.expiresIn: ${authorizationResponse.expiresIn}")
+                Timber.d("authorizationResponse.accessToken = ${authorizationResponse.accessToken}")
                 UserManager.userSpotifyAuthToken = authorizationResponse.accessToken
                 viewModel.getSpotifySavedShowLatestEpisodes()
             }

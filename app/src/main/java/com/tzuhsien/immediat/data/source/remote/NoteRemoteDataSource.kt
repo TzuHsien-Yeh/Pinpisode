@@ -813,7 +813,7 @@ object NoteRemoteDataSource : DataSource {
             val result = SpotifyApi.retrofitService.searchOnSpotify(
                 bearerWithToken = SPOTIFY_BEARER + authToken,
                 type = SPOTIFY_PARAM_TYPE,
-                limit = 20,
+                limit = 12,
                 query = query
             )
             Result.Success(result)

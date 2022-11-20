@@ -6,9 +6,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.model.SpotifyItem
-import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.ItemSpotifyLatestContentBinding
 
 class SpContentAdapter(
@@ -20,6 +20,11 @@ class SpContentAdapter(
             if (item.images.isNotEmpty()) {
                 Glide.with(binding.imgThumbnail)
                     .load(item.images[0].url)
+                    .apply(
+                        RequestOptions
+                            .placeholderOf(R.drawable.app_icon)
+                            .error(R.drawable.app_icon)
+                    )
                     .into(binding.imgThumbnail)
                 binding.imgThumbnail.alpha = 1F
             } else {
@@ -44,15 +49,15 @@ class SpContentAdapter(
 
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SpotifyItemViewHolder {
-        return SpotifyItemViewHolder(ItemSpotifyLatestContentBinding.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SpContentAdapter.SpotifyItemViewHolder {
+        return SpContentAdapter.SpotifyItemViewHolder(ItemSpotifyLatestContentBinding.inflate(
             LayoutInflater.from(parent.context), parent, false)
         )
     }
 
     override fun onBindViewHolder(holder: SpotifyItemViewHolder, position: Int) {
         val item = getItem(position)
-        holder.itemView.isClickable = UserManager.userSpotifyAuthToken.isNotEmpty()
+        holder.itemView.isClickable = item.id.isNotEmpty()
         holder.itemView.setOnClickListener {
             uiState.onSpotifyLatestContentClick(item)
         }

@@ -1,4 +1,4 @@
-package com.tzuhsien.immediat.search
+package com.tzuhsien.immediat.search.result
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -11,10 +11,10 @@ import com.tzuhsien.immediat.databinding.ItemYtSearchResultBinding
 import com.tzuhsien.immediat.ext.utcToLocalTime
 
 class YtSearchResultAdapter(
-    private val uiState: SearchUiState
+    private val uiState: SearchResultUiState
 ): ListAdapter<ItemX, YtSearchResultAdapter.YtResultViewHolder>(DiffCallback) {
     class YtResultViewHolder(private val binding: ItemYtSearchResultBinding): RecyclerView.ViewHolder(binding.root) {
-        fun bind(resultItem: ItemX, uiState: SearchUiState){
+        fun bind(resultItem: ItemX){
 
             Glide.with(binding.imgThumbnail)
                 .load(resultItem.snippet.thumbnails.high.url)
@@ -50,6 +50,6 @@ class YtSearchResultAdapter(
         holder.itemView.setOnClickListener {
             uiState.onYoutubeItemClick(item)
         }
-        holder.bind(item, uiState)
+        holder.bind(item)
     }
 }
