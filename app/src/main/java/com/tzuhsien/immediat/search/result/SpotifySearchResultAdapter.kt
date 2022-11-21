@@ -26,21 +26,26 @@ class SpotifySearchResultAdapter(
                             .error(R.drawable.app_icon)
                     )
                     .into(binding.imgThumbnail)
+            } else if (!resultItem.album?.images.isNullOrEmpty()) {
+                Glide.with(binding.imgThumbnail)
+                    .load(resultItem.album!!.images[0].url)
+                    .apply(
+                        RequestOptions
+                            .placeholderOf(R.drawable.app_icon)
+                            .error(R.drawable.app_icon)
+                    )
+                    .into(binding.imgThumbnail)
             } else {
                 binding.imgThumbnail.setImageResource(R.drawable.app_icon)
             }
 
             binding.textTitle.text = resultItem.name
-            binding.textShowName.text = if (null != resultItem.show) {
-                resultItem.show.name
-            } else if (null != resultItem.album) {
+            binding.textShowName.text = if (null != resultItem.album) {
                 val artistList = mutableListOf<String>()
                 for (artist in resultItem.album.artists) {
                     artistList.add(artist.name)
                 }
-
-                artistList.toString().trimStart().trimEnd()
-
+                artistList.toString()
             } else { "" }
 
             binding.textType.text = when (resultItem.type) {

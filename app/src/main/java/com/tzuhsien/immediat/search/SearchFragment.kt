@@ -6,7 +6,6 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SearchView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
@@ -45,7 +44,7 @@ class SearchFragment : Fragment() {
         binding = FragmentSearchBinding.inflate(layoutInflater)
 
         binding.searchviewSearch.setOnQueryTextListener(
-            object : SearchView.OnQueryTextListener {
+            object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     Timber.d("onQueryTextSubmit: QUERY = $query")
                     query?.let {
@@ -275,7 +274,7 @@ class SearchFragment : Fragment() {
                 .setScopes(
                     arrayOf(
 //                        "ugc-image-upload",
-//                        "user-read-playback-state",
+                        "user-read-playback-state",
 //                        "user-modify-playback-state",
                         "user-read-currently-playing",
                         "app-remote-control",

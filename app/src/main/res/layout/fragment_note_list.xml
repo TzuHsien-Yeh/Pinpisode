@@ -86,6 +86,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="6dp"
         tools:text="hahaha oo"
+        style="@style/yt_bold_17sp"
         app:layout_constraintTop_toTopOf="@+id/img_pic_to_profile"
         app:layout_constraintBottom_toBottomOf="@+id/img_pic_to_profile"
         app:layout_constraintStart_toEndOf="@+id/img_pic_to_profile"/>
@@ -110,6 +111,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textSize="16sp"
+            style="@style/yt_medium_13sp_text"
             android:textColor="@color/color_primary"
             tools:text="duration"/>
 

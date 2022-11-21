@@ -24,6 +24,7 @@ import com.tzuhsien.immediat.signin.SignInFragmentDirections
 import com.tzuhsien.immediat.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.immediat.util.SwipeHelper
 import com.tzuhsien.immediat.youtubenote.YouTubeNoteFragmentDirections
+import kotlinx.coroutines.*
 import timber.log.Timber
 
 class NoteListFragment : Fragment() {
@@ -32,6 +33,9 @@ class NoteListFragment : Fragment() {
         getVmFactory()
     }
     private lateinit var binding: FragmentNoteListBinding
+    val scrollJob = Job()
+    val coroutineScope = CoroutineScope(scrollJob + Dispatchers.Main)
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -156,17 +160,23 @@ class NoteListFragment : Fragment() {
 
         itemTouchHelper.attachToRecyclerView(binding.recyclerviewNoteList)
 
-
-
         viewModel.liveNoteList.observe(viewLifecycleOwner) { list ->
             Timber.d("viewModel.liveNoteList.observe: $list")
             list?.let {
                 viewModel.getAllTags(list)
                 if (null != viewModel.selectedTag) {
                     noteAdapter.submitList(list.filter { it.tags.contains(viewModel.selectedTag) })
+                    coroutineScope.launch {
+                        delay(100L)
+                        binding.recyclerviewNoteList.scrollToPosition(0)
+                    }
 
                 } else {
                     noteAdapter.submitList(list)
+                    coroutineScope.launch {
+                        delay(100L)
+                        binding.recyclerviewNoteList.scrollToPosition(0)
+                    }
                 }
 
                 for (note in list) {
@@ -216,7 +226,11 @@ class NoteListFragment : Fragment() {
         return binding.root
     }
 
+    override fun onStop() {
+        super.onStop()
+        scrollJob.cancel()
 
+    }
 
     fun deleteButton(position: Int) : SwipeHelper.UnderlayButton {
         return SwipeHelper.UnderlayButton(

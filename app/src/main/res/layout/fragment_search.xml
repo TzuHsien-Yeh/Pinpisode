@@ -6,14 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".search.SearchFragment">
 
-    <SearchView
+    <androidx.appcompat.widget.SearchView
         android:id="@+id/searchview_search"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_margin="16dp"
-        android:iconifiedByDefault="false"
-        style="@style/yt_bold_17sp"
-        android:queryHint="Search or paste url"
+        app:iconifiedByDefault="false"
+        app:theme="@style/search_view_style"
+        app:queryBackground="@null"
+        app:background="@null"
+        app:queryHint="Search or paste url"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
