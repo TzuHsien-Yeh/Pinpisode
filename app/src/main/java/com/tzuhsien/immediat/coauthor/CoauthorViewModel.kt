@@ -3,19 +3,19 @@ package com.tzuhsien.immediat.coauthor
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.data.model.UserInfo
 import com.tzuhsien.immediat.data.source.Repository
+import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.network.LoadApiStatus
-import com.tzuhsien.immediat.util.ServiceLocator.repository
 import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class CoauthorViewModel(private val repository: Repository, val note: Note) : ViewModel() {
 
@@ -23,15 +23,23 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
     val foundUser: LiveData<UserInfo?>
         get() = _foundUser
 
-    private val _addSuccess = MutableLiveData<Boolean>(false)
-    val addSuccess: LiveData<Boolean>
-        get() = _addSuccess
+    private val _isInviteSuccess = MutableLiveData<Boolean>(false)
+    val isInviteSuccess: LiveData<Boolean>
+        get() = _isInviteSuccess
 
-    var errorMsg: String? = null
+    private val _resultMsg = MutableLiveData<String?>(null)
+    val resultMsg: LiveData<String?>
+        get() = _resultMsg
 
     private val _noteOwner = MutableLiveData<UserInfo>()
     val noteOwner: LiveData<UserInfo>
             get() = _noteOwner
+
+    private val _quitCoauthoringResult = MutableLiveData<String>(null)
+    val quitCoauthoringResult: LiveData<String>
+        get() = _quitCoauthoringResult
+
+
 
     private var _liveCoauthorInfo = MutableLiveData<List<UserInfo>>()
     val liveCoauthorInfo: LiveData<List<UserInfo>>
@@ -69,7 +77,6 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
-                    errorMsg = result.error
                     null
                 }
                 is Result.Error -> {
@@ -100,18 +107,22 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
+
+                    if (null == result.data) {
+                        _resultMsg.value = MyApplication.applicationContext().getString(R.string.user_not_found)
+                    }
+
                     result.data
                 }
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
-                    errorMsg = result.error
+
                     null
                 }
                 is Result.Error -> {
                     _error.value = result.exception.toString()
                     _status.value = LoadApiStatus.ERROR
-
                     null
                 }
                 else -> {
@@ -123,24 +134,20 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
         }
     }
 
-    fun addUserAsCoauthor() {
-        val authorSet = mutableSetOf<String>()
-        authorSet.addAll(note.authors)
-
-        foundUser.value?.let {
-            authorSet.add(it.id)
-        }
-
+    fun sendCoauthorInvitation(){
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.updateNoteAuthors(note.id, authorSet)
+            val result = foundUser.value?.let { repository.sendCoauthorInvitation(note, it.id) }
 
-            _addSuccess.value = when (result) {
+            _isInviteSuccess.value = when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
+
+                    resetFoundUser()
+                    _resultMsg.value = MyApplication.applicationContext().getString(R.string.coauthor_invitation_sent)
                     result.data
                 }
                 is Result.Fail -> {
@@ -162,8 +169,42 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
         }
     }
 
-    fun resetFoundUser() {
+    private fun resetFoundUser() {
         _foundUser.value = null
+    }
+
+    fun quitCoauthoringTheNote() {
+        val newAuthorList = mutableListOf<String>()
+        newAuthorList.addAll(note.authors)
+        newAuthorList.remove(UserManager.userId)
+
+        coroutineScope.launch {
+            _status.value = LoadApiStatus.LOADING
+
+            when(val result = repository.deleteUserFromAuthors(
+                noteId = note.id,
+                authors = newAuthorList
+            )) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+
+                    _quitCoauthoringResult.value = result.data
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
     }
 
 }

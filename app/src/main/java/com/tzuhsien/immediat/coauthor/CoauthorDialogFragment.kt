@@ -10,10 +10,13 @@ import android.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentCoauthorDialogBinding
 import com.tzuhsien.immediat.ext.getVmFactory
+import com.tzuhsien.immediat.notelist.NoteListFragmentDirections
 import com.tzuhsien.immediat.tag.TagDialogFragmentArgs
 
 class CoauthorDialogFragment : DialogFragment() {
@@ -43,21 +46,39 @@ class CoauthorDialogFragment : DialogFragment() {
                 .into(binding.imgOwnerPic)
         }
 
+        binding.textCoauthors.text = when (viewModel.note.authors.size) {
+            1 -> null
+            2 -> getString(R.string.coauthor)
+            else -> getString(R.string.coauthors)
+        }
+
         if (UserManager.userId == viewModel.note.ownerId) {
             binding.searchUserByEmail.visibility = View.VISIBLE
-            binding.textAddCoauthors.visibility = View.VISIBLE
-            binding.textOnlyOwnerCanInviteCoauthors.visibility = View.GONE
+            binding.textInviteCoauthors.visibility = View.VISIBLE
+            binding.textQuitCoauthoring.visibility = View.GONE
         } else {
             binding.searchUserByEmail.visibility = View.GONE
-            binding.textAddCoauthors.visibility = View.GONE
-            binding.textOnlyOwnerCanInviteCoauthors.visibility = View.VISIBLE
+            binding.textInviteCoauthors.visibility = View.GONE
+            binding.textQuitCoauthoring.visibility = View.VISIBLE
+        }
+
+        binding.textQuitCoauthoring.setOnClickListener {
+            viewModel.quitCoauthoringTheNote()
+        }
+
+        viewModel.quitCoauthoringResult.observe(viewLifecycleOwner) {
+            it?.let {
+                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                findNavController().navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+            }
         }
 
         binding.searchUserByEmail.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     query?.let {
-                        viewModel.findUserByEmail(query)
+                        // remove leading and trailing whitespace by .trim()
+                        viewModel.findUserByEmail(query.trim())
                     }
                     return false
                 }
@@ -68,36 +89,27 @@ class CoauthorDialogFragment : DialogFragment() {
             }
         )
 
-        binding.textNotFound.visibility = View.GONE
-        binding.viewGroupUserSearchResult.visibility = View.GONE
-
         viewModel.foundUser.observe(viewLifecycleOwner) {
-            if (null != it) {
+             it?.let {
                 binding.viewGroupUserSearchResult.visibility = View.VISIBLE
-                binding.textNotFound.visibility = View.GONE
                 binding.textSearchResultName.text = it.name
                 binding.textSearchResultEmail.text = it.email
-
                 Glide.with(binding.imgSearchResultPic)
                     .load(it.pic)
                     .into(binding.imgSearchResultPic)
 
-            } else {
-                binding.textNotFound.visibility = View.VISIBLE
-                binding.viewGroupUserSearchResult.visibility = View.GONE
+                 binding.textResultMsg.visibility = View.GONE
             }
         }
 
         binding.viewGroupUserSearchResult.setOnClickListener {
-            viewModel.addUserAsCoauthor()
+            viewModel.sendCoauthorInvitation()
             binding.viewGroupUserSearchResult.visibility = View.GONE
-            viewModel.resetFoundUser()
         }
 
-        viewModel.addSuccess.observe(viewLifecycleOwner) {
-            if (it) {
-                Toast.makeText(context, "Add Success", Toast.LENGTH_SHORT).show()
-            }
+        viewModel.resultMsg.observe(viewLifecycleOwner) {
+            binding.textResultMsg.visibility = if (null != it) View.VISIBLE else View.GONE
+            it.let { binding.textResultMsg.text = it }
         }
 
         return binding.root

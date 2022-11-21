@@ -38,4 +38,56 @@
         <item name="android:windowBackground">@null</item>
     </style>
 
+    <style name="search_view_style" parent="Widget.AppCompat.SearchView">
+        <item name="fontFamily">@font/youtube_sans_medium</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="yt_bold_20sp" parent="">
+        <item name="android:textSize">20sp</item>
+        <item name="fontFamily">@font/youtube_sans_bold</item>
+    </style>
+
+    <style name="yt_medium_19sp" parent="">
+        <item name="android:textSize">19sp</item>
+        <item name="fontFamily">@font/youtube_sans_medium</item>
+    </style>
+
+    <style name="yt_bold_17sp" parent="">
+        <item name="android:textSize">17sp</item>
+        <item name="fontFamily">@font/youtube_sans_bold</item>
+    </style>
+
+    <style name="source_title_style" parent="">
+        <item name="android:textSize">16sp</item>
+        <item name="fontFamily">@font/youtube_sans_bold</item>
+    </style>
+
+    <style name="description_text_style" parent="">
+        <item name="android:textSize">15sp</item>
+        <item name="fontFamily">@font/youtube_sans_medium</item>
+    </style>
+
+    <style name="yt_medium_11sp_text" parent="">
+        <item name="android:textSize">11sp</item>
+        <item name="fontFamily">@font/youtube_sans_medium</item>
+    </style>
+    <style name="yt_medium_13sp_text" parent="">
+        <item name="android:textSize">13sp</item>
+        <item name="fontFamily">@font/youtube_sans_medium</item>
+    </style>
+    <style name="yt_medium_14sp_text" parent="">
+        <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/youtube_sans_medium</item>
+    </style>
+    <style name="small_text_style" parent="">
+        <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/youtube_sans_light</item>
+    </style>
+
+    <style name="timestamp_title_style" parent="">
+        <item name="fontFamily">@font/youtube_sans_bold</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
 </resources>

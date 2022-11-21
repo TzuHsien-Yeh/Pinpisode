@@ -14,19 +14,32 @@
         app:layout_constraintTop_toTopOf="parent"
         app:autoPlay="false" />
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ic_decoration"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="12dp"
+        android:src="@drawable/app_icon"
+        app:shapeAppearanceOverlay="@style/circle"
+        app:layout_constraintTop_toTopOf="@+id/edit_digest"
+        app:layout_constraintBottom_toBottomOf="@+id/edit_digest"
+        app:layout_constraintStart_toStartOf="parent"/>
+
     <EditText
         android:id="@+id/edit_digest"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="26dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="@dimen/standard"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="16dp"
-        android:maxLength="60"
+        android:maxLength="35"
+        android:maxLines="1"
         android:inputType="text"
         android:hint="@string/input_video_summary"
-        android:textSize="16sp"
+        style="@style/source_title_style"
         android:background="@color/transparent"
+        app:layout_constraintStart_toEndOf="@+id/ic_decoration"
         app:layout_constraintTop_toBottomOf="@+id/youtube_player_view"
         app:layout_constraintBottom_toTopOf="@+id/recycler_view_time_items"/>
 
@@ -48,8 +61,9 @@
         app:borderWidth="0dp"
         android:backgroundTint="@color/color_primary_variant"
         android:src="@drawable/ic_pin"
-        app:fabCustomSize="54dp"
-        android:scaleX="-1"
+        app:fabCustomSize="55dp"
+        app:maxImageSize="50dp"
+        app:tint="@color/color_primary"
         app:layout_constraintBottom_toTopOf="@id/note_page_bottom_options"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -61,18 +75,19 @@
         android:layout_marginBottom="12dp"
         app:borderWidth="0dp"
         android:backgroundTint="@color/color_primary_variant"
-        android:src="@drawable/ic_youtube_black"
+        android:src="@drawable/ic_clip"
         app:fabCustomSize="54dp"
+        app:maxImageSize="50dp"
+        app:tint="@color/color_primary"
         app:layout_constraintBottom_toTopOf="@id/btn_take_timestamp"
         app:layout_constraintEnd_toEndOf="parent"/>
-
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/note_page_bottom_options"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:paddingVertical="4dp"
-        android:background="@color/color_primary"
+        android:background="@color/note_bottom_options_bg"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageView

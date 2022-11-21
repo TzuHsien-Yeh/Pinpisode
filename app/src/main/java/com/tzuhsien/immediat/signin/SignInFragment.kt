@@ -38,7 +38,7 @@ class SignInFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
 
         // Build a GoogleSignInClient with the options specified by gso.
@@ -91,11 +91,23 @@ class SignInFragment : Fragment() {
             val account = task.getResult(ApiException::class.java)!!
             firebaseAuthWithGoogle(account)
 
+//            youtubeAuth(account)
+
         } catch (e: ApiException) {
             Timber.d("Google Sign in exception: ${e.statusCode}")
             Toast.makeText(context, "Sign in failed", Toast.LENGTH_LONG).show()
         }
     }
+
+//    private fun youtubeAuth(account: GoogleSignInAccount) {
+//        val authToken = GoogleAuthUtil.getToken(
+//            MyApplication.applicationContext(),
+//            account.account!!,
+//            "oauth2:https://www.googleapis.com/auth/youtube",
+//            Bundle()
+//        )
+//        Timber.d("authToken: $authToken")
+//    }
 
     private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
         val credential = GoogleAuthProvider.getCredential(account.idToken, null)
@@ -115,6 +127,7 @@ class SignInFragment : Fragment() {
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         return  GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
+//            .requestScopes(Scope("https://www.googleapis.com/auth/youtube"))
             .requestEmail()
             .build()
     }

@@ -15,6 +15,8 @@ fun String.utcToLocalTime(): String {
 
 fun Float.formatDuration(): String = DateUtils.formatElapsedTime(this.toLong())
 
+fun Long.formatDuration(): String = DateUtils.formatElapsedTime(this/1000)
+
 fun String.parseDuration(): Long? = Duration.parseIsoStringOrNull(this)?.inWholeMilliseconds
 
 
@@ -43,7 +45,7 @@ fun String.extractSpotifySourceId(): String {
 
     return if (spotifyShareLink in this) {
         this.substringAfter(spotifyShareLink)
-            .substringBefore("?si=")
+            .substringBefore("?si=", this.substringAfter(spotifyShareLink))
             .replace("/", ":")
 
     } else {

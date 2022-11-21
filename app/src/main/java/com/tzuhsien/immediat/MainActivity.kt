@@ -2,6 +2,7 @@ package com.tzuhsien.immediat
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.MotionEvent
@@ -46,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 
         intent?.extras?.let {
             handleIntent(it)
-            Timber.d("[onNewIntent] handleIntent called")
+            Timber.d("[onNewIntent] handleIntent called: extra = ${it.toString()}")
         }
     }
 
@@ -61,7 +62,6 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
         /** Read intent data if the activity has not been created when getting intent from other app **/
-
         Timber.d("onCreate CALLED")
         Timber.d("intent.data: ${intent.data}, ${intent.data?.host}, ${intent.data?.query}")
         Timber.d("intent.extra: ${intent.extras?.getString(Intent.EXTRA_TEXT)}")
@@ -134,7 +134,17 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.signInFragment -> {
                     binding.toolbar.visibility = View.GONE
+                    binding.toolbarText.text = null
                     binding.toolbar.navigationIcon = null
+                }
+
+                R.id.notificationFragment -> {
+                    binding.toolbar.visibility = View.VISIBLE
+                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationOnClickListener {
+                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                    }
+                    binding.toolbarText.text = getString(R.string.coauthor_invitation)
                 }
 
             }
@@ -160,6 +170,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return super.dispatchTouchEvent(event)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.toolbar.visibility = View.GONE
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            binding.toolbar.visibility = View.VISIBLE
+        }
     }
 
     private fun handleIntent(intentExtras: Bundle){

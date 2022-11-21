@@ -2,25 +2,31 @@ package com.tzuhsien.immediat.youtubenote
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
-import com.tzuhsien.immediat.coauthor.CoauthorDialogFragment
+import com.tzuhsien.immediat.coauthor.CoauthorDialogFragmentDirections
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseDuration
 import com.tzuhsien.immediat.tag.TagDialogFragmentDirections
+import com.tzuhsien.immediat.util.SwipeHelper
 import timber.log.Timber
 
 
@@ -84,20 +90,25 @@ class YouTubeNoteFragment : Fragment() {
                     viewModel.createTimeItem(second, null)
                 }
 
+                val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
+
                 binding.btnClip.setOnClickListener {
                     when (viewModel.startOrStopToggle) {
                         0 -> {
                             viewModel.startAt = second
                             viewModel.startOrStopToggle = 1
-                            binding.btnClip.setImageResource(R.drawable.ic_square)
+                            binding.btnClip.apply {
+                                setImageResource(R.drawable.ic_clipping_stop)
+                                startAnimation(animation)
+                            }
                             Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
                         }
                         1 -> {
                             viewModel.endAt = second
                             Timber.d("btnClip second time clicked, viewModel.endAt = ${viewModel.endAt}")
 
-                            binding.btnClip.setImageResource(R.drawable.ic_youtube_black)
-//                            binding.btnClip.setImageResource(R.drawable.ic_end_clipping)
+                            binding.btnClip.setImageResource(R.drawable.ic_clip)
+                            binding.btnClip.animation = null
                             viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
                             viewModel.startOrStopToggle = 0
                         }
@@ -109,22 +120,29 @@ class YouTubeNoteFragment : Fragment() {
         /**
          * Digest of the video (editText)
          * */
-        binding.editDigest.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                viewModel.noteToBeUpdated?.digest = binding.editDigest.text.toString()
-                viewModel.updateNote()
-            }
-        }
-        viewModel.liveNoteData.observe(viewLifecycleOwner, Observer { note ->
-            note?.let {
-                binding.editDigest.setText(note.digest)
-                viewModel.noteToBeUpdated = note
+        binding.editDigest.setBackgroundColor(Color.TRANSPARENT)
 
-                if (note.duration.parseDuration() == 0L) {
-                    viewModel.updateInfoFromYouTube(note)
+        viewModel.liveNoteDataReassigned.observe(viewLifecycleOwner) {
+            if (it) {
+                viewModel.liveNoteData.observe(viewLifecycleOwner) { note ->
+                    note?.let {
+                        binding.editDigest.setText(note.digest)
+                        viewModel.noteToBeUpdated = note
+
+                        if (note.duration.parseDuration() == 0L) {
+                            viewModel.updateInfoFromYouTube(note)
+                        }
+                    }
+                }
+                binding.editDigest.setOnFocusChangeListener { _, hasFocus ->
+                    if (!hasFocus) {
+                        viewModel.noteToBeUpdated?.digest = binding.editDigest.text.toString()
+                        viewModel.updateNote()
+                    }
                 }
             }
-        })
+        }
+
 
         /**
          *  Edit or read only mode
@@ -141,6 +159,7 @@ class YouTubeNoteFragment : Fragment() {
                 binding.editDigest.hint = getString(R.string.input_video_summary)
             }
 
+            binding.icAddTag.isEnabled = it
             binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
             binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
         }
@@ -148,6 +167,17 @@ class YouTubeNoteFragment : Fragment() {
         /**
          *  RecyclerView views
          * */
+        // Swipe to delete
+        binding.recyclerViewTimeItems.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(binding.recyclerViewTimeItems) {
+            override fun instantiateUnderlayButton(position: Int): List<UnderlayButton> {
+                val deleteButton = deleteButton(position)
+                return listOf(deleteButton)
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
+
+
         val adapter = TimeItemAdapter(
             uiState = viewModel.uiState
         )
@@ -214,9 +244,9 @@ class YouTubeNoteFragment : Fragment() {
          * */
         binding.icCoauthoring.setOnClickListener {
             findNavController().navigate(
-                YouTubeNoteFragmentDirections.actionYouTubeNoteFragmentToCoauthorDialogFragment(
+                (CoauthorDialogFragmentDirections.actionGlobalCoauthorDialogFragment(
                     viewModel.noteToBeUpdated!!
-                )
+                ))
             )
         }
 
@@ -241,10 +271,27 @@ class YouTubeNoteFragment : Fragment() {
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             binding.youtubePlayerView.enterFullScreen()
-            // TODO : hide toolbar and bottom tool bar
+
+            binding.notePageBottomOptions.visibility = View.GONE
 
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             binding.youtubePlayerView.exitFullScreen()
+
+            binding.notePageBottomOptions.visibility = View.VISIBLE
         }
     }
+
+    fun deleteButton(position: Int) : SwipeHelper.UnderlayButton {
+        return SwipeHelper.UnderlayButton(
+            MyApplication.applicationContext(),
+            getString(R.string.delete),
+            14.0f,
+            android.R.color.holo_red_light,
+            object : SwipeHelper.UnderlayButtonClickListener {
+                override fun onClick() {
+                    viewModel.deleteTimeItem(position)
+                }
+            })
+    }
+
 }

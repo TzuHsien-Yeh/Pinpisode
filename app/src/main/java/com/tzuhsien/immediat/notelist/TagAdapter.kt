@@ -1,16 +1,13 @@
 package com.tzuhsien.immediat.notelist
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.allViews
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.tzuhsien.immediat.databinding.ItemTagBinding
 
 class TagAdapter(
-//    private val uiState: NoteListUiState
 private val onClickListener: OnTagClickListener
 ): ListAdapter<String, TagAdapter.TagViewHolder>(DiffCallback) {
     class TagViewHolder(private val binding: ItemTagBinding): RecyclerView.ViewHolder(binding.root){

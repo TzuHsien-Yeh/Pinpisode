@@ -2,6 +2,7 @@ package com.tzuhsien.immediat.network
 
 import com.tzuhsien.immediat.BuildConfig
 import com.tzuhsien.immediat.data.model.YouTubeResult
+import com.tzuhsien.immediat.data.model.YouTubeSearchResult
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -10,6 +11,8 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 private const val BASE_URL = "https://www.googleapis.com/youtube/v3/"
+private const val ENDPOINT_VIDEOS = "videos"
+private const val ENDPOINT_SEARCH = "search"
 
 val loggingInterceptor =
     HttpLoggingInterceptor().setLevel(
@@ -25,7 +28,6 @@ val client = OkHttpClient.Builder()
             .url
             .newBuilder()
             .addQueryParameter("key", BuildConfig.YOUTUBE_API_KEY)
-            .addQueryParameter("part", "snippet, contentDetails")
             .build()
         chain.proceed(chain.request().newBuilder().url(url).build())
     }
@@ -41,10 +43,28 @@ private val retrofit = Retrofit.Builder()
     .build()
 
 interface YouTubeApiService {
-    @GET("videos")
+    @GET(ENDPOINT_VIDEOS)
     suspend fun getVideoInfo(
+        @Query("part") part: String,
         @Query("id") id: String
     ): YouTubeResult
+
+    @GET(ENDPOINT_SEARCH)
+    suspend fun getYouTubeSearchResult(
+        @Query("part") part: String,
+        @Query("type") type: String,
+        @Query("maxResults") maxResult: Int?,
+        @Query("q") query: String?
+    ): YouTubeSearchResult
+
+    @GET(ENDPOINT_VIDEOS)
+    suspend fun getTrendingVideos(
+        @Query("part") part: String,
+        @Query("chart") chart: String,
+        @Query("regionCode") regionCode: String?,
+        @Query("maxResults") maxResult: Int?
+    ): YouTubeResult
+
 }
 
 /**

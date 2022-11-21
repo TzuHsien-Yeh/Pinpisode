@@ -1,6 +1,5 @@
 package com.tzuhsien.immediat.notelist
 
-import android.opengl.Visibility
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
@@ -14,11 +13,11 @@ import com.tzuhsien.immediat.data.model.Note
 import com.tzuhsien.immediat.databinding.ItemNoteBinding
 
 class NoteAdapter (
-    private val onClickListener: OnNoteClickListener,
+    private val uiState: NoteListUiState
 ) : ListAdapter<Note, NoteAdapter.NoteViewHolder>(DiffCallback) {
 
     class NoteViewHolder(private val binding: ItemNoteBinding) : RecyclerView.ViewHolder(binding.root){
-        fun bind(note: Note) {
+        fun bind(note: Note, uiState: NoteListUiState) {
             val context = binding.root.context
             Glide.with(binding.imgThumbnail)
                 .load(note.thumbnail)
@@ -28,13 +27,16 @@ class NoteAdapter (
             val timeAgo = DateUtils.getRelativeTimeSpanString(note.lastEditTime)
             binding.textLastEditTime.text = timeAgo
             binding.textNumberOfCoauthors.visibility = if (note.authors.size == 1) View.GONE else View.VISIBLE
-            binding.textNumberOfCoauthors.text = context.getString(
-                R.string.number_of_coauthors, (note.authors.size.minus(1))
-            )
-
-            binding.ic3Dots.setOnClickListener {
-                // navigate to
+            binding.textNumberOfCoauthors.text = if (note.authors.size > 2) {
+                context.getString(
+                    R.string.number_of_coauthors, (note.authors.size.minus(1))
+                ) + "s"
+            } else {
+                context.getString(
+                    R.string.number_of_coauthors, (note.authors.size.minus(1))
+                )
             }
+
         }
     }
 
@@ -50,25 +52,20 @@ class NoteAdapter (
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
-        return NoteViewHolder(ItemNoteBinding.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteAdapter.NoteViewHolder {
+        return NoteAdapter.NoteViewHolder(ItemNoteBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         ))
     }
 
-    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: NoteAdapter.NoteViewHolder, position: Int) {
         val note = getItem(position)
         holder.itemView.setOnClickListener {
-            onClickListener.onClick(note)
+            uiState.onNoteClicked(note)
         }
-        holder.bind(note)
-    }
+        holder.bind(note, uiState)
 
-    class OnNoteClickListener(val clickListener: (note: Note) -> Unit) {
-        fun onClick(note: Note) {
-            clickListener(note)
-        }
     }
 }

@@ -36,6 +36,15 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
     var isAscending: Boolean = true // 0: Ascending order; 1: Descending
 
+
+    var invitationList = repository.getLiveIncomingCoauthorInvitations()
+
+    val uiState = NoteListUiState(
+        onNoteClicked = { note ->
+            navigateToNotePage(note)
+        }
+    )
+
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
         get() = _status
@@ -75,9 +84,9 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
-                    if (result.data.items[0].contentDetails.duration != note.duration) {
+                    if (result.data.items[0].contentDetails?.duration != note.duration) {
                         val noteToUpdate = Note()
-                        noteToUpdate.duration = result.data.items[0].contentDetails.duration
+                        noteToUpdate.duration = result.data.items[0].contentDetails!!.duration
                         noteToUpdate.thumbnail = result.data.items[0].snippet.thumbnails.high.url
                         noteToUpdate.title = result.data.items[0].snippet.title
                         updateYouTubeInfo(noteId, noteToUpdate)
@@ -237,4 +246,75 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
+
+    fun deleteOrQuitCoauthoringNote(noteIndex: Int) {
+        val noteToBeRemoved = liveNoteList.value?.get(noteIndex)
+        if (noteToBeRemoved?.ownerId == UserManager.userId) {
+            deleteNote(noteToBeRemoved!!)
+        } else {
+            quitCoauthoringNote(noteToBeRemoved!!)
+        }
+    }
+
+    private fun quitCoauthoringNote(noteToBeRemoved: Note) {
+
+        val newAuthorList = mutableListOf<String>()
+        newAuthorList.addAll(noteToBeRemoved.authors)
+        newAuthorList.remove(UserManager.userId)
+
+        coroutineScope.launch {
+            _status.value = LoadApiStatus.LOADING
+
+            when(val result = repository.deleteUserFromAuthors(
+                noteId = noteToBeRemoved.id,
+                authors = newAuthorList
+            )) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
+    }
+
+    private fun deleteNote(noteToBeRemoved: Note) {
+        coroutineScope.launch {
+            _status.value = LoadApiStatus.LOADING
+
+            when(val result = repository.deleteNote(noteId = noteToBeRemoved.id)) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+                }
+            }
+        }
+    }
 }
+
+data class NoteListUiState(
+    val onNoteClicked: (Note) -> Unit
+)

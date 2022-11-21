@@ -9,21 +9,19 @@
         android:id="@+id/card_time_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginVertical="8dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:cardElevation="4dp"
-        app:cardCornerRadius="20dp"
-        app:cardMaxElevation="2dp"
+        app:cardElevation="@dimen/card_view_elevation"
+        app:cardCornerRadius="16dp"
+        app:cardMaxElevation="@dimen/card_view_elevation"
         app:cardPreventCornerOverlap="true"
-        app:cardUseCompatPadding="false">
+        app:cardUseCompatPadding="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="10dp">
+            android:paddingVertical="6dp"
+            android:paddingHorizontal="16dp">
 
             <TextView
                 android:id="@+id/text_time_start"
@@ -31,16 +29,14 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                android:textStyle="bold"
-                android:textSize="16sp"
+                style="@style/timestamp_title_style"
                 tools:text="00:24"/>
 
             <TextView
                 android:id="@+id/text_time_end"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="16sp"
+                style="@style/timestamp_title_style"
                 android:layout_marginStart="4dp"
                 app:layout_constraintStart_toEndOf="@id/text_time_start"
                 app:layout_constraintTop_toTopOf="parent"
@@ -48,42 +44,41 @@
 
             <EditText
                 android:id="@+id/edit_text_item_title"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="4dp"
-                android:textStyle="bold"
-                android:textSize="16sp"
+                android:inputType="text"
+                style="@style/timestamp_title_style"
                 android:maxLines="1"
                 android:maxLength="20"
                 android:hint="@string/moment"
                 android:background="@color/transparent"
                 android:textAlignment="textStart"
                 app:layout_constraintStart_toEndOf="@+id/text_time_end"
-                app:layout_constraintEnd_toStartOf="@+id/delete_time_item"
+                app:layout_constraintEnd_toStartOf="@+id/extra_space_for_click_to_play"
                 app:layout_constraintTop_toTopOf="parent"/>
+
+            <View
+                android:id="@+id/extra_space_for_click_to_play"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintStart_toEndOf="@+id/edit_text_item_title"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
             <EditText
                 android:id="@+id/edit_text_input_text"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/add_some_notes"
-                android:maxLength="400"
-                android:textSize="15sp"
+                android:maxLength="600"
+                style="@style/description_text_style"
                 app:layout_constraintTop_toBottomOf="@+id/text_time_start"
                 app:layout_constraintStart_toStartOf="parent"/>
 
-            <TextView
-                android:id="@+id/delete_time_item"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/delete"
-                android:textSize="10sp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
         </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     </androidx.cardview.widget.CardView>
 

@@ -49,9 +49,6 @@ class YouTubeNoteViewModel(
         onItemContentChanged = { item ->
             updateTimeItem(item)
         },
-        onItemToDelete = { item ->
-            deleteTimeItem(item)
-        },
         onTimeClick = { item ->
             playTimeItem(item)
         }
@@ -63,17 +60,21 @@ class YouTubeNoteViewModel(
     val liveNoteData: LiveData<Note?>
         get() = _liveNoteData
 
+    private var _liveNoteDataReassigned = MutableLiveData(false)
+    val liveNoteDataReassigned: LiveData<Boolean>
+        get() = _liveNoteDataReassigned
+
     private var _liveTimeItemList = MutableLiveData<List<TimeItem>>()
     val liveTimeItemList: LiveData<List<TimeItem>>
         get() = _liveTimeItemList
 
-    private var _timeItemLiveDataReassigned = MutableLiveData<Boolean>(false)
+    private var _timeItemLiveDataReassigned = MutableLiveData(false)
     val timeItemLiveDataReassigned: LiveData<Boolean>
         get() = _timeItemLiveDataReassigned
 
 
     /** Decide whether the viewer can edit the note **/
-    private var _canEdit = MutableLiveData<Boolean>(false)
+    private var _canEdit = MutableLiveData(false)
     val canEdit: LiveData<Boolean>
         get() = _canEdit
 
@@ -142,6 +143,8 @@ class YouTubeNoteViewModel(
     private fun getLiveNoteById(noteId: String) {
         _liveNoteData = repository.getLiveNoteById(noteId)
         _status.value = LoadApiStatus.DONE
+
+        _liveNoteDataReassigned.value = true
     }
 
     private fun getLiveTimeItemsResult(noteId: String) {
@@ -350,9 +353,11 @@ class YouTubeNoteViewModel(
 
     }
 
-    private fun deleteTimeItem(timeItem: TimeItem) {
+    fun deleteTimeItem(timeItemIndex: Int) {
+        val timeItemToDelete = liveTimeItemList.value?.get(timeItemIndex)
+
         coroutineScope.launch {
-            when (val result = repository.deleteTimeItem(noteId!!, timeItem)) {
+            when (val result = repository.deleteTimeItem(noteId!!, timeItemToDelete!!)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -444,17 +449,14 @@ class YouTubeNoteViewModel(
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
                 is Result.Error -> {
                     _error.value = result.exception.toString()
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
                 else -> {
                     _error.value = Util.getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
             }
         }
@@ -490,13 +492,16 @@ class YouTubeNoteViewModel(
         }
     }
 
+    fun invokeLiveNoteDataChange() {
+        _liveNoteData.value = _liveNoteData.value
+    }
+
 }
 
 
 data class YouTubeNoteUiState(
     var onItemTitleChanged: (TimeItem) -> Unit,
     var onItemContentChanged: (TimeItem) -> Unit,
-    var onItemToDelete: (TimeItem) -> Unit,
     val onTimeClick: (TimeItem) -> Unit,
     var canEdit: Boolean = false
 )

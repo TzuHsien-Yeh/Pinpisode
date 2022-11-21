@@ -32,6 +32,29 @@
             tools:text="YouTube" />
     </androidx.cardview.widget.CardView>
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/btn_notification_bell"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="@dimen/standard"
+        android:src="@drawable/ic_notification"
+        android:background="@color/selected_tag_background"
+        app:contentPadding="8dp"
+        app:shapeAppearanceOverlay="@style/circle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/badge_notification_not_empty"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_marginTop="11dp"
+        android:layout_marginEnd="12dp"
+        app:layout_constraintEnd_toEndOf="@+id/btn_notification_bell"
+        app:layout_constraintTop_toTopOf="@id/btn_notification_bell"
+        android:background="@color/color_primary_variant"
+        app:shapeAppearanceOverlay="@style/circle"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_tag"
         android:layout_width="0dp"
@@ -45,25 +68,28 @@
         tools:listitem="@layout/item_tag"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/img_pic_to_profile"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_marginStart="@dimen/standard"
+        android:layout_marginVertical="@dimen/standard"
+        android:src="@drawable/app_icon"
+        app:layout_constraintBottom_toTopOf="@id/card_selected_tag"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/circle" />
+
     <TextView
         android:id="@+id/text_user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="6dp"
+        tools:text="hahaha oo"
+        style="@style/yt_bold_17sp"
         app:layout_constraintTop_toTopOf="@+id/img_pic_to_profile"
         app:layout_constraintBottom_toBottomOf="@+id/img_pic_to_profile"
-        app:layout_constraintEnd_toStartOf="@+id/img_pic_to_profile"/>
-
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/img_pic_to_profile"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginVertical="10dp"
-        android:layout_marginEnd="16dp"
-        app:shapeAppearanceOverlay="@style/circle"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/card_sort_by"/>
+        app:layout_constraintStart_toEndOf="@+id/img_pic_to_profile"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_sort_by"
@@ -85,6 +111,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textSize="16sp"
+            style="@style/yt_medium_13sp_text"
             android:textColor="@color/color_primary"
             tools:text="duration"/>
 
@@ -125,7 +152,6 @@
         android:id="@+id/recyclerview_note_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="16dp"
         tools:listitem="@layout/item_note"
         app:layout_constraintTop_toBottomOf="@id/recyclerview_tag"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -137,8 +163,11 @@
         android:layout_height="60dp"
         android:layout_margin="24dp"
         android:src="@drawable/ic_search"
-        app:fabCustomSize="60dp"
+        app:fabCustomSize="58dp"
+        app:maxImageSize="52dp"
+        app:tint="@color/color_primary"
         app:borderWidth="0dp"
+        app:elevation="2dp"
         android:backgroundTint="@color/color_primary_variant"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>

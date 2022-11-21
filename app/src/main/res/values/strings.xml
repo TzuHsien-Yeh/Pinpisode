@@ -3,20 +3,23 @@
     <string name="internet_not_connected">您尚未連接 Internet</string>
     <string name="unknown_error">Unknown error</string>
     <string name="video_not_available">This video is not available anymore.</string>
-    <string name="click_to_take_notes">Click on the video to start taking notes!</string>
+    <string name="click_to_take_notes">Click to start taking notes!</string>
     <string name="end_time_format">&#x20;-&#x20;%s</string>
     <string name="manage_tags_for_this_note">Manage tags for this note</string>
     <string name="id_edit_add_tag">edit_add_tag</string>
     <string name="add_new_tag">Add new tag</string>
     <string name="youtube_note_uri">http://pinpisode/youtube_note/%1s/%2s</string>
+    <string name="spotify_note_uri">http://pinpisode/spotify_note/%1s/%2s</string>
     <string name="send_to">Share link with</string>
     <string name="input_video_summary">Input video summary</string>
     <string name="moment">Moment</string>
     <string name="add_some_notes">Add some notes</string>
     <string name="delete">Delete</string>
+    <string name="quit">Quit</string>
     <string name="pin_your_episodes">Pin your episodes!</string>
     <string name="youtube_note">YouTube Note</string>
     <string name="spotify_note">Spotify Note</string>
+    <string name="coauthor_invitation">Coauthor invitation</string>
     <string name="find_your_episodes">Find your episodes</string>
     <string name="profile">Profile</string>
 
@@ -27,6 +30,15 @@
     <string name="note_owner">Owner</string>
     <string name="add_coauthors">Invite coauthors</string>
     <string name="coauthor">Coauthor</string>
-    <string name="only_note_owner_can_invite_user_to_coauthor">Only note owner can invite others to coauthor</string>
+    <string name="coauthors">Coauthors</string>
+    <string name="quit_coauthoring">Quit coauthoring</string>
     <string name="number_of_coauthors">%d coauthor</string>
+    <string name="invitation_content">%1s invited you to help edit a %2s note:</string>
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
+    <string name="coauthor_invitation_sent">Coauthor invitation sent</string>
+    <string name="trending_on_youtube">Trending on YouTube</string>
+    <string name="trending_on_spotify">What\'s new on Spotify</string>
+    <string name="youtube">YouTube</string>
+    <string name="spotify">Spotify</string>
 </resources>

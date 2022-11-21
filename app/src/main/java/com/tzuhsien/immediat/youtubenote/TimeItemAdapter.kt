@@ -1,8 +1,6 @@
 package com.tzuhsien.immediat.youtubenote
 
-import android.graphics.Typeface
-import android.text.InputType
-import android.text.InputType.TYPE_NULL
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,20 +24,6 @@ class TimeItemAdapter(
 
         fun bind(timeItem: TimeItem, uiState: YouTubeNoteUiState) {
 
-            var deleteViewState = 0
-
-            fun resetDeleteBtnStatus() {
-                deleteViewState = 0
-                binding.deleteTimeItem.text = "Delete"
-                binding.deleteTimeItem.typeface = Typeface.DEFAULT
-            }
-
-            fun confirmDeleteStatus() {
-                deleteViewState = 1
-                binding.deleteTimeItem.text = "Confirm on delete"
-                binding.deleteTimeItem.typeface = Typeface.DEFAULT_BOLD
-            }
-
             binding.textTimeStart.text = timeItem.startAt.formatDuration()
             if (null != timeItem.endAt) {
                 binding.textTimeEnd.visibility = View.VISIBLE
@@ -55,8 +39,8 @@ class TimeItemAdapter(
             val titleView = binding.editTextItemTitle
             val contentView = binding.editTextInputText
 
-            titleView.setBackgroundColor(context.getColor(R.color.transparent))
-            contentView.setBackgroundColor(context.getColor(R.color.transparent))
+            titleView.setBackgroundColor(Color.TRANSPARENT)
+            contentView.setBackgroundColor(Color.TRANSPARENT)
 
             titleView.setText(timeItem.title)
             contentView.setText(timeItem.text)
@@ -65,48 +49,26 @@ class TimeItemAdapter(
                 if (!hasFocus) {
                     timeItem.title = titleView.text.toString()
                     uiState.onItemTitleChanged(timeItem)
-                } else {
-                    resetDeleteBtnStatus()
                 }
             }
             contentView.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     timeItem.text = contentView.text.toString()
                     uiState.onItemContentChanged(timeItem)
-                } else {
-                    resetDeleteBtnStatus()
                 }
             }
 
-            binding.deleteTimeItem.typeface = when (deleteViewState) {
-                0 -> Typeface.DEFAULT
-                1 -> Typeface.DEFAULT_BOLD
-                else -> Typeface.DEFAULT
-            }
-
-            binding.deleteTimeItem.setOnClickListener {
-                when (deleteViewState) {
-                    0 -> {
-                        confirmDeleteStatus()
-                    }
-                    1 -> {
-                        uiState.onItemToDelete(timeItem)
-                        resetDeleteBtnStatus()
-                    }
-                }
-            }
 
             // Play the timeTime when onClicked
             binding.textTimeStart.setOnClickListener {
                 uiState.onTimeClick(timeItem)
-
-                resetDeleteBtnStatus()
             }
 
             binding.textTimeEnd.setOnClickListener {
                 uiState.onTimeClick(timeItem)
-
-                resetDeleteBtnStatus()
+            }
+            binding.extraSpaceForClickToPlay.setOnClickListener {
+                uiState.onTimeClick(timeItem)
             }
 
             /** Disable edit functions only if the viewer is one of the authors **/
@@ -123,7 +85,6 @@ class TimeItemAdapter(
                     contentView.visibility = View.VISIBLE
                 }
             }
-            binding.deleteTimeItem.visibility = if (uiState.canEdit) View.VISIBLE else View.GONE
 
         }
     }

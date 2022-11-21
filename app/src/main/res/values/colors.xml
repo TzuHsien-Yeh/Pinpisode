@@ -9,24 +9,25 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="transparent">#00000000</color>
-    <color name="translucent">#80000000</color>
+    <color name="translucent">#30000000</color>
     <color name="translucent_40">#66000000</color>
     <color name="translucent_80">#cc000000</color>
     <color name="card_color">#FFFFFF</color>
 
 <!--    theme colors-->
     <color name="color_primary">#fff8e6</color>
-    <color name="color_primary_variant">#ff4664</color>
+    <color name="color_primary_variant">#F1576F</color>
     <color name="color_on_primary">#FF000000</color>
 
-    <color name="color_secondary">#ff4664</color>
+    <color name="color_secondary">#F1576F</color>
     <color name="color_secondary_variant">#ffebcf</color>
     <color name="color_on_secondary">#fff8e6</color>
 
-    <color name="selected_tag_background">#fff8e6</color>
+    <color name="selected_tag_background">#EDDBC0</color>
     <color name="tag_text_color">#FF000000</color>
-
-    <color name="theme_medium"></color>
     
-    <color name="old_book_color">#F3EFE6</color>
+    <color name="note_bottom_options_bg">#EDDBC0</color>
+    
+    <color name="light_beige">#fff8e6</color>
+    <color name="beige">#EDDBC0</color>
 </resources>

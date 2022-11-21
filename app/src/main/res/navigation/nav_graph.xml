@@ -17,11 +17,13 @@
             android:id="@+id/action_noteListFragment_to_searchFragment"
             app:destination="@id/searchFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.tzuhsien.immediat.search.SearchFragment"
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" />
+
     <fragment
         android:id="@+id/youTubeNoteFragment"
         android:name="com.tzuhsien.immediat.youtubenote.YouTubeNoteFragment"
@@ -48,15 +50,9 @@
             android:id="@+id/action_youTubeNoteFragment_pop"
             app:popUpTo="@id/youTubeNoteFragment"
             app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_youTubeNoteFragment_to_coauthorDialogFragment"
-            app:destination="@id/coauthorDialogFragment" />
-
     </fragment>
 
-    <action android:id="@+id/action_global_YouTubeNoteFragment"
-        app:destination="@id/youTubeNoteFragment" />
-    <action android:id="@+id/action_global_noteListFragment" app:destination="@id/noteListFragment" />
+
     <dialog
         android:id="@+id/tagDialogFragment"
         android:name="com.tzuhsien.immediat.tag.TagDialogFragment"
@@ -88,9 +84,6 @@
             app:argType="com.tzuhsien.immediat.data.model.Note"
             app:nullable="false"/>
 
-        <action
-            android:id="@+id/action_coauthorDialogFragment_to_youTubeNoteFragment"
-            app:destination="@id/youTubeNoteFragment" />
     </dialog>
     <fragment
         android:id="@+id/spotifyNoteFragment"
@@ -108,9 +101,25 @@
             app:argType="string"
             app:nullable="false" />
 
+        <deepLink
+            android:autoVerify="true"
+            app:uri="http://pinpisode/spotify_note/{note_id_key}/{source_id_key}" />
+
     </fragment>
 
 
     <action android:id="@+id/action_global_spotifyNoteFragment" app:destination="@id/spotifyNoteFragment"/>
+    <fragment
+        android:id="@+id/notificationFragment"
+        android:name="com.tzuhsien.immediat.notification.NotificationFragment"
+        android:label="fragment_notification"
+        tools:layout="@layout/fragment_notification" />
 
+    <action android:id="@+id/action_global_notificationFragment" app:destination="@id/notificationFragment"/>
+    <action android:id="@+id/action_global_coauthorDialogFragment" app:destination="@id/coauthorDialogFragment" />
+    <action android:id="@+id/action_global_YouTubeNoteFragment"
+        app:destination="@id/youTubeNoteFragment" />
+
+    <action android:id="@+id/action_global_noteListFragment"
+        app:destination="@id/noteListFragment" />
 </navigation>
