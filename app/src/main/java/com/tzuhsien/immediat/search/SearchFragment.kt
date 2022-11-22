@@ -132,7 +132,7 @@ class SearchFragment : Fragment() {
         }
 
         /**
-         * Search results of key word
+         * Search results of key words
          * */
         // Display search result
         setUpViewPager()
@@ -146,17 +146,19 @@ class SearchFragment : Fragment() {
 
             binding.tabLayoutSearchResults.visibility = if (null != it) View.VISIBLE else View.GONE
 
-            binding.icYoutube.visibility = if (null == it) View.VISIBLE else View.GONE
-            binding.textTrendingOnYoutube.visibility = if (null == it) View.VISIBLE else View.GONE
-            binding.recyclerviewYtTrending.visibility = if (null == it) View.VISIBLE else View.GONE
+            if (null != it) {
+                binding.icYoutube.visibility = View.GONE
+                binding.textTrendingOnYoutube.visibility = View.GONE
+                binding.recyclerviewYtTrending.visibility = View.GONE
 
-            binding.icSpotify.visibility = if (null == it) View.VISIBLE else View.GONE
-            binding.textNewOnSpotify.visibility = if (null == it) View.VISIBLE else View.GONE
-            binding.recyclerviewSpLatestContent.visibility = if (null == it) View.VISIBLE else View.GONE
-            binding.imgViewCoverSpotifyContent.visibility = if (null == it) View.VISIBLE else View.GONE
-            binding.btnSpotifyAuth.visibility = if (null == it) View.VISIBLE else View.GONE
+                binding.icSpotify.visibility = View.GONE
+                binding.textNewOnSpotify.visibility = View.GONE
+                binding.viewGroupSpNotAuthorized.visibility = View.GONE
+                binding.recyclerviewSpLatestContent.visibility = View.GONE
+                binding.textSpotifyMessage.visibility = View.GONE
+            }
+
         }
-
 
         /**
          * Recommendations
@@ -165,35 +167,50 @@ class SearchFragment : Fragment() {
         binding.recyclerviewYtTrending.adapter = ytTrendingAdapter
         viewModel.ytTrendingList.observe(viewLifecycleOwner) {
             ytTrendingAdapter.submitList(it)
-
-            Timber.d("_ytTrendingList.value = $it")
         }
 
-        // Cover the content if not authorized
+        // Check if Spotify auth token available and if the user want to auth
         viewModel.isAuthRequired.observe(viewLifecycleOwner) {
-            if (it) {
-                showLoginActivityCode.launch(getLoginActivityCodeIntent())
-                viewModel.doneRequestSpotifyAuthToken()
+            when(it) {
+                null -> {
+                    if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
+                        viewModel.getSpotifySavedShowLatestEpisodes()
+                        binding.viewGroupSpNotAuthorized.visibility = View.GONE
+                    }
+                }
+                true -> {
+                    showLoginActivityCode.launch(getLoginActivityCodeIntent())
+                    viewModel.doneRequestSpotifyAuthToken()
+                }
+                false -> {
+                    binding.viewGroupSpNotAuthorized.visibility = View.GONE
+                    viewModel.getSpotifySavedShowLatestEpisodes()
+                }
             }
         }
 
         binding.btnSpotifyAuth.setOnClickListener {
-            showLoginActivityCode.launch(getLoginActivityCodeIntent())
-            viewModel.doneRequestSpotifyAuthToken()
-            viewModel.getSpotifySavedShowLatestEpisodes()
+            viewModel.requestSpotifyAuthToken()
         }
 
+        // The latest episode of user's saved show on Spotify
         val spLatestContentAdapter = SpContentAdapter(viewModel.uiState)
         binding.recyclerviewSpLatestContent.adapter = spLatestContentAdapter
         viewModel.spotifyLatestEpisodesList.observe(viewLifecycleOwner) {
             Timber.d("viewModel.spotifyLatestEpisodesList.observe: $it")
             spLatestContentAdapter.submitList(it)
 
-            binding.btnSpotifyAuth.visibility = if (it[0].id.isEmpty()) View.VISIBLE else View.GONE
-            binding.imgViewCoverSpotifyContent.visibility = if (it[0].id.isEmpty()) View.VISIBLE else View.GONE
-            binding.recyclerviewSpLatestContent.alpha = if (it[0].id.isEmpty()) 0.5F else 1F
+            binding.recyclerviewSpLatestContent.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
+        }
+        viewModel.spotifyMsg.observe(viewLifecycleOwner) {
+            it?.let {
+                binding.textSpotifyMessage.text = it
+            }
         }
 
+        /**
+         *  Navigation
+         * */
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
             it?.let {
                 findNavController().navigate(
@@ -273,24 +290,12 @@ class SearchFragment : Fragment() {
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-//                        "ugc-image-upload",
-                        "user-read-playback-state",
+//                    "user-read-playback-state",
 //                        "user-modify-playback-state",
-                        "user-read-currently-playing",
+//                    "user-read-currently-playing",
                         "app-remote-control",
-//                        "playlist-read-private",
-//                        "playlist-read-collaborative",
-//                        "playlist-modify-private",
-//                        "playlist-modify-public",
-//                        "user-follow-modify",
-                        "user-follow-read",
                         "user-read-playback-position",
-//                        "user-top-read",
-//                        "user-read-recently-played",
-//                        "user-library-modify",
-                        "user-library-read",
-//                        "user-read-email",
-//                        "user-read-private"
+                        "user-library-read"
                     )
                 )
                 .setCustomParam("code_challenge_method", "S256")
@@ -325,6 +330,16 @@ class SearchFragment : Fragment() {
         AuthorizationClient.createLoginActivityIntent(
             activity,
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
+                .setScopes(
+                arrayOf(
+//                    "user-read-playback-state",
+//                        "user-modify-playback-state",
+//                    "user-read-currently-playing",
+                    "app-remote-control",
+                    "user-read-playback-position",
+                    "user-library-read"
+                )
+            )
                 .setCustomParam("grant_type", "authorization_code")
                 .setCustomParam("code", code)
                 .setCustomParam("code_verifier", CODE_VERIFIER)

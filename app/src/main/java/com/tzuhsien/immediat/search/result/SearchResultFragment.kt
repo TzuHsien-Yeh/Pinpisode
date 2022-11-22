@@ -76,7 +76,6 @@ class SearchResultFragment : Fragment() {
         }
 
         if (viewModel.source == Source.SPOTIFY && UserManager.userSpotifyAuthToken.isEmpty()) {
-//            binding.textNeedSpotifyAuth.visibility = View.VISIBLE
             binding.btnSpotifyAuth.visibility = View.VISIBLE
         }
 
@@ -159,24 +158,11 @@ class SearchResultFragment : Fragment() {
                     REDIRECT_URI)
                     .setScopes(
                         arrayOf(
-//                        "ugc-image-upload",
-//                        "user-read-playback-state",
-//                        "user-modify-playback-state",
                             "user-read-currently-playing",
                             "app-remote-control",
-//                        "playlist-read-private",
-//                        "playlist-read-collaborative",
-//                        "playlist-modify-private",
-//                        "playlist-modify-public",
-//                        "user-follow-modify",
                             "user-follow-read",
                             "user-read-playback-position",
-//                        "user-top-read",
-//                        "user-read-recently-played",
-//                        "user-library-modify",
                             "user-library-read",
-//                        "user-read-email",
-//                        "user-read-private"
                         )
                     )
                     .setCustomParam("code_challenge_method", "S256")
@@ -211,9 +197,16 @@ class SearchResultFragment : Fragment() {
         fun getLoginActivityTokenIntent(code: String): Intent =
             AuthorizationClient.createLoginActivityIntent(
                 activity,
-                AuthorizationRequest.Builder(CLIENT_ID,
-                    AuthorizationResponse.Type.TOKEN,
-                    REDIRECT_URI)
+                AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
+                    .setScopes(
+                        arrayOf(
+                            "user-read-currently-playing",
+                            "app-remote-control",
+                            "user-follow-read",
+                            "user-read-playback-position",
+                            "user-library-read",
+                        )
+                    )
                     .setCustomParam("grant_type", "authorization_code")
                     .setCustomParam("code", code)
                     .setCustomParam("code_verifier", CODE_VERIFIER)
