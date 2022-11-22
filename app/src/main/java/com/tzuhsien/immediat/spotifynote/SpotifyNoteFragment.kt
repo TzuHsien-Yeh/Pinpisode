@@ -29,6 +29,7 @@ import com.tzuhsien.immediat.data.model.Source
 import com.tzuhsien.immediat.data.model.TimeItemDisplay
 import com.tzuhsien.immediat.data.source.local.UserManager
 import com.tzuhsien.immediat.databinding.FragmentSpotifyNoteBinding
+import com.tzuhsien.immediat.ext.extractSpotifySourceId
 import com.tzuhsien.immediat.ext.formatDuration
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseSpotifyImageUri
@@ -101,52 +102,43 @@ class SpotifyNoteFragment : Fragment() {
 
                     binding.textTotalTime.text = state.track.duration.formatDuration()
 
-                    if (!state.isPaused) {
-                        // Update new info after the playerState catching up with the current playing track
-                        viewModel.updateNewInfo(state)
+                    if (state.track.uri.extractSpotifySourceId() == viewModel.sourceId) {
+                        // Update new info when the player is playing the assigned uri
+                        viewModel.newSpotifyNote = Note(
+                            source = Source.SPOTIFY.source,
+                            sourceId = viewModel.sourceId,
+                            tags = listOf(Source.SPOTIFY.source),
+                            title = state.track.name,
+                            thumbnail = state.track.imageUri.raw!!.parseSpotifyImageUri(),
+                            duration = state.track.duration.toString()
+                        )
+                        viewModel.invokeCreateNewNoteLiveData()
+                    }
 
-                        // track current playing position in real time
-                        viewModel.unpauseTrackingPosition()
-                    } else {
+                    if (state.isPaused) {
                         // stop the timer from keep updating time
                         viewModel.pauseTrackingPosition()
+                    } else {
+                        // track current playing position in real time
+                        viewModel.unpauseTrackingPosition()
                     }
 
                 }
 
                 SpotifyService.subscribeToPlayerContext { playerContext ->
                     Timber.d("playerContext: $playerContext")
-
                 }
-
-
             }
-
         }
 
-        viewModel.getInfoFromPlayerState.observe(viewLifecycleOwner) {
-            it?.let {
-
-                viewModel.shouldCreateNewNote.observe(viewLifecycleOwner) { shouldCreateNote ->
-                    SpotifyService.getCurrentTrack { track ->
-                        val newSpotifyNote = Note(
-                            source = Source.SPOTIFY.source,
-                            sourceId = viewModel.sourceId,
-                            tags = listOf(Source.SPOTIFY.source),
-                            title = track.name,
-                            thumbnail = track.imageUri.raw!!.parseSpotifyImageUri(),
-                            duration = track.duration.toString()
-                        )
-
-                        if (shouldCreateNote) {
-                            viewModel.createNewSpotifyNote(newSpotifyNote)
-                            viewModel.createNewNoteFinished()
-                        }
-                    }
-
+        viewModel.shouldCreateNewNote.observe(viewLifecycleOwner) { shouldCreateNote ->
+            Timber.d("viewModel.shouldCreateNewNote.observe: $shouldCreateNote, note: ${viewModel.newSpotifyNote}")
+            if (viewModel.newSpotifyNote.sourceId == viewModel.sourceId) {
+                if (shouldCreateNote) {
+                    viewModel.createNewSpotifyNote(viewModel.newSpotifyNote)
+                    viewModel.doneCreatingNewNote()
                 }
             }
-
         }
 
         /**

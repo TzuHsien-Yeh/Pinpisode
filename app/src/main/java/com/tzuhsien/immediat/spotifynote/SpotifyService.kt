@@ -6,7 +6,10 @@ import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.protocol.client.Subscription
-import com.spotify.protocol.types.*
+import com.spotify.protocol.types.ImageUri
+import com.spotify.protocol.types.PlayerContext
+import com.spotify.protocol.types.PlayerState
+import com.spotify.protocol.types.Repeat
 import timber.log.Timber
 
 
@@ -99,12 +102,6 @@ object SpotifyService {
 
     fun seekTo (seekToPosition: Long) {
         spotifyAppRemote?.playerApi?.seekTo(seekToPosition)
-    }
-
-    fun getCurrentTrack(handler: (track: Track) -> Unit) {
-        spotifyAppRemote?.playerApi?.playerState?.setResultCallback { result ->
-            handler(result.track)
-        }
     }
 
     fun subscribeToPlayerState(handler: (PlayerState) -> Unit){

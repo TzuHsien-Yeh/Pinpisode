@@ -4,7 +4,6 @@ import android.os.Handler
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.spotify.protocol.types.PlayerState
 import com.tzuhsien.immediat.MyApplication
 import com.tzuhsien.immediat.R
 import com.tzuhsien.immediat.data.Result
@@ -30,15 +29,13 @@ class SpotifyNoteViewModel(
     var sourceId: String,
 ) : ViewModel() {
 
+    var newSpotifyNote: Note = Note()
+
     var playingState = PlayingState.STOPPED
 
     private val _isSpotifyNeedLogin = MutableLiveData<Boolean>(false)
     val isSpotifyNeedLogin: LiveData<Boolean>
         get() = _isSpotifyNeedLogin
-
-    private val _getInfoFromPlayerState = MutableLiveData<PlayerState?>(null)
-    val getInfoFromPlayerState: LiveData<PlayerState?>
-        get() = _getInfoFromPlayerState
 
     private val _isSpotifyConnected = MutableLiveData<Boolean>(false)
     val isSpotifyConnected: LiveData<Boolean>
@@ -220,6 +217,7 @@ class SpotifyNoteViewModel(
     }
 
     private fun checkSpotifyNoteExistence(sourceId: String) {
+        Timber.d("checkSpotifyNoteExistence sourceId: $sourceId")
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
@@ -229,6 +227,8 @@ class SpotifyNoteViewModel(
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
 
+
+                    Timber.d("checkSpotifyNoteExistence: success")
                     if (null == result.data) {
                         // note not exist, create a new note with info from playerState
                         _shouldCreateNewNote.value = true
@@ -238,7 +238,6 @@ class SpotifyNoteViewModel(
                         checkIfViewerCanEdit(result.data.authors.contains(UserManager.userId))
                         getLiveNoteById(result.data.id)
                         getLiveTimeItemsResult(result.data.id)
-                        createNewNoteFinished()
                     }
                 }
                 is Result.Fail -> {
@@ -259,6 +258,7 @@ class SpotifyNoteViewModel(
 
 
     fun createNewSpotifyNote(newSpotifyNote: Note) {
+        Timber.d("createNewSpotifyNote(newSpotifyNote)")
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
@@ -274,7 +274,9 @@ class SpotifyNoteViewModel(
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
 
-                    // new note created,
+                    Timber.d("createNewSpotifyNote SUCCESS")
+                    // new note created
+                    _shouldCreateNewNote.value = false
                     // save one time note info & noteId, check if user is in author list, and start listening to live data
                     noteId = result.data.id
                     checkIfViewerCanEdit(result.data.authors.contains(UserManager.userId))
@@ -300,15 +302,6 @@ class SpotifyNoteViewModel(
                 }
             }
         }
-    }
-
-    fun updateNewInfo(state: PlayerState) {
-        _getInfoFromPlayerState.value = state
-    }
-
-    fun createNewNoteFinished() {
-        _shouldCreateNewNote.value = false
-        _getInfoFromPlayerState.value = null
     }
 
     private fun checkIfViewerCanEdit(isInAuthors: Boolean) {
@@ -495,6 +488,13 @@ class SpotifyNoteViewModel(
         positionHandler.postDelayed(positionUpdateRunnable, 500)
     }
 
+    fun doneCreatingNewNote() {
+        _shouldCreateNewNote.value = false
+    }
+
+    fun invokeCreateNewNoteLiveData() {
+        _shouldCreateNewNote.value = _shouldCreateNewNote.value
+    }
 
 }
 
