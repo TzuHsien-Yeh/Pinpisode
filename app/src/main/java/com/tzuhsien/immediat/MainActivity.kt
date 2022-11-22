@@ -57,7 +57,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // initialize timber
-        Timber.plant(Timber.DebugTree())
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
@@ -83,12 +86,12 @@ class MainActivity : AppCompatActivity() {
         val toolbar: Toolbar = binding.toolbar
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
-        binding.toolbar.visibility= View.VISIBLE
+        binding.toolbar.visibility = View.VISIBLE
         binding.toolbar.navigationIcon = null
         binding.toolbarText.text = getString(R.string.pin_your_episodes)
 
-        navController.addOnDestinationChangedListener{controller, destination, arguments->
-            when(destination.id){
+        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            when (destination.id) {
 
                 R.id.noteListFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
@@ -181,7 +184,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleIntent(intentExtras: Bundle){
+    private fun handleIntent(intentExtras: Bundle) {
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
@@ -196,31 +199,35 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (UserManager.userId != null) {
-            intentExtras.getString(Intent.EXTRA_TEXT)?.let {
-                if (it.contains("spotify")){
+            intentExtras.getString(Intent.EXTRA_TEXT)?.let { extra ->
+                if (extra.contains("spotify")) {
                     // Handle Spotify intent
-                    val sourceId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
-                    if (null != sourceId){
-                        Timber.d("HANDLE spotify INTENT FUN intent extras : $sourceId")
+
+                    val sourceId =
+                        intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
+                    sourceId?.let { it ->
+
+                        Timber.d("HANDLE spotify INTENT FUN intent extras : $it")
 
                         navController.navigate(
-                            SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(sourceIdKey = sourceId)
+                            SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+                                sourceIdKey = it)
                         )
                     }
 
                 } else {
                     // Handle YouTube intent
-                    val sourceId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
-                    if (null != sourceId){
-                        Timber.d("HANDLE youtube INTENT FUN intent extras : $sourceId")
+                    val videoId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
+                    videoId?.let {
+                        Timber.d("HANDLE youtube INTENT FUN intent extras : $it")
 
                         navController.navigate(
-                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = sourceId)
+                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = it)
                         )
                     }
                 }
-            }
 
+            }
         }
 
     }

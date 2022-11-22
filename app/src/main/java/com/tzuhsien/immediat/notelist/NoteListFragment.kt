@@ -36,7 +36,6 @@ class NoteListFragment : Fragment() {
     val scrollJob = Job()
     val coroutineScope = CoroutineScope(scrollJob + Dispatchers.Main)
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -63,6 +62,9 @@ class NoteListFragment : Fragment() {
             .into(binding.imgPicToProfile)
         binding.textUserName.text = UserManager.userName
         binding.imgPicToProfile.setOnClickListener {
+            findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToProfileFragment())
+        }
+        binding.textUserName.setOnClickListener {
             findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToProfileFragment())
         }
 

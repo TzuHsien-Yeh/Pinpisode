@@ -143,19 +143,24 @@ class SpotifyNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            val connectResult = SpotifyService.connectToAppRemote()
-
-            when (connectResult) {
-                is Result.Success -> {
-                    _status.value = LoadApiStatus.DONE
+//            val connectResult =
+                SpotifyService.connectToAppRemote(MyApplication.applicationContext()){
+                if (it) {
                     _isSpotifyConnected.value = true
                 }
-                is Result.Fail -> {
-                    _error.value = connectResult.error
-                    _isSpotifyNeedLogin.value = true
-                }
-                else -> {}
             }
+
+//            when (connectResult) {
+//                is Result.Success -> {
+//                    _status.value = LoadApiStatus.DONE
+//                    _isSpotifyConnected.value = true
+//                }
+//                is Result.Fail -> {
+//                    _error.value = connectResult.error
+//                    _isSpotifyNeedLogin.value = true
+//                }
+//                else -> {}
+//            }
 
 
         }

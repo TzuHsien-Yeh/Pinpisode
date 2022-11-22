@@ -7,6 +7,7 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="white_transparent">#50FFFFFF</color>
 
     <color name="transparent">#00000000</color>
     <color name="translucent">#30000000</color>
@@ -15,12 +16,12 @@
     <color name="card_color">#FFFFFF</color>
 
 <!--    theme colors-->
-    <color name="color_primary">#fff8e6</color>
-    <color name="color_primary_variant">#F1576F</color>
+    <color name="color_primary">#EDDBC0</color>
+    <color name="color_primary_variant">#FF7171</color>
     <color name="color_on_primary">#FF000000</color>
 
-    <color name="color_secondary">#F1576F</color>
-    <color name="color_secondary_variant">#ffebcf</color>
+    <color name="color_secondary">#FF7171</color>
+    <color name="color_secondary_variant">#EDDBC0</color>
     <color name="color_on_secondary">#fff8e6</color>
 
     <color name="selected_tag_background">#EDDBC0</color>

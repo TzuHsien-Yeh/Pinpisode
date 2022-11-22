@@ -1,18 +1,13 @@
 package com.tzuhsien.immediat.spotifynote
 
+import android.content.Context
 import android.graphics.Bitmap
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.protocol.client.Subscription
-import com.spotify.protocol.types.ImageUri
-import com.spotify.protocol.types.PlayerState
-import com.spotify.protocol.types.Track
-import com.tzuhsien.immediat.MyApplication
-import com.tzuhsien.immediat.data.Result
+import com.spotify.protocol.types.*
 import timber.log.Timber
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 
 enum class PlayingState {
@@ -31,24 +26,45 @@ object SpotifyService {
         .showAuthView(true)
         .build()
     private var playerStateSubscription: Subscription<PlayerState>? = null
+    private var playerContextSubscription: Subscription<PlayerContext>? = null
 
+//    suspend fun connectToAppRemote(): Result<SpotifyAppRemote> =
+//        suspendCoroutine { cont ->
+//            SpotifyAppRemote.connect(
+//                MyApplication.applicationContext(),
+//                connectionParams,
+//                object : Connector.ConnectionListener {
+//                    override fun onConnected(spotifyAppRemote: SpotifyAppRemote) {
+//                        this@SpotifyService.spotifyAppRemote = spotifyAppRemote
+//                        cont.resume(Result.Success(spotifyAppRemote))
+//                    }
+//
+//                    override fun onFailure(error: Throwable) {
+//                        cont.resume(Result.Fail(error.message!!))
+//                    }
+//                })
+//        }
 
-    suspend fun connectToAppRemote(): Result<SpotifyAppRemote> =
-        suspendCoroutine { cont ->
-            SpotifyAppRemote.connect(
-                MyApplication.applicationContext(),
-                connectionParams,
-                object : Connector.ConnectionListener {
-                    override fun onConnected(spotifyAppRemote: SpotifyAppRemote) {
-                        this@SpotifyService.spotifyAppRemote = spotifyAppRemote
-                        cont.resume(Result.Success(spotifyAppRemote))
-                    }
+    fun connectToAppRemote(context: Context, handler: (connected: Boolean) -> Unit) {
 
-                    override fun onFailure(error: Throwable) {
-                        cont.resume(Result.Fail(error.message!!))
-                    }
-                })
+        if (spotifyAppRemote?.isConnected == true) {
+            handler(true)
+            return
         }
+
+        val connectionListener = object : Connector.ConnectionListener {
+            override fun onConnected(spAppRemote: SpotifyAppRemote) {
+                spotifyAppRemote = spAppRemote
+                handler(true)
+            }
+
+            override fun onFailure(throwable: Throwable) {
+                Timber.e("SpotifyService", throwable.message, throwable)
+                handler(false)
+            }
+        }
+        SpotifyAppRemote.connect(context, connectionParams, connectionListener)
+    }
 
     fun disconnect() {
         SpotifyAppRemote.disconnect(spotifyAppRemote)
@@ -56,6 +72,7 @@ object SpotifyService {
 
     fun play(uri: String) {
         spotifyAppRemote?.playerApi?.play(uri)
+        spotifyAppRemote?.playerApi?.setRepeat(Repeat.ONE)
     }
 
     fun resume() {
@@ -112,6 +129,31 @@ object SpotifyService {
                 }
             })
             ?.setErrorCallback { } as Subscription<PlayerState>
+        }
+    }
+
+    fun subscribeToPlayerContext(handler: (PlayerContext) -> Unit){
+        val playerContextEventCallback = Subscription.EventCallback<PlayerContext> { playerContext ->
+            handler(playerContext)
+        }
+
+        playerContextSubscription = cancelAndResetSubscription(playerContextSubscription)
+
+        spotifyAppRemote?.let {
+            playerContextSubscription =
+                it.playerApi.subscribeToPlayerContext().setEventCallback(
+                    playerContextEventCallback
+                )?.setLifecycleCallback(
+                    object : Subscription.LifecycleCallback {
+                        override fun onStart() {
+                            Timber.d("Event: start")
+                        }
+
+                        override fun onStop() {
+                            Timber.d("Event: end")
+                        }
+                    })
+                    ?.setErrorCallback { } as Subscription<PlayerContext>
         }
     }
 

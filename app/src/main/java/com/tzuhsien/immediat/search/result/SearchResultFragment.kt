@@ -108,6 +108,7 @@ class SearchResultFragment : Fragment() {
 
             viewModel.navigateToSpotifyNote.observe(viewLifecycleOwner) {
                 it?.let {
+                    Timber.d("viewModel.navigateToSpotifyNote.observe: $it")
                     findNavController().navigate(
                         SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
                             sourceIdKey = it

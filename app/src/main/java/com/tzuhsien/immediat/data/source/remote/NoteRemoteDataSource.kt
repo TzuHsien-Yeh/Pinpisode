@@ -49,7 +49,7 @@ object NoteRemoteDataSource : DataSource {
 
     // Spotify
     private const val SPOTIFY_BEARER = "Bearer "
-    private const val SPOTIFY_PARAM_TYPE = "episode,track"
+    private const val SPOTIFY_PARAM_TYPE = "episode"
 
     override fun getAllLiveNotes(): MutableLiveData<List<Note>> {
         val liveData = MutableLiveData<List<Note>>()

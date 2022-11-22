@@ -20,6 +20,7 @@
         android:id="@+id/text_note_owner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/yt_bold_17sp"
         android:text="@string/note_owner"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -39,6 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
+        style="@style/yt_medium_14sp_text"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@+id/text_note_owner"
         android:text="@string/coauthor"/>
@@ -62,16 +64,20 @@
         android:layout_height="wrap_content"
         android:text="@string/add_coauthors"
         android:layout_marginTop="16dp"
+        style="@style/yt_bold_17sp"
         app:layout_constraintTop_toBottomOf="@id/img_owner_pic"
         app:layout_constraintStart_toStartOf="parent"/>
 
-    <SearchView
+    <androidx.appcompat.widget.SearchView
         android:id="@+id/search_user_by_email"
         android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:queryHint="Find user by email"
-        android:iconifiedByDefault="false"
+        app:queryHint="Find user by email"
+        app:theme="@style/search_view_style"
+        app:queryBackground="@null"
+        app:background="@null"
+        app:iconifiedByDefault="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_invite_coauthors" />
@@ -100,6 +106,7 @@
             android:id="@+id/text_search_result_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/yt_medium_17sp"
             android:layout_marginHorizontal="16dp"
             app:layout_constraintStart_toEndOf="@id/img_search_result_pic"
             app:layout_constraintTop_toTopOf="@+id/img_search_result_pic"/>
@@ -108,6 +115,7 @@
             android:id="@+id/text_search_result_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/yt_medium_17sp"
             android:layout_marginHorizontal="16dp"
             app:layout_constraintStart_toEndOf="@+id/img_search_result_pic"
             app:layout_constraintBottom_toBottomOf="@+id/img_search_result_pic"/>
@@ -125,7 +133,7 @@
         android:background="@drawable/bg_small_radius_rounded_corner"
         android:paddingHorizontal="@dimen/standard"
         android:paddingVertical="8dp"
-        android:fontFamily="bold"
+        style="@style/yt_bold_20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/img_owner_pic"
@@ -138,6 +146,7 @@
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/standard"
         android:textAlignment="center"
+        style="@style/yt_bold_20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/search_user_by_email"
