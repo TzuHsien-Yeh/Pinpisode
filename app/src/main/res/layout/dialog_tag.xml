@@ -15,6 +15,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:paddingBottom="16dp"
         app:layout_constraintStart_toStartOf="parent">
+
         <TextView
             android:id="@+id/text_add_tags"
             android:layout_width="match_parent"

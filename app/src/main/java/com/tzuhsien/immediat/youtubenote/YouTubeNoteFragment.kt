@@ -136,8 +136,10 @@ class YouTubeNoteFragment : Fragment() {
                 }
                 binding.editDigest.setOnFocusChangeListener { _, hasFocus ->
                     if (!hasFocus) {
-                        viewModel.noteToBeUpdated?.digest = binding.editDigest.text.toString()
-                        viewModel.updateNote()
+                        viewModel.noteToBeUpdated?.let { note ->
+                            note.digest = binding.editDigest.text.toString()
+                            viewModel.updateNote()
+                        }
                     }
                 }
             }
@@ -235,8 +237,9 @@ class YouTubeNoteFragment : Fragment() {
          *  Buttons on the bottom of the page: Navigate to tag fragment
          * */
         binding.icAddTag.setOnClickListener {
-            findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(
-                viewModel.noteToBeUpdated!!))
+            viewModel.noteToBeUpdated?.let {
+                findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(it))
+            }
         }
 
         /**

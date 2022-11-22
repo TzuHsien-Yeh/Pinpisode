@@ -79,9 +79,13 @@ class SpotifyNoteFragment : Fragment() {
             if (it) {
                 SpotifyService.play(SPOTIFY_URI + viewModel.sourceId)
 
+                Timber.d("SpotifyService.play(${SPOTIFY_URI + viewModel.sourceId})")
+
+
                 SpotifyService.subscribeToPlayerState { state ->
                     updateSeekbar(state)
                     updatePlayPauseButton(state)
+
                     viewModel.updateCurrentPosition(state.playbackPosition)
                     viewModel.startTrackingPosition()
 
@@ -89,13 +93,11 @@ class SpotifyNoteFragment : Fragment() {
                         binding.imgCoverArt.setImageBitmap(it)
                     }
                     binding.textSourceTitle.text = state.track.name
-                    Timber.d("state.track: ${state.track}")
                     binding.textPublisher.text = if (state.track.isPodcast) {
                         state.track.album.name
                     } else {
                         state.track.artist.name
                     }
-
 
                     binding.textTotalTime.text = state.track.duration.formatDuration()
 
@@ -111,6 +113,12 @@ class SpotifyNoteFragment : Fragment() {
                     }
 
                 }
+
+                SpotifyService.subscribeToPlayerContext { playerContext ->
+                    Timber.d("playerContext: $playerContext")
+
+                }
+
 
             }
 
@@ -183,7 +191,7 @@ class SpotifyNoteFragment : Fragment() {
          * **/
         viewModel.currentPosition.observe(viewLifecycleOwner) { currentSec ->
 
-            Timber.d("viewModel.currentPosition.observe: $currentSec")
+//            Timber.d("viewModel.currentPosition.observe: $currentSec")
             // Text of time to show progress
             binding.textCurrentSecond.text = currentSec.formatDuration()
 

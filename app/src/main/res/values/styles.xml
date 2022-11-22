@@ -48,10 +48,6 @@
         <item name="fontFamily">@font/youtube_sans_bold</item>
     </style>
 
-    <style name="yt_medium_19sp" parent="">
-        <item name="android:textSize">19sp</item>
-        <item name="fontFamily">@font/youtube_sans_medium</item>
-    </style>
 
     <style name="yt_bold_17sp" parent="">
         <item name="android:textSize">17sp</item>
@@ -78,6 +74,16 @@
     </style>
     <style name="yt_medium_14sp_text" parent="">
         <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/youtube_sans_medium</item>
+    </style>
+
+    <style name="yt_medium_17sp" parent="">
+        <item name="android:textSize">17sp</item>
+        <item name="fontFamily">@font/youtube_sans_medium</item>
+    </style>
+
+    <style name="yt_medium_19sp" parent="">
+        <item name="android:textSize">19sp</item>
         <item name="fontFamily">@font/youtube_sans_medium</item>
     </style>
     <style name="small_text_style" parent="">

@@ -9,9 +9,9 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/card_selected_tag"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="38dp"
         android:layout_marginStart="16dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="11dp"
         android:visibility="gone"
         app:cardBackgroundColor="@color/selected_tag_background"
         app:cardCornerRadius="20dp"
@@ -25,8 +25,9 @@
             android:id="@+id/text_selected_tag"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginHorizontal="8dp"
+            android:layout_marginHorizontal="11dp"
             android:layout_marginVertical="6dp"
+            style="@style/yt_medium_14sp_text"
             android:textColor="@color/tag_text_color"
             android:textSize="17sp"
             tools:text="YouTube" />
@@ -42,6 +43,7 @@
         app:contentPadding="8dp"
         app:shapeAppearanceOverlay="@style/circle"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/card_sort_by"
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <com.google.android.material.imageview.ShapeableImageView
@@ -59,11 +61,10 @@
         android:id="@+id/recyclerview_tag"
         android:layout_width="0dp"
         android:layout_height="38dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="3dp"
-        app:layout_constraintBottom_toBottomOf="@+id/card_sort_by"
+        android:layout_marginHorizontal="@dimen/standard"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerview_note_list"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/card_sort_by"
+        app:layout_constraintEnd_toEndOf="parent"
         android:orientation="horizontal"
         tools:listitem="@layout/item_tag"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
@@ -73,9 +74,8 @@
         android:layout_width="46dp"
         android:layout_height="46dp"
         android:layout_marginStart="@dimen/standard"
-        android:layout_marginVertical="@dimen/standard"
+        android:layout_marginTop="@dimen/standard"
         android:src="@drawable/app_icon"
-        app:layout_constraintBottom_toTopOf="@id/card_selected_tag"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearanceOverlay="@style/circle" />
@@ -95,10 +95,10 @@
         android:id="@+id/card_sort_by"
         android:layout_width="80dp"
         android:layout_height="38dp"
-        android:layout_marginEnd="3dp"
-        android:layout_marginBottom="6dp"
-        app:layout_constraintBottom_toTopOf="@+id/recyclerview_note_list"
-        app:layout_constraintEnd_toStartOf="@id/btn_switch_direction"
+        android:layout_marginEnd="@dimen/standard"
+        android:layout_marginBottom="14dp"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerview_tag"
+        app:layout_constraintEnd_toEndOf="parent"
         app:cardElevation="2dp"
         app:cardCornerRadius="20dp"
         app:cardBackgroundColor="@color/color_primary_variant"
@@ -121,27 +121,28 @@
         android:id="@+id/btn_switch_direction"
         android:layout_width="wrap_content"
         android:layout_height="38dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toStartOf="@+id/card_sort_by"
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="@+id/card_sort_by"
         app:layout_constraintBottom_toBottomOf="@+id/card_sort_by">
 
         <ImageView
             android:id="@+id/sort_asc"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginEnd="4dp"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/sort_desc"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/sort_desc"
             android:src="@drawable/ic_triangle"/>
 
         <ImageView
             android:id="@+id/sort_desc"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/sort_asc"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:src="@drawable/ic_triangle"
             android:scaleY="-1"
@@ -152,9 +153,9 @@
         android:id="@+id/recyclerview_note_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="14dp"
         tools:listitem="@layout/item_note"
-        app:layout_constraintTop_toBottomOf="@id/recyclerview_tag"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerview_tag"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
