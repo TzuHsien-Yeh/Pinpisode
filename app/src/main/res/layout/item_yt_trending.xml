@@ -33,8 +33,7 @@
 
             <TextView
                 android:id="@+id/text_title"
-                style="@style/source_title_style"
-                android:textSize="16sp"
+                style="@style/yt_bold_17sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -53,7 +52,7 @@
                 tools:text="channel title"
                 android:maxLines="1"
                 android:ellipsize="end"
-                style="@style/description_text_style"
+                style="@style/yt_medium_15sp"
                 app:layout_constraintTop_toBottomOf="@+id/text_title"/>
             <TextView
                 android:id="@+id/text_published_time"

@@ -41,7 +41,7 @@
         tools:text="gfsvkvavhilfafdsoihgftyughkjgfyughjhgfdrtyuijhgfdrtyuijkhgfdgchjbvgfuyghkjbhgvfgugyhkjnbnvcfghv"
         android:maxLines="2"
         android:ellipsize="end"
-        style="@style/description_text_style"
+        style="@style/yt_medium_15sp"
         app:layout_constraintTop_toBottomOf="@+id/text_source_title"
         app:layout_constraintStart_toStartOf="@+id/text_source_title"
         app:layout_constraintEnd_toEndOf="parent"/>

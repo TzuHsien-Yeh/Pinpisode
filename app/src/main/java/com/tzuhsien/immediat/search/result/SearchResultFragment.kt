@@ -158,9 +158,9 @@ class SearchResultFragment : Fragment() {
                     REDIRECT_URI)
                     .setScopes(
                         arrayOf(
-                            "user-read-currently-playing",
-                            "app-remote-control",
-                            "user-follow-read",
+//                            "user-read-currently-playing",
+//                            "app-remote-control",
+//                            "user-follow-read",
                             "user-read-playback-position",
                             "user-library-read",
                         )
@@ -200,9 +200,9 @@ class SearchResultFragment : Fragment() {
                 AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
                     .setScopes(
                         arrayOf(
-                            "user-read-currently-playing",
-                            "app-remote-control",
-                            "user-follow-read",
+//                            "user-read-currently-playing",
+//                            "app-remote-control",
+//                            "user-follow-read",
                             "user-read-playback-position",
                             "user-library-read",
                         )

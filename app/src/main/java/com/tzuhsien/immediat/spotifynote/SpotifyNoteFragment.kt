@@ -53,74 +53,6 @@ class SpotifyNoteFragment : Fragment() {
     private lateinit var binding: FragmentSpotifyNoteBinding
     private lateinit var trackProgressBar: TrackProgressBar
 
-    override fun onDestroy() {
-        super.onDestroy()
-        SpotifyService.disconnect()
-        Intent(context, SpotifyNoteService::class.java).apply {
-            action = SpotifyNoteService.ACTION_STOP
-            context?.startService(this)
-        }
-        Timber.d("onDestroy() CALLED")
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-    private fun registerTimestampReceiver() {
-        val timestampReceiver = TimestampReceiver(TimestampReceiver.OnActionListener {
-            when (it) {
-                TimestampReceiver.ACTION_TAKE_TIMESTAMP -> takeTimestamp()
-                TimestampReceiver.ACTION_CLIP_START -> startClipping() // save clipStartSec
-                TimestampReceiver.ACTION_CLIP_END -> endClipping() // createTimeItem
-            }
-        })
-
-        val filter = IntentFilter().apply {
-            addAction(TimestampReceiver.ACTION_TAKE_TIMESTAMP)
-            addAction(TimestampReceiver.ACTION_CLIP_START)
-            addAction(TimestampReceiver.ACTION_CLIP_END)
-        }
-        context?.registerReceiver(timestampReceiver, filter)
-    }
-
-    private fun takeTimestamp() {
-        Timber.d("takeTimestamp")
-        viewModel.createTimeItem((viewModel.currentSecond / 1000).toFloat(), null)
-    }
-
-    private fun startClipping() {
-        Timber.d("clipStart")
-        viewModel.startAt = (viewModel.currentSecond / 1000).toFloat()
-
-        val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
-
-        binding.btnClip.apply {
-            setImageResource(R.drawable.ic_clipping_stop)
-            startAnimation(animation)
-        }
-        viewModel.startOrStopToggle = 1
-
-        Intent(context, SpotifyNoteService::class.java).apply {
-            this.action = SpotifyNoteService.ACTION_START_CLIPPING
-            context?.startService(this)
-        }
-    }
-
-    private fun endClipping() {
-        Timber.d("clipEnd")
-        viewModel.endAt = (viewModel.currentSecond / 1000).toFloat()
-        binding.btnClip.setImageResource(R.drawable.ic_clip)
-        binding.btnClip.animation = null
-        viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
-        viewModel.startOrStopToggle = 0
-
-        Intent(context, SpotifyNoteService::class.java).apply {
-            this.action = SpotifyNoteService.ACTION_DONE_CLIPPING
-            context?.startService(this)
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -512,6 +444,74 @@ class SpotifyNoteFragment : Fragment() {
             })
     }
 
+    // Receive action on notification
+    private val timestampReceiver = TimestampReceiver(TimestampReceiver.OnActionListener {
+        when (it) {
+            TimestampReceiver.ACTION_TAKE_TIMESTAMP -> takeTimestamp()
+            TimestampReceiver.ACTION_CLIP_START -> startClipping() // save clipStartSec
+            TimestampReceiver.ACTION_CLIP_END -> endClipping() // createTimeItem
+        }
+    })
+
+    private fun registerTimestampReceiver() {
+        val filter = IntentFilter().apply {
+            addAction(TimestampReceiver.ACTION_TAKE_TIMESTAMP)
+            addAction(TimestampReceiver.ACTION_CLIP_START)
+            addAction(TimestampReceiver.ACTION_CLIP_END)
+        }
+        context?.registerReceiver(timestampReceiver, filter)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        SpotifyService.disconnect()
+        Intent(context, SpotifyNoteService::class.java).apply {
+            action = SpotifyNoteService.ACTION_STOP
+            context?.startService(this)
+        }
+        context?.unregisterReceiver(timestampReceiver)
+        Timber.d("onDestroy() CALLED")
+    }
+
+    /**
+     *  Take timestamp / clip
+     * */
+    private fun takeTimestamp() {
+        Timber.d("takeTimestamp")
+        viewModel.createTimeItem((viewModel.currentSecond / 1000).toFloat(), null)
+    }
+
+    private fun startClipping() {
+        Timber.d("clipStart")
+        viewModel.startAt = (viewModel.currentSecond / 1000).toFloat()
+
+        val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
+
+        binding.btnClip.apply {
+            setImageResource(R.drawable.ic_clipping_stop)
+            startAnimation(animation)
+        }
+        viewModel.startOrStopToggle = 1
+
+        Intent(context, SpotifyNoteService::class.java).apply {
+            this.action = SpotifyNoteService.ACTION_START_CLIPPING
+            context?.startService(this)
+        }
+    }
+
+    private fun endClipping() {
+        Timber.d("clipEnd")
+        viewModel.endAt = (viewModel.currentSecond / 1000).toFloat()
+        binding.btnClip.setImageResource(R.drawable.ic_clip)
+        binding.btnClip.animation = null
+        viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
+        viewModel.startOrStopToggle = 0
+
+        Intent(context, SpotifyNoteService::class.java).apply {
+            this.action = SpotifyNoteService.ACTION_DONE_CLIPPING
+            context?.startService(this)
+        }
+    }
 
     /**
      *  Spotify Auth flow
@@ -550,24 +550,11 @@ class SpotifyNoteFragment : Fragment() {
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-//                        "ugc-image-upload",
-//                        "user-read-playback-state",
-//                        "user-modify-playback-state",
-                        "user-read-currently-playing",
-                        "app-remote-control",
-//                        "playlist-read-private",
-//                        "playlist-read-collaborative",
-//                        "playlist-modify-private",
-//                        "playlist-modify-public",
-//                        "user-follow-modify",
-                        "user-follow-read",
+//                        "user-read-currently-playing",
+//                        "app-remote-control",
+//                        "user-follow-read",
                         "user-read-playback-position",
-//                        "user-top-read",
-//                        "user-read-recently-played",
-//                        "user-library-modify",
                         "user-library-read",
-//                        "user-read-email",
-//                        "user-read-private"
                     )
                 )
                 .setCustomParam("code_challenge_method", "S256")

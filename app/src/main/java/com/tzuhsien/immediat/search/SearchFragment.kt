@@ -284,7 +284,7 @@ class SearchFragment : Fragment() {
         }
     }
 
-    fun getLoginActivityCodeIntent(): Intent =
+    private fun getLoginActivityCodeIntent(): Intent =
         AuthorizationClient.createLoginActivityIntent(
             activity,
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
@@ -293,7 +293,7 @@ class SearchFragment : Fragment() {
 //                    "user-read-playback-state",
 //                        "user-modify-playback-state",
 //                    "user-read-currently-playing",
-                        "app-remote-control",
+//                        "app-remote-control",
                         "user-read-playback-position",
                         "user-library-read"
                     )
@@ -326,7 +326,7 @@ class SearchFragment : Fragment() {
         }
     }
 
-    fun getLoginActivityTokenIntent(code: String): Intent =
+    private fun getLoginActivityTokenIntent(code: String): Intent =
         AuthorizationClient.createLoginActivityIntent(
             activity,
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
@@ -335,7 +335,7 @@ class SearchFragment : Fragment() {
 //                    "user-read-playback-state",
 //                        "user-modify-playback-state",
 //                    "user-read-currently-playing",
-                    "app-remote-control",
+//                    "app-remote-control",
                     "user-read-playback-position",
                     "user-library-read"
                 )

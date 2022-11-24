@@ -183,7 +183,9 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
                 when (episodeResult) {
                     is Result.Success -> {
-                        list.add(episodeResult.data.items[0])
+                        val latestEpisode = episodeResult.data.items[0]
+                        latestEpisode.show = item.show
+                        list.add(latestEpisode)
                     }
                     is Result.Fail -> {
                         _error.value = episodeResult.error
