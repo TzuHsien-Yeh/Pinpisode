@@ -7,6 +7,7 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable-v24/button_dialog_close_ripple.xml" value="0.242" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/bg_dialog.xml" value="0.171" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/bg_edit_text_chip_style.xml" value="0.1935" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/bg_rounded_pink.xml" value="0.169" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/bg_search_bar.xml" value="0.171" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/bg_small_radius_rounded_corner.xml" value="0.341" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/bottom_nav_item_selector.xml" value="0.126" />
@@ -47,6 +48,7 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_timestamp_card.xml" value="0.22135416666666666" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_yt_search_result.xml" value="0.21041666666666667" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_yt_trending.xml" value="0.25" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/notification_layout.xml" value="0.30775075987841943" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/menu/bottom_nav_menu.xml" value="0.3625" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1" />
       </map>

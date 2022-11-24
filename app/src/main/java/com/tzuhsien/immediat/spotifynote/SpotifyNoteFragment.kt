@@ -1,6 +1,7 @@
 package com.tzuhsien.immediat.spotifynote
 
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
@@ -55,7 +56,69 @@ class SpotifyNoteFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         SpotifyService.disconnect()
-        Timber.d("onDestroy(): SpotifyService.disconnect()")
+        Intent(context, SpotifyNoteService::class.java).apply {
+            action = SpotifyNoteService.ACTION_STOP
+            context?.startService(this)
+        }
+        Timber.d("onDestroy() CALLED")
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
+    private fun registerTimestampReceiver() {
+        val timestampReceiver = TimestampReceiver(TimestampReceiver.OnActionListener {
+            when (it) {
+                TimestampReceiver.ACTION_TAKE_TIMESTAMP -> takeTimestamp()
+                TimestampReceiver.ACTION_CLIP_START -> startClipping() // save clipStartSec
+                TimestampReceiver.ACTION_CLIP_END -> endClipping() // createTimeItem
+            }
+        })
+
+        val filter = IntentFilter().apply {
+            addAction(TimestampReceiver.ACTION_TAKE_TIMESTAMP)
+            addAction(TimestampReceiver.ACTION_CLIP_START)
+            addAction(TimestampReceiver.ACTION_CLIP_END)
+        }
+        context?.registerReceiver(timestampReceiver, filter)
+    }
+
+    private fun takeTimestamp() {
+        Timber.d("takeTimestamp")
+        viewModel.createTimeItem((viewModel.currentSecond / 1000).toFloat(), null)
+    }
+
+    private fun startClipping() {
+        Timber.d("clipStart")
+        viewModel.startAt = (viewModel.currentSecond / 1000).toFloat()
+
+        val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
+
+        binding.btnClip.apply {
+            setImageResource(R.drawable.ic_clipping_stop)
+            startAnimation(animation)
+        }
+        viewModel.startOrStopToggle = 1
+
+        Intent(context, SpotifyNoteService::class.java).apply {
+            this.action = SpotifyNoteService.ACTION_START_CLIPPING
+            context?.startService(this)
+        }
+    }
+
+    private fun endClipping() {
+        Timber.d("clipEnd")
+        viewModel.endAt = (viewModel.currentSecond / 1000).toFloat()
+        binding.btnClip.setImageResource(R.drawable.ic_clip)
+        binding.btnClip.animation = null
+        viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
+        viewModel.startOrStopToggle = 0
+
+        Intent(context, SpotifyNoteService::class.java).apply {
+            this.action = SpotifyNoteService.ACTION_DONE_CLIPPING
+            context?.startService(this)
+        }
     }
 
     override fun onCreateView(
@@ -71,6 +134,7 @@ class SpotifyNoteFragment : Fragment() {
         }
 
         viewModel.isSpotifyConnected.observe(viewLifecycleOwner) { it ->
+            Timber.d("viewModel.isSpotifyConnected.observe: $it")
             binding.playPauseButton.isEnabled = it
             binding.seekBackButton.isEnabled = it
             binding.seekForwardButton.isEnabled = it
@@ -83,7 +147,9 @@ class SpotifyNoteFragment : Fragment() {
                 Timber.d("SpotifyService.play(${SPOTIFY_URI + viewModel.sourceId})")
 
 
+                Timber.e("fragment subscribe")
                 SpotifyService.subscribeToPlayerState { state ->
+                    Timber.d("SpotifyService.subscribeToPlayerState:  $state ")
                     updateSeekbar(state)
                     updatePlayPauseButton(state)
 
@@ -125,9 +191,11 @@ class SpotifyNoteFragment : Fragment() {
 
                 }
 
-                SpotifyService.subscribeToPlayerContext { playerContext ->
-                    Timber.d("playerContext: $playerContext")
+                Intent(context, SpotifyNoteService::class.java).apply {
+                    action = SpotifyNoteService.ACTION_START
+                    context?.startService(this)
                 }
+                registerTimestampReceiver()
             }
         }
 
@@ -136,7 +204,7 @@ class SpotifyNoteFragment : Fragment() {
             if (viewModel.newSpotifyNote.sourceId == viewModel.sourceId) {
                 if (shouldCreateNote) {
                     viewModel.createNewSpotifyNote(viewModel.newSpotifyNote)
-                    viewModel.doneCreatingNewNote()
+                    viewModel.hasUploaded = true
                 }
             }
         }
@@ -145,6 +213,7 @@ class SpotifyNoteFragment : Fragment() {
          * Bind player control
          * **/
         binding.playPauseButton.setOnClickListener {
+            Timber.d("binding.playPauseButton.setOnClickListener, ${viewModel.playingState}")
             when (viewModel.playingState) {
                 PlayingState.STOPPED -> {
                     viewModel.playingState = PlayingState.PLAYING
@@ -182,44 +251,45 @@ class SpotifyNoteFragment : Fragment() {
          *  Update UI according to current position
          * **/
         viewModel.currentPosition.observe(viewLifecycleOwner) { currentSec ->
-
-//            Timber.d("viewModel.currentPosition.observe: $currentSec")
             // Text of time to show progress
             binding.textCurrentSecond.text = currentSec.formatDuration()
+        }
 
-            /**
-             *  Take timestamps / clips buttons
-             * */
-            binding.btnTakeTimestamp.setOnClickListener {
-                Timber.d("binding.btnTakeTimestamp.setOnClickListener clicked")
-                viewModel.createTimeItem((currentSec/1000).toFloat(), null)
-            }
+        /**
+         *  Take timestamps / clips buttons
+         * */
+        binding.btnTakeTimestamp.setOnClickListener {
+            Timber.d("binding.btnTakeTimestamp.setOnClickListener clicked")
+//            viewModel.createTimeItem((viewModel.currentSecond / 1000).toFloat(), null)
+            takeTimestamp()
+        }
 
-            val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
+//        val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
 
-            binding.btnClip.setOnClickListener {
-                when (viewModel.startOrStopToggle) {
-                    0 -> {
-                        viewModel.startAt = (currentSec/1000).toFloat()
-                        viewModel.startOrStopToggle = 1
-                        binding.btnClip.apply {
-                            setImageResource(R.drawable.ic_clipping_stop)
-                            startAnimation(animation)
-                        }
-                        Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
-                    }
-                    1 -> {
-                        viewModel.endAt = (currentSec/1000).toFloat()
-                        Timber.d("btnClip second time clicked, viewModel.endAt = ${viewModel.endAt}")
-
-                        binding.btnClip.setImageResource(R.drawable.ic_clip)
-                        binding.btnClip.animation = null
-                        viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
-                        viewModel.startOrStopToggle = 0
-                    }
+        binding.btnClip.setOnClickListener {
+            when (viewModel.startOrStopToggle) {
+                0 -> {
+//                    viewModel.startAt = (viewModel.currentSecond / 1000).toFloat()
+//                    viewModel.startOrStopToggle = 1
+//                    binding.btnClip.apply {
+//                        setImageResource(R.drawable.ic_clipping_stop)
+//                        startAnimation(animation)
+//                    }
+                    startClipping()
+                    Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
+                }
+                1 -> {
+                    endClipping()
+                    Timber.d("btnClip second time clicked, viewModel.endAt = ${viewModel.endAt}")
+//                    viewModel.endAt = (viewModel.currentSecond / 1000).toFloat()
+//                    binding.btnClip.setImageResource(R.drawable.ic_clip)
+//                    binding.btnClip.animation = null
+//                    viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
+//                    viewModel.startOrStopToggle = 0
                 }
             }
         }
+
 
         /**
          *  Play the time items
@@ -237,7 +307,7 @@ class SpotifyNoteFragment : Fragment() {
         viewModel.clipLength.observe(viewLifecycleOwner) { clipLength ->
 
             if (null != clipLength) {
-                object : CountDownTimer( (clipLength * 1000).toLong(), 500) {
+                object : CountDownTimer((clipLength * 1000).toLong(), 500) {
                     override fun onTick(millisUntilFinished: Long) {
                         viewModel.clearPlayingMomentEnd()
                         Timber.d("countDownTimer onTick, clip length: $clipLength")
@@ -305,7 +375,8 @@ class SpotifyNoteFragment : Fragment() {
          *  RecyclerView views
          * */
         // Swipe to delete
-        binding.recyclerViewTimeItems.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        binding.recyclerViewTimeItems.addItemDecoration(DividerItemDecoration(context,
+            DividerItemDecoration.VERTICAL))
         val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(binding.recyclerViewTimeItems) {
             override fun instantiateUnderlayButton(position: Int): List<UnderlayButton> {
                 val deleteButton = deleteButton(position)
@@ -392,8 +463,9 @@ class SpotifyNoteFragment : Fragment() {
         binding.icShare.setOnClickListener {
             val shareIntent = Intent().apply {
                 action = Intent.ACTION_SEND
-                type="text/plain"
-                putExtra(Intent.EXTRA_TEXT, getString(R.string.spotify_note_uri, viewModel.noteId, viewModel.sourceId))
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT,
+                    getString(R.string.spotify_note_uri, viewModel.noteId, viewModel.sourceId))
             }
             startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
         }
@@ -427,7 +499,7 @@ class SpotifyNoteFragment : Fragment() {
         }
     }
 
-    fun deleteButton(position: Int) : SwipeHelper.UnderlayButton {
+    fun deleteButton(position: Int): SwipeHelper.UnderlayButton {
         return SwipeHelper.UnderlayButton(
             MyApplication.applicationContext(),
             getString(R.string.delete),

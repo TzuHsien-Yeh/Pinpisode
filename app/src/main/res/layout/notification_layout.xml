@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:id="@+id/btn_clip"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="50dp"
+        android:background="@drawable/bg_rounded_pink"
+        android:src="@drawable/ic_clip"
+        app:tint="@color/light_beige"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"/>
+
+    <ProgressBar
+        android:id="@+id/btn_clipping"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="50dp"
+        style="?android:attr/progressBarStyle"
+        android:indeterminate="true"
+        android:indeterminateDrawable="@drawable/rotate_square_animation"
+        android:indeterminateBehavior="repeat"
+        android:background="@drawable/bg_rounded_pink"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"/>
+
+    <ImageView
+        android:id="@+id/btn_take_timestamp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="80dp"
+        android:layout_marginEnd="50dp"
+        android:background="@drawable/bg_rounded_pink"
+        android:src="@drawable/ic_pin"
+        app:tint="@color/light_beige"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"/>
+
+</RelativeLayout>

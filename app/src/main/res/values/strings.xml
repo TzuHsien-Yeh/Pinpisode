@@ -44,4 +44,6 @@
     <string name="only_episode_supported">Pinpisode supports only podcast episodes on Spotify</string>
     <string name="authorize_to_access">Authorize to access</string>
     <string name="saved_show">Saved show</string>
+
+    <string name="take_timestamp">Take Timestamp</string>
 </resources>

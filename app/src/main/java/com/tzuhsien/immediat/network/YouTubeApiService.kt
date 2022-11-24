@@ -27,7 +27,7 @@ val client = OkHttpClient.Builder()
             .request()
             .url
             .newBuilder()
-            .addQueryParameter("key", BuildConfig.YOUTUBE_API_KEY)
+            .addQueryParameter("key", BuildConfig.YT_API_KEY)
             .build()
         chain.proceed(chain.request().newBuilder().url(url).build())
     }

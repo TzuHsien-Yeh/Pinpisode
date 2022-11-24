@@ -112,7 +112,7 @@
             android:layout_gravity="center"
             android:textSize="16sp"
             style="@style/yt_medium_13sp_text"
-            android:textColor="@color/color_primary"
+            android:textColor="@color/light_beige"
             tools:text="duration"/>
 
     </androidx.cardview.widget.CardView>
@@ -166,7 +166,7 @@
         android:src="@drawable/ic_search"
         app:fabCustomSize="58dp"
         app:maxImageSize="52dp"
-        app:tint="@color/color_primary"
+        app:tint="@color/light_beige"
         app:borderWidth="0dp"
         app:elevation="2dp"
         android:backgroundTint="@color/color_primary_variant"
