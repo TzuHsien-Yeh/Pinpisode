@@ -57,22 +57,22 @@ class YouTubeNoteFragment : Fragment() {
 
         var ytPlayer: YouTubePlayer? = null
 
-        viewModel.playStart.observe(viewLifecycleOwner, Observer { startAt ->
+        viewModel.playStart.observe(viewLifecycleOwner) { startAt ->
             startAt?.let {
                 ytPlayer?.seekTo(startAt)
                 ytPlayer?.play()
             }
-        })
+        }
 
-        viewModel.currentSecond.observe(viewLifecycleOwner, Observer { currentSec ->
-            viewModel.playMomentEnd?.let {
+        viewModel.currentSecond.observe(viewLifecycleOwner) { currentSec ->
+            viewModel.playEnd?.let {
                 if (it <= currentSec) {
                     ytPlayer?.pause()
                     viewModel.clearPlayingMomentStart()
                     viewModel.clearPlayingMomentEnd()
                 }
             }
-        })
+        }
 
         youTubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(@NonNull youTubePlayer: YouTubePlayer) {

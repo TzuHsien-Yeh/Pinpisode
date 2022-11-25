@@ -36,7 +36,7 @@ class YouTubeNoteViewModel(
     val playStart: LiveData<Float?>
         get() = _playStart
 
-    var playMomentEnd: Float? = null
+    var playEnd: Float? = null
 
     private val _currentSecond = MutableLiveData<Float>()
     val currentSecond: LiveData<Float>
@@ -381,7 +381,7 @@ class YouTubeNoteViewModel(
 
     private fun playTimeItem(timeItem: TimeItem) {
         _playStart.value = timeItem.startAt
-        playMomentEnd = timeItem.endAt
+        playEnd = timeItem.endAt
     }
 
     fun updateNote() {
@@ -417,7 +417,7 @@ class YouTubeNoteViewModel(
     }
 
     fun clearPlayingMomentEnd() {
-        playMomentEnd = null
+        playEnd = null
     }
 
     fun getCurrentSecond(second: Float) {
@@ -491,11 +491,6 @@ class YouTubeNoteViewModel(
             }
         }
     }
-
-    fun invokeLiveNoteDataChange() {
-        _liveNoteData.value = _liveNoteData.value
-    }
-
 }
 
 

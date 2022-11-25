@@ -72,7 +72,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_yt_trending"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="286dp"
         android:layout_marginStart="@dimen/standard"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"

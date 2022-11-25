@@ -73,24 +73,26 @@ class SpotifyNoteViewModel(
 
     var currentSecond: Long = 0L
 
+    /** Clipping **/
     // state of clipping btn
     var startOrStopToggle = 0
-
+    // Save start and stop position of a clip
     var startAt: Float = 0f
     var endAt: Float = 0f
 
     /**  play the time items **/
-    private val _toPlay = MutableLiveData<List<Float?>?>(null)
-    val toPlay: LiveData<List<Float?>?>
-        get() = _toPlay
-
-    private val _playStart = MutableLiveData<Float?>(null)
-    val playStart: LiveData<Float?>
+    private val _playStart = MutableLiveData<Long?>(null)
+    val playStart: LiveData<Long?>
         get() = _playStart
+    var playEnd: Long? = null
 
-    private val _clipLength = MutableLiveData<Float?>(null)
-    val clipLength: LiveData<Float?>
-        get() = _clipLength
+//    private val _seekToPosition = MutableLiveData<Long>()
+//    val seekToPosition: LiveData<Long>
+//        get() = _seekToPosition
+//
+//    private val _pause = MutableLiveData<Boolean>()
+//    val pause: LiveData<Boolean>
+//        get() = _pause
 
     /** Decide whether the viewer can edit the note **/
     private var _canEdit = MutableLiveData<Boolean>(false)
@@ -148,18 +150,6 @@ class SpotifyNoteViewModel(
                     _isSpotifyConnected.value = true
                 }
             }
-//            val connectResult = SpotifyService.connectToAppRemote
-//            when (connectResult) {
-//                is Result.Success -> {
-//                    _status.value = LoadApiStatus.DONE
-//                    _isSpotifyConnected.value = true
-//                }
-//                is Result.Fail -> {
-//                    _error.value = connectResult.error
-//                    _isSpotifyNeedLogin.value = true
-//                }
-//                else -> {}
-//            }
         }
     }
 
@@ -419,10 +409,18 @@ class SpotifyNoteViewModel(
     }
 
     private fun playTimeItem(timeItem: TimeItem) {
-        _playStart.value = timeItem.startAt
-        _clipLength.value = (timeItem.endAt?.minus(timeItem.startAt))
-        _toPlay.value = listOf(timeItem.startAt, timeItem.endAt)
+        _playStart.value = timeItem.startAt.toLong().times(1000)
+        playEnd = timeItem.endAt?.toLong()?.times(1000)
     }
+
+    fun clearPlayingMomentStart() {
+        _playStart.value = null
+    }
+
+    fun clearPlayingMomentEnd() {
+        playEnd = null
+    }
+
 
     fun updateNote() {
         coroutineScope.launch {
@@ -451,22 +449,9 @@ class SpotifyNoteViewModel(
         _shouldCreateNewNote.value = _shouldCreateNewNote.value
     }
 
-    fun clearPlayingMomentStart() {
-        _playStart.value = null
-    }
-
-    fun clearPlayingMomentEnd() {
-        _clipLength.value = null
-    }
-
-    fun clearPlaying() {
-        _toPlay.value = null
-    }
-
     fun notifyDisplayChange() {
         _liveTimeItemList.value = _liveTimeItemList.value
     }
-
 
     override fun onCleared() {
         super.onCleared()
@@ -474,14 +459,14 @@ class SpotifyNoteViewModel(
     }
 
     /**
-     *  Get player position every 0.5 sec
+     *  Get player position every 0.20 sec
      * **/
     val positionHandler = Handler()
     private val positionUpdateRunnable = object : Runnable {
         override fun run() {
-            _currentPosition.value = _currentPosition.value?.plus(500L)
-            currentSecond += 500L
-            positionHandler.postDelayed(this, 500.toLong())
+            _currentPosition.value = _currentPosition.value?.plus(200L)
+            currentSecond += 200L
+            positionHandler.postDelayed(this, 200.toLong())
         }
     }
 
@@ -500,9 +485,8 @@ class SpotifyNoteViewModel(
 
     fun unpauseTrackingPosition() {
         positionHandler.removeCallbacks(positionUpdateRunnable)
-        positionHandler.postDelayed(positionUpdateRunnable, 500)
+        positionHandler.postDelayed(positionUpdateRunnable, 200)
     }
-
 
 }
 
