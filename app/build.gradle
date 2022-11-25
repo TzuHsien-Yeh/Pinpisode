@@ -11,10 +11,10 @@ android {
 
     defaultConfig {
         applicationId "com.tzuhsien.immediat"
-        minSdk 24
+        minSdk 26
         targetSdk 32
-        versionCode 4
-        versionName "1.0.3"
+        versionCode 5
+        versionName "1.0.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -25,14 +25,14 @@ android {
     buildTypes {
         Properties properties = new Properties()
         properties.load(project.rootProject.file('local.properties').newDataInputStream()) // load local.properties
-        def ytApiKey = properties.getProperty('YT_API_KEY') // read property from local.properties
+        def ytApiKey = properties.getProperty('encodedYtApiKey') // read property from local.properties
 
         debug {
-            buildConfigField "String", "YT_API_KEY", ytApiKey // BuildConfig
+            buildConfigField "String", "encodedYtApiKey", ytApiKey // BuildConfig
         }
 
         release {
-            buildConfigField "String", "YT_API_KEY", ytApiKey // BuildConfig
+            buildConfigField "String", "encodedYtApiKey", ytApiKey // BuildConfig
 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

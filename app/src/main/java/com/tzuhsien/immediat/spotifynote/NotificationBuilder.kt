@@ -16,8 +16,8 @@ class NotificationBuilder {
     fun build(context: Context, isClipping: Boolean, channelId: String, packageName: String): Notification {
         val notificationView = RemoteViews(packageName, R.layout.notification_layout)
         notificationView.setOnClickPendingIntent(R.id.btn_take_timestamp, timestampPendingIntent(context))
-        notificationView.setOnClickPendingIntent(R.id.btn_clip, startClippingPendingIntent(context, isClipping))
-        notificationView.setOnClickPendingIntent(R.id.btn_clipping, endClippingPendingIntent(context, isClipping))
+        notificationView.setOnClickPendingIntent(R.id.btn_clip, startClippingPendingIntent(context))
+        notificationView.setOnClickPendingIntent(R.id.btn_clipping, endClippingPendingIntent(context))
         notificationView.setOnClickPendingIntent(R.id.blank_view, noteFragmentPendingIntent(context))
 
         if (isClipping) {
@@ -46,14 +46,14 @@ class NotificationBuilder {
         return PendingIntent.getBroadcast(context, 0, timestampIntent, PendingIntent.FLAG_IMMUTABLE)
     }
 
-    private fun startClippingPendingIntent(context: Context, isClipping: Boolean): PendingIntent {
+    private fun startClippingPendingIntent(context: Context): PendingIntent {
         val clipIntent = Intent().apply {
             action = TimestampReceiver.ACTION_CLIP_START
         }
         return PendingIntent.getBroadcast(context, 0, clipIntent, PendingIntent.FLAG_IMMUTABLE)
     }
 
-    private fun endClippingPendingIntent(context: Context, isClipping: Boolean): PendingIntent {
+    private fun endClippingPendingIntent(context: Context): PendingIntent {
         val clipEndIntent = Intent().apply {
             action = TimestampReceiver.ACTION_CLIP_END
         }

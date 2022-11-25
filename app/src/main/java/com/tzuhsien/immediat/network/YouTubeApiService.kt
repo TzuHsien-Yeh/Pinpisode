@@ -9,10 +9,14 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import java.util.Base64.getDecoder
 
 private const val BASE_URL = "https://www.googleapis.com/youtube/v3/"
 private const val ENDPOINT_VIDEOS = "videos"
 private const val ENDPOINT_SEARCH = "search"
+
+private val decodedBytes: ByteArray = getDecoder().decode(BuildConfig.encodedYtApiKey)
+private val decodedYtApiKey = String(decodedBytes)
 
 val loggingInterceptor =
     HttpLoggingInterceptor().setLevel(
@@ -27,7 +31,7 @@ val client = OkHttpClient.Builder()
             .request()
             .url
             .newBuilder()
-            .addQueryParameter("key", BuildConfig.YT_API_KEY)
+            .addQueryParameter("key", decodedYtApiKey)
             .build()
         chain.proceed(chain.request().newBuilder().url(url).build())
     }

@@ -544,7 +544,7 @@ class SpotifyNoteFragment : Fragment() {
         }
     }
 
-    fun getLoginActivityCodeIntent(): Intent =
+    private fun getLoginActivityCodeIntent(): Intent =
         AuthorizationClient.createLoginActivityIntent(
             activity,
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
@@ -585,7 +585,7 @@ class SpotifyNoteFragment : Fragment() {
         }
     }
 
-    fun getLoginActivityTokenIntent(code: String): Intent =
+    private fun getLoginActivityTokenIntent(code: String): Intent =
         AuthorizationClient.createLoginActivityIntent(
             activity,
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
