@@ -57,7 +57,6 @@ class SpContentAdapter(
 
     override fun onBindViewHolder(holder: SpotifyItemViewHolder, position: Int) {
         val item = getItem(position)
-        holder.itemView.isClickable = item.id.isNotEmpty()
         holder.itemView.setOnClickListener {
             uiState.onSpotifyLatestContentClick(item)
         }

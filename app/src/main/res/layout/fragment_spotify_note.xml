@@ -25,20 +25,26 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/standard"
         style="@style/yt_bold_17sp"
+        android:maxLines="2"
+        android:ellipsize="end"
         app:layout_constraintTop_toTopOf="@id/img_cover_art"
         app:layout_constraintStart_toEndOf="@+id/img_cover_art"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:text="avuiefvbqrevavele"/>
+        tools:text="avuiefvbqrevfghjhghfdsrtdygujlkhgfdstyughkjnmbvcxdffgkhjn,mbnvbfhbvncbxvdffjghkbnmnvbcxdgfjghkbn vbcxvdgtygkhjbmvcbxgavele"/>
 
     <TextView
         android:id="@+id/text_publisher"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        tools:text="gfsvkvavhilfv"
-        style="@style/description_text_style"
+        android:layout_marginEnd="@dimen/standard"
+        tools:text="gfsvkvavhilfafdsoihgftyughkjgfyughjhgfdrtyuijhgfdrtyuijkhgfdgchjbvgfuyghkjbhgvfgugyhkjnbnvcfghv"
+        android:maxLines="2"
+        android:ellipsize="end"
+        style="@style/yt_medium_15sp"
         app:layout_constraintTop_toBottomOf="@+id/text_source_title"
-        app:layout_constraintStart_toStartOf="@+id/text_source_title"/>
+        app:layout_constraintStart_toStartOf="@+id/text_source_title"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Playback controls -->
 
@@ -164,7 +170,7 @@
         android:backgroundTint="@color/color_primary_variant"
         android:src="@drawable/ic_pin"
         app:maxImageSize="50dp"
-        app:tint="@color/color_primary"
+        app:tint="@color/light_beige"
         app:fabCustomSize="55dp"
         app:layout_constraintBottom_toTopOf="@id/note_page_bottom_options"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -179,7 +185,7 @@
         android:backgroundTint="@color/color_primary_variant"
         android:src="@drawable/ic_clip"
         app:maxImageSize="50dp"
-        app:tint="@color/color_primary"
+        app:tint="@color/light_beige"
         app:fabCustomSize="54dp"
         app:layout_constraintBottom_toTopOf="@id/btn_take_timestamp"
         app:layout_constraintEnd_toEndOf="parent"/>

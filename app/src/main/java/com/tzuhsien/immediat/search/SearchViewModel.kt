@@ -21,8 +21,6 @@ import timber.log.Timber
 
 class SearchViewModel(private val repository: Repository) : ViewModel() {
 
-    var userSpotifyAuthToken: String? = null
-
     // Search by pasting url
     var spotifySingleResultId: String? = null
     var ytSingleResultId: String? = null
@@ -40,31 +38,21 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     val searchQuery: LiveData<String>
         get() = _searchQuery
 
-    private val _youtubeSearchResult = MutableLiveData<YouTubeSearchResult>(null)
-    val youTubeSearchResult: LiveData<YouTubeSearchResult>
-        get() = _youtubeSearchResult
-
-    private val _ytSearchResultList = MutableLiveData<List<ItemX>>()
-    val ytSearchResultList: LiveData<List<ItemX>>
-        get() = _ytSearchResultList
-
-    private val _spotifySearchResult = MutableLiveData<SpotifySearchResult>(null)
-    val spSearchResult: LiveData<SpotifySearchResult>
-         get() = _spotifySearchResult
-
-
 
     private val _ytTrendingList = MutableLiveData<List<Item>>()
     val ytTrendingList: LiveData<List<Item>>
         get() = _ytTrendingList
 
-    private val _spotifyLatestEpisodesList = MutableLiveData(listOf(SpotifyItem(), SpotifyItem()))
+    private val _spotifyLatestEpisodesList = MutableLiveData<List<SpotifyItem>>()
     val spotifyLatestEpisodesList: LiveData<List<SpotifyItem>>
         get() = _spotifyLatestEpisodesList
 
+    private val _spotifyMsg = MutableLiveData<String>(null)
+    val spotifyMsg: LiveData<String>
+        get() = _spotifyMsg
 
-    private val _isAuthRequired = MutableLiveData(false)
-    val isAuthRequired: LiveData<Boolean>
+    private val _isAuthRequired = MutableLiveData<Boolean?>(null)
+    val isAuthRequired: LiveData<Boolean?>
         get() = _isAuthRequired
 
     val uiState = SearchUiState(
@@ -75,7 +63,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             navigateToYoutubeNote(item.id)
         },
         onSpotifyLatestContentClick = { item ->
-            navigateToSpotifyNote(item.id)
+            navigateToSpotifyNote(item.uri.extractSpotifySourceId())
         }
     )
 
@@ -112,9 +100,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
     init {
         getYoutubeTrendingVideos()
-        if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
-            getSpotifySavedShowLatestEpisodes()
-        }
     }
 
     private fun getYoutubeTrendingVideos() {
@@ -131,29 +116,24 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                     _status.value = LoadApiStatus.DONE
 
                     putToItemList(result.data)
-                    result.data
                 }
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
                 is Result.Error -> {
                     _error.value = result.exception.toString()
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
                 else -> {
                     _error.value = Util.getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
-                    null
                 }
             }
         }
     }
 
     fun getSpotifySavedShowLatestEpisodes() {
-
         Timber.d("getSpotifySavedShowLatestEpisodes")
         coroutineScope.launch {
 
@@ -166,7 +146,11 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
 
-                    getShowEpisodesById(result.data.items)
+                    if (result.data.items.isEmpty()) {
+                        _spotifyMsg.value = "You haven't saved any show yet"
+                    } else {
+                        getShowEpisodesById(result.data.items)
+                    }
                 }
                 is Result.Fail -> {
                     _error.value = result.error
@@ -175,6 +159,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                 is Result.Error -> {
                     _error.value = result.exception.toString()
                     _status.value = LoadApiStatus.ERROR
+                    Timber.d("getSpotifySavedShowLatestEpisodes is Result.Error: ${result.exception.toString()}")
                 }
                 else -> {
                     _error.value = Util.getString(R.string.unknown_error)
@@ -198,7 +183,9 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
                 when (episodeResult) {
                     is Result.Success -> {
-                        list.add(episodeResult.data.items[0])
+                        val latestEpisode = episodeResult.data.items[0]
+                        latestEpisode.show = item.show
+                        list.add(latestEpisode)
                     }
                     is Result.Fail -> {
                         _error.value = episodeResult.error
@@ -213,7 +200,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                         _status.value = LoadApiStatus.ERROR
                     }
                 }
-
             }
 
             _spotifyLatestEpisodesList.value = list
@@ -227,13 +213,9 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         }
 
         _ytTrendingList.value = list
-        Timber.d("_ytTrendingList.value = $list")
     }
 
     fun findMediaSource(query: String) {
-
-        Timber.d("findMediaSource")
-
         // Check if the query is a YouTube url
         if (query.contains(youtubeWatchUrl) || query.contains(youtubeShareLink)) {
             val videoId = query.extractYoutubeVideoId()
@@ -344,91 +326,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    private fun searchOnYouTube(query: String) {
-
-        coroutineScope.launch {
-
-            _status.value = LoadApiStatus.LOADING
-
-            val result = repository.searchOnYouTube(query)
-
-            _youtubeSearchResult.value = when (result) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
-
-                    Timber.d("youtubeSearchResults: ${result.data}")
-
-                    putYtResultToItemList(result.data)
-                    result.data
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                else -> {
-                    _error.value = Util.getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-            }
-        }
-    }
-
-    private fun putYtResultToItemList(ytResult: YouTubeSearchResult) {
-        val list = mutableListOf<ItemX>()
-        for (item in ytResult.items) {
-            list.add(item)
-        }
-
-        _ytSearchResultList.value = list
-    }
-
-    private fun searchOnSpotify(query: String) {
-
-        Timber.d("searchOnSpotify")
-        coroutineScope.launch {
-
-            _status.value = LoadApiStatus.LOADING
-
-            val result = repository.searchOnSpotify(query, authToken = UserManager.userSpotifyAuthToken)
-
-            _spotifySearchResult.value =
-                when (result) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
-
-                    Timber.d("spotifySearchResults: ${result.data}")
-
-//                    putResultToItemList(result.data)
-                    result.data
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                else -> {
-                    _error.value = Util.getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-            }
-        }
-    }
-
     fun navigateToYoutubeNote(videoId: String) {
         _navigateToYoutubeNote.value = videoId
     }
@@ -453,6 +350,10 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
     fun doneRequestSpotifyAuthToken() {
         _isAuthRequired.value = false
+    }
+
+    fun requestSpotifyAuthToken() {
+        _isAuthRequired.value = true
     }
 
 }

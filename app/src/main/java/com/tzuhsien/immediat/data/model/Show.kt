@@ -13,7 +13,7 @@ data class Show(
     val isExternallyHosted: Boolean,
     val languages: List<String>,
     val mediaType: String,
-    val name: String,
+    var name: String,
     val publisher: String,
     val totalEpisodes: Int,
     val type: String,

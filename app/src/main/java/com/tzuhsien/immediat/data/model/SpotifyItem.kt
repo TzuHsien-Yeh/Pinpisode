@@ -10,7 +10,7 @@ data class SpotifyItem(
     val name: String = "",
     val releaseDate: String = "",
     val releaseDatePrecision: String = "",
-    val show: Show? = null,
+    var show: Show? = null,
     val type: String = "",
     val uri: String = "",
     val album: Album? = null

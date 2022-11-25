@@ -54,9 +54,9 @@ interface SpotifyApiService {
 
     @GET("$ENDPOINT_SHOWS/{id}/$ENDPOINT_EPISODES")
     suspend fun getShowEpisodes(
+        @Path("id") id: String,
         @Header("Authorization") bearerWithToken: String,
-        @Query("limit") limit: Int,
-        @Path("id") id: String
+        @Query("limit") limit: Int
     ): Episodes
 
     @GET(ENDPOINT_SEARCH)

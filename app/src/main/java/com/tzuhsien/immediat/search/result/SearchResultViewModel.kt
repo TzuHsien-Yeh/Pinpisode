@@ -8,6 +8,7 @@ import com.tzuhsien.immediat.data.Result
 import com.tzuhsien.immediat.data.model.*
 import com.tzuhsien.immediat.data.source.Repository
 import com.tzuhsien.immediat.data.source.local.UserManager
+import com.tzuhsien.immediat.ext.extractSpotifySourceId
 import com.tzuhsien.immediat.network.LoadApiStatus
 import com.tzuhsien.immediat.util.Util
 import kotlinx.coroutines.CoroutineScope
@@ -38,11 +39,7 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
             _navigateToYoutubeNote.value = item.id.videoId
         },
         onSpotifyItemClick = { spotifyItem ->
-            _navigateToSpotifyNote.value = if (spotifyItem.type == "episode") {
-                "episode:" + spotifyItem.id
-            } else {
-                "track:" + spotifyItem.id
-            }
+            _navigateToSpotifyNote.value = spotifyItem.uri.extractSpotifySourceId()
         }
     )
 

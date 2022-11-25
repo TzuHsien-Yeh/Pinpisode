@@ -13,6 +13,16 @@ private val onClickListener: OnTagClickListener
     class TagViewHolder(private val binding: ItemTagBinding): RecyclerView.ViewHolder(binding.root){
         fun bind(tag: String){
             binding.textTag.text = tag
+            if (adapterPosition == 0) {
+                val param = binding.cardTag.layoutParams as ViewGroup.MarginLayoutParams
+                param.marginStart = 18
+                binding.cardTag.layoutParams = param
+            } else {
+                val param = binding.cardTag.layoutParams as ViewGroup.MarginLayoutParams
+                param.marginStart = 5
+                binding.cardTag.layoutParams = param
+            }
+
         }
     }
 

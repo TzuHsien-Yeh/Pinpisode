@@ -63,7 +63,7 @@
         android:src="@drawable/ic_pin"
         app:fabCustomSize="55dp"
         app:maxImageSize="50dp"
-        app:tint="@color/color_primary"
+        app:tint="@color/light_beige"
         app:layout_constraintBottom_toTopOf="@id/note_page_bottom_options"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -78,7 +78,7 @@
         android:src="@drawable/ic_clip"
         app:fabCustomSize="54dp"
         app:maxImageSize="50dp"
-        app:tint="@color/color_primary"
+        app:tint="@color/light_beige"
         app:layout_constraintBottom_toTopOf="@id/btn_take_timestamp"
         app:layout_constraintEnd_toEndOf="parent"/>
 

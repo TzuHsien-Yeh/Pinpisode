@@ -850,8 +850,8 @@ object NoteRemoteDataSource : DataSource {
         return try {
             val result = SpotifyApi.retrofitService.getShowEpisodes(
                 bearerWithToken = SPOTIFY_BEARER + authToken,
-                limit = 1,
-                id = showId
+                id = showId,
+                limit = 1
             )
             Result.Success(result)
 

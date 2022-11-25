@@ -31,4 +31,6 @@
     
     <color name="light_beige">#fff8e6</color>
     <color name="beige">#EDDBC0</color>
+    <color name="brown_translucent">#804b371c</color>
+    <color name="brown_walnut">#604432</color>
 </resources>
