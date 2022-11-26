@@ -23,6 +23,12 @@ class YtTrendingAdapter(
             binding.textTitle.text = resultItem.snippet.title
             binding.textChannelName.text = resultItem.snippet.channelTitle
             binding.textPublishedTime.text = resultItem.snippet.publishedAt.utcToLocalTime()
+
+            if(adapterPosition == 0) {
+                val param = binding.cardYtTrending.layoutParams as ViewGroup.MarginLayoutParams
+                param.marginStart = 24
+                binding.cardYtTrending.layoutParams = param
+            }
         }
     }
 

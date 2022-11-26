@@ -14,7 +14,7 @@
         app:iconifiedByDefault="false"
         app:theme="@style/search_view_style"
         app:queryBackground="@null"
-        app:background="@null"
+        android:background="@drawable/bg_searchview"
         app:queryHint="Search or paste url"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -73,7 +73,6 @@
         android:id="@+id/recyclerview_yt_trending"
         android:layout_width="match_parent"
         android:layout_height="286dp"
-        android:layout_marginStart="@dimen/standard"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/text_trending_on_youtube"
@@ -104,7 +103,6 @@
         android:id="@+id/recyclerview_sp_latest_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="@dimen/standard"
         android:layout_marginBottom="@dimen/standard"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -134,7 +132,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:cardElevation="@dimen/card_view_elevation"
                 app:cardCornerRadius="10dp"
-                app:cardBackgroundColor="@color/white"
+                app:cardBackgroundColor="@color/background_color_to_theme"
                 app:cardMaxElevation="@dimen/card_view_elevation"
                 app:cardPreventCornerOverlap="true"
                 app:cardUseCompatPadding="true">
@@ -192,7 +190,7 @@
                 app:layout_constraintStart_toEndOf="@+id/mock_sp_card_1"
                 app:cardElevation="@dimen/card_view_elevation"
                 app:cardCornerRadius="10dp"
-                app:cardBackgroundColor="@color/white"
+                app:cardBackgroundColor="@color/background_color_to_theme"
                 app:cardMaxElevation="@dimen/card_view_elevation"
                 app:cardPreventCornerOverlap="true"
                 app:cardUseCompatPadding="true">
@@ -242,7 +240,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/img_view_cover_spotify_content"
             android:layout_width="480dp"
@@ -253,7 +250,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:shapeAppearanceOverlay="@style/rounded_corner"
-            android:background="@color/brown_translucent">
+            android:background="@color/cover_color_to_theme">
 
         </com.google.android.material.imageview.ShapeableImageView>
 
@@ -292,12 +289,13 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:visibility="gone"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/background_color_to_theme"
         app:cardCornerRadius="16dp"
         app:cardElevation="@dimen/card_view_elevation"
         app:cardMaxElevation="@dimen/card_view_elevation"
         app:cardPreventCornerOverlap="true"
         app:cardUseCompatPadding="false"
+        android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/text_search_result">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -318,8 +316,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textSize="@dimen/source_title_text_size"
-                android:textStyle="bold"
+                style="@style/yt_bold_17sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/img_thumbnail"
                 tools:text="aglifhevowrv;rvl" />
@@ -329,6 +326,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                style="@style/yt_medium_15sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_title"
                 tools:text="channel title" />
@@ -339,6 +337,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:paddingBottom="16dp"
+                style="@style/small_text_style"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_channel_name"
                 tools:text="published at (locale date time)" />
@@ -350,10 +349,10 @@
         android:id="@+id/card_single_spotify_result"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginHorizontal="16dp"
         android:visibility="gone"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/background_color_to_theme"
         app:cardCornerRadius="16dp"
         app:cardElevation="@dimen/card_view_elevation"
         app:cardMaxElevation="@dimen/card_view_elevation"
@@ -379,8 +378,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textSize="@dimen/source_title_text_size"
-                android:textStyle="bold"
+                style="@style/yt_bold_17sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/img_spotify_source"
                 tools:text="aglifhevowrv;rvl" />
@@ -390,6 +388,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                style="@style/yt_medium_15sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_spotify_source_title"
                 tools:text="channel title" />
@@ -400,6 +399,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:paddingBottom="16dp"
+                style="@style/small_text_style"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_spotify_show"
                 tools:text="published at (locale date time)" />
@@ -413,7 +413,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="50dp"
         android:textAlignment="center"
-        android:textSize="20sp"
+        style="@style/yt_bold_20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/searchview_search" />

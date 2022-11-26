@@ -5,19 +5,16 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.widget.addTextChangedListener
 import androidx.core.widget.doAfterTextChanged
-import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.google.android.material.chip.Chip
-import com.tzuhsien.immediat.R.*
+import com.tzuhsien.immediat.R
+import com.tzuhsien.immediat.R.anim
+import com.tzuhsien.immediat.R.layout
 import com.tzuhsien.immediat.databinding.DialogTagBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import timber.log.Timber
@@ -30,7 +27,7 @@ class TagDialogFragment : AppCompatDialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(DialogFragment.STYLE_NO_FRAME, style.TagDialog)
+        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.TagDialog)
     }
 
     override fun onCreateView(
@@ -40,7 +37,6 @@ class TagDialogFragment : AppCompatDialogFragment() {
 
         binding = DialogTagBinding.inflate(inflater, container, false)
         binding.layoutTags.startAnimation(AnimationUtils.loadAnimation(context, anim.anim_slide_up))
-
 
         for (t in viewModel.allTags) {
             val chip = inflater.inflate(layout.chip_tag, binding.chipGroupTags, false) as Chip
@@ -78,6 +74,10 @@ class TagDialogFragment : AppCompatDialogFragment() {
         binding.buttonCloseTagDialog.setOnClickListener {
             viewModel.saveChanges()
         }
+        binding.windowBackground.setOnClickListener {
+            Timber.d("binding.windowBackground.setOnClickListener")
+            viewModel.saveChanges()
+        }
 
         viewModel.leave.observe(viewLifecycleOwner, Observer {
             if (it){
@@ -93,6 +93,5 @@ class TagDialogFragment : AppCompatDialogFragment() {
         binding.layoutTags.startAnimation(AnimationUtils.loadAnimation(context, anim.anim_slide_down))
         Handler().postDelayed({ super.dismiss() }, 200)
     }
-
 
 }

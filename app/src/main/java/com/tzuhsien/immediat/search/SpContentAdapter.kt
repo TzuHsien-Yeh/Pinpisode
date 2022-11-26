@@ -34,6 +34,12 @@ class SpContentAdapter(
 
             binding.textTitle.text = item.name
             binding.textShowName.text = item.show?.name
+
+            if(adapterPosition == 0) {
+                val param = binding.cardSpLatestEpisode.layoutParams as ViewGroup.MarginLayoutParams
+                param.marginStart = 24
+                binding.cardSpLatestEpisode.layoutParams = param
+            }
         }
     }
 

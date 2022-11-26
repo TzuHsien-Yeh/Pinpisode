@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -45,6 +46,11 @@ class SignInFragment : Fragment() {
         googleSignInClient = GoogleSignIn.getClient(requireContext(), getGSO())
 
         binding = FragmentSignInBinding.inflate(layoutInflater)
+        Glide.with(binding.appIcon)
+            .load(R.raw.pinpisode_logo_with_text)
+            .into(binding.appIcon)
+
+        binding.appIcon
         binding.btnSignIn.setOnClickListener { signIn() }
         auth = Firebase.auth
 

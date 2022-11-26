@@ -34,8 +34,8 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         get() = _spotifyEpisodeData
 
     // Search by keywords
-    private val _searchQuery = MutableLiveData<String>(null)
-    val searchQuery: LiveData<String>
+    private val _searchQuery = MutableLiveData<String?>(null)
+    val searchQuery: LiveData<String?>
         get() = _searchQuery
 
 
@@ -218,10 +218,13 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     fun findMediaSource(query: String) {
         // Check if the query is a YouTube url
         if (query.contains(youtubeWatchUrl) || query.contains(youtubeShareLink)) {
+
             val videoId = query.extractYoutubeVideoId()
             if (videoId.isNotEmpty()) {
                 getYoutubeVideoInfoById(videoId)
             }
+            _searchQuery.value = null
+
         } else if (query.contains(spotifyShareLink) || query.contains(spotifyUri)) {
             // If the query is a  Spotify link, request auth token to proceed to search
             _isAuthRequired.value = UserManager.userSpotifyAuthToken.isEmpty()
@@ -234,10 +237,12 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                     getTrackInfoById(sourceId.substringAfter("track"))
                 }
             }
+
+            _searchQuery.value = null
+
         } else {
             _searchQuery.value = query
         }
-
     }
 
     private fun getEpisodeInfoById(id: String) {
@@ -277,15 +282,11 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                     }
                 }
             }
-        } else {
-
-            // TODO: PROMPT TO AUTH
         }
-
     }
 
     private fun getTrackInfoById(id: String) {
-
+        // TODO: get track info
     }
 
     private fun getYoutubeVideoInfoById(videoId: String) {

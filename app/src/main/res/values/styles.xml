@@ -24,8 +24,14 @@
 
     <style name="ChipCustomStyle" parent="@style/Widget.MaterialComponents.Chip.Choice">
         <item name="chipBackgroundColor">@color/chip_background_color_selector</item>
-        <item name="android:textColor">@color/color_on_primary</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/chip_text_color_selector</item>
+        <item name="rippleColor">@color/transparent</item>
+    </style>
+
+    <style name="chipText" parent="TextAppearance.MaterialComponents.Chip">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/youtube_sans_medium</item>
+        <item name="android:textColor">@color/chip_text_color_selector</item>
     </style>
 
     <style name="DialogTheme" parent="Theme.MaterialComponents.DayNight.Dialog">
@@ -39,7 +45,7 @@
     </style>
 
     <style name="search_view_style" parent="Widget.AppCompat.SearchView">
-        <item name="fontFamily">@font/youtube_sans_medium</item>
+        <item name="fontFamily">@font/youtube_sans_light</item>
         <item name="android:textSize">20sp</item>
     </style>
 
@@ -98,6 +104,7 @@
     <style name="timestamp_title_style" parent="">
         <item name="fontFamily">@font/youtube_sans_bold</item>
         <item name="android:textSize">18sp</item>
+        <item name="android:textCursorDrawable">@null</item>
     </style>
 
 </resources>

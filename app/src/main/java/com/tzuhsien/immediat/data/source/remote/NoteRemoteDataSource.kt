@@ -523,7 +523,10 @@ object NoteRemoteDataSource : DataSource {
             val doc = FirebaseFirestore.getInstance().collection(PATH_NOTES).document(noteId)
 
             doc
-                .update(KEY_AUTHORS, authors.toList())
+                .update(
+                    KEY_AUTHORS, authors.toList(),
+                    KEY_LAST_EDIT_TIME, Calendar.getInstance().timeInMillis
+                )
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         continuation.resume(Result.Success(true))

@@ -444,7 +444,6 @@ class SpotifyNoteFragment : Fragment() {
         val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
 
         binding.btnClip.apply {
-            setImageResource(R.drawable.ic_clipping_stop)
             startAnimation(animation)
         }
         viewModel.startOrStopToggle = 1

@@ -5,32 +5,38 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="white_transparent">#50FFFFFF</color>
 
-    <color name="transparent">#00000000</color>
-    <color name="translucent">#30000000</color>
-    <color name="translucent_40">#66000000</color>
-    <color name="translucent_80">#cc000000</color>
-    <color name="card_color">#FFFFFF</color>
-
-<!--    theme colors-->
+    <!--    theme colors-->
     <color name="color_primary">#EDDBC0</color>
     <color name="color_primary_variant">#FF7171</color>
     <color name="color_on_primary">#FF000000</color>
-
     <color name="color_secondary">#FF7171</color>
     <color name="color_secondary_variant">#EDDBC0</color>
     <color name="color_on_secondary">#fff8e6</color>
 
-    <color name="selected_tag_background">#EDDBC0</color>
-    <color name="tag_text_color">#FF000000</color>
-    
-    <color name="note_bottom_options_bg">#EDDBC0</color>
-    
+<!--    color name to code    -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="white_transparent">#50FFFFFF</color>
+    <color name="dark_mode_grey">#2a2a2a</color>
     <color name="light_beige">#fff8e6</color>
     <color name="beige">#EDDBC0</color>
-    <color name="brown_translucent">#804b371c</color>
+
+<!--    translucent colors-->
+    <color name="transparent">#00000000</color>
+    <color name="translucent">#30000000</color>
+    <color name="translucent_40">#66000000</color>
+    <color name="translucent_80">#cc000000</color>
     <color name="brown_walnut">#604432</color>
+
+<!--    color for component-->
+    <color name="selected_tag_background">#EDDBC0</color>
+    <color name="note_bottom_options_bg">#EDDBC0</color>
+    <color name="background_color_to_theme">#FFFFFFFF</color>
+    <color name="background_color_variant_to_theme">#d5d5d5</color>
+    <color name="text_color_to_theme">#2a2a2a</color>
+    <color name="cover_color_to_theme">#66000000</color>
+    <color name="bg_floating_action_btn_to_theme">#FF7171</color>
+    <color name="ic_floating_action_btn_to_theme">#fff8e6</color>
+    <color name="audio_player_color_to_theme">#FF000000</color>
 </resources>

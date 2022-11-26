@@ -59,11 +59,11 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="12dp"
         app:borderWidth="0dp"
-        android:backgroundTint="@color/color_primary_variant"
+        android:backgroundTint="@color/bg_floating_action_btn_to_theme"
         android:src="@drawable/ic_pin"
         app:fabCustomSize="55dp"
         app:maxImageSize="50dp"
-        app:tint="@color/light_beige"
+        app:tint="@color/ic_floating_action_btn_to_theme"
         app:layout_constraintBottom_toTopOf="@id/note_page_bottom_options"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -74,11 +74,11 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="12dp"
         app:borderWidth="0dp"
-        android:backgroundTint="@color/color_primary_variant"
+        android:backgroundTint="@color/bg_floating_action_btn_to_theme"
         android:src="@drawable/ic_clip"
         app:fabCustomSize="54dp"
         app:maxImageSize="50dp"
-        app:tint="@color/light_beige"
+        app:tint="@color/ic_floating_action_btn_to_theme"
         app:layout_constraintBottom_toTopOf="@id/btn_take_timestamp"
         app:layout_constraintEnd_toEndOf="parent"/>
 
