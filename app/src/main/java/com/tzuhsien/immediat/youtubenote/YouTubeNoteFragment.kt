@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.annotation.NonNull
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -25,10 +26,12 @@ import com.tzuhsien.immediat.data.model.TimeItemDisplay
 import com.tzuhsien.immediat.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseDuration
+import com.tzuhsien.immediat.loading.LoadingDialogDirections
+import com.tzuhsien.immediat.network.LoadApiStatus
+import com.tzuhsien.immediat.spotifynote.SpotifyNoteService
 import com.tzuhsien.immediat.tag.TagDialogFragmentDirections
 import com.tzuhsien.immediat.util.SwipeHelper
 import timber.log.Timber
-
 
 class YouTubeNoteFragment : Fragment() {
 
@@ -46,6 +49,11 @@ class YouTubeNoteFragment : Fragment() {
     ): View? {
 
         binding = FragmentYoutubeNoteBinding.inflate(layoutInflater)
+
+        Intent(context, SpotifyNoteService::class.java).apply {
+            action = SpotifyNoteService.ACTION_STOP
+            context?.startService(this)
+        }
 
         /**
          *  YouTube player and behavior control
@@ -263,6 +271,23 @@ class YouTubeNoteFragment : Fragment() {
                 putExtra(Intent.EXTRA_TEXT, getString(R.string.youtube_note_uri, viewModel.noteId, videoId))
             }
             startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
+        }
+
+        /** Loading status **/
+        viewModel.status.observe(viewLifecycleOwner) {
+            when(it) {
+                LoadApiStatus.LOADING -> {
+                    findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                }
+                LoadApiStatus.DONE -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to true))
+                }
+                LoadApiStatus.ERROR -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to false))
+                }
+            }
         }
 
         return binding.root

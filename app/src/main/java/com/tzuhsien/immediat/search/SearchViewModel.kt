@@ -139,31 +139,43 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.getUserSavedShows(UserManager.userSpotifyAuthToken)
+            if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
 
-            when (result) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
+                val result = repository.getUserSavedShows(UserManager.userSpotifyAuthToken)
 
-                    if (result.data.items.isEmpty()) {
-                        _spotifyMsg.value = "You haven't saved any show yet"
-                    } else {
-                        getShowEpisodesById(result.data.items)
+                when (result) {
+                    is Result.Success -> {
+                        _error.value = null
+                        _status.value = LoadApiStatus.DONE
+
+                        if (result.data.items.isEmpty()) {
+                            _spotifyMsg.value = "You haven't saved any show yet"
+                        } else {
+                            getShowEpisodesById(result.data.items)
+                        }
                     }
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                    Timber.d("getSpotifySavedShowLatestEpisodes is Result.Error: ${result.exception.toString()}")
-                }
-                else -> {
-                    _error.value = Util.getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
+                    is Result.Fail -> {
+                        _error.value = result.error
+                        _status.value = LoadApiStatus.ERROR
+
+                        if (result.error == "The access token expired") {
+                            _isAuthRequired.value = true
+                        } else {
+                            _spotifyMsg.value = result.error
+                        }
+
+                        Timber.d("getUserSavedShows is Result.Fail [msg]: ${result.error}")
+                    }
+                    is Result.Error -> {
+                        _error.value = result.exception.toString()
+                        _status.value = LoadApiStatus.ERROR
+
+                        Timber.d("getSpotifySavedShowLatestEpisodes is Result.Error: ${result.exception}")
+                    }
+                    else -> {
+                        _error.value = Util.getString(R.string.unknown_error)
+                        _status.value = LoadApiStatus.ERROR
+                    }
                 }
             }
         }

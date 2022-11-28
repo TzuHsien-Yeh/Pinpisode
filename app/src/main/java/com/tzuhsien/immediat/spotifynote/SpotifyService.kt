@@ -109,7 +109,7 @@ object SpotifyService {
             handler(playerState)
         }
 
-        playerStateSubscription = cancelAndResetSubscription(playerStateSubscription)
+//        playerStateSubscription = cancelAndResetSubscription(playerStateSubscription)
 
         spotifyAppRemote?.let {
             playerStateSubscription =

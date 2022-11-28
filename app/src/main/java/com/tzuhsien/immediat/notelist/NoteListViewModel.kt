@@ -152,7 +152,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         _tagSet.value = set
     }
 
-    fun navigateToNotePage(note: Note) {
+    private fun navigateToNotePage(note: Note) {
         when (note.source) {
             Source.YOUTUBE.source -> {
                 _navigateToYoutubeNote.value = note

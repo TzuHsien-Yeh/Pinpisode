@@ -28,7 +28,7 @@ class NotificationBuilder {
             notificationView.setViewVisibility(R.id.btn_clipping, View.GONE)
         }
 
-        val bmp = BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+        val bmp = BitmapFactory.decodeResource(context.resources, R.mipmap.launcher)
 
         return NotificationCompat.Builder(context, channelId)
             .setAutoCancel(false)

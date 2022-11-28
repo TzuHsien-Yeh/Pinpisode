@@ -17,6 +17,7 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/btn_seek_back.xml" value="0.23" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/chip_background_color_selector.xml" value="0.1745" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/chip_text_color_selector.xml" value="0.338" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/icontest.xml" value="0.1" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/img_rounded_corner_maker.xml" value="0.2515" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/rotate_square_animation.xml" value="0.338" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/rounded_corner.xml" value="0.225" />
@@ -25,6 +26,7 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/chip_input_tag.xml" value="0.5" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/chip_tag.xml" value="0.3614583333333333" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/custom_player_ui.xml" value="0.2078125" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/dialog_loading.xml" value="0.1875" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/dialog_message.xml" value="0.3333333333333333" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/dialog_tag.xml" value="0.22" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_coauthor_dialog.xml" value="0.22" />
@@ -33,8 +35,8 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_option_dialog.xml" value="0.19791666666666666" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_paste_url.xml" value="0.3625" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_profile.xml" value="0.25679347826086957" />
-        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_search.xml" value="0.33" />
-        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_search_result.xml" value="0.3333333333333333" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_search.xml" value="0.2347560975609756" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_search_result.xml" value="0.21388888888888888" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_sign_in.xml" value="0.22" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_spotify_note.xml" value="0.22" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/fragment_tag_dialog_list_dialog.xml" value="0.2907801418439716" />
@@ -44,7 +46,7 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_invitation.xml" value="0.4244791666666667" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_note.xml" value="0.33" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_sp_trending.xml" value="0.23645833333333333" />
-        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_spotify_latest_content.xml" value="0.3333333333333333" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_spotify_latest_content.xml" value="0.38832252085264135" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_spotify_search_result.xml" value="0.3333333333333333" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_tag.xml" value="0.22" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/item_time_card.xml" value="0.22" />
@@ -54,6 +56,9 @@
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/layout/notification_layout.xml" value="0.30775075987841943" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/menu/bottom_nav_menu.xml" value="0.3625" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.184" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/mipmap-anydpi-v26/launcher.xml" value="0.1045" />
+        <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/mipmap-anydpi-v26/launcher_round.xml" value="0.1045" />
       </map>
     </option>
   </component>

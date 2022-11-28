@@ -34,6 +34,8 @@ class MyApplication: Application() {
                 "Spotify Note",
                 NotificationManager.IMPORTANCE_LOW
             )
+
+            channel.setSound(null, null)
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }

@@ -163,7 +163,6 @@ class YouTubeNoteViewModel(
             when (val result = repository.checkIfNoteAlreadyExists(Source.YOUTUBE.source, videoId)) {
                 is Result.Success -> {
                     _error.value = null
-                    _status.value = LoadApiStatus.DONE
 
                     if (null == result.data) {
                         // note not exist, get info from yt and then create a new note
@@ -195,12 +194,9 @@ class YouTubeNoteViewModel(
     private fun getYoutubeVideoInfoById(videoId: String) {
         coroutineScope.launch {
 
-            _status.value = LoadApiStatus.LOADING
-
             when (val result = repository.getYouTubeVideoInfoById(videoId)) {
                 is Result.Success -> {
                     _error.value = null
-                    _status.value = LoadApiStatus.DONE
 
                     createNewYouTubeNote(result.data.items[0])
                 }
@@ -233,8 +229,6 @@ class YouTubeNoteViewModel(
         )
 
         coroutineScope.launch {
-
-            _status.value = LoadApiStatus.LOADING
 
             val result = repository.createNote(
                 source = Source.YOUTUBE.source,

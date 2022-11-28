@@ -59,7 +59,7 @@
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/img_note_thumbnail"
         android:layout_width="0dp"
-        android:layout_height="86dp"
+        android:layout_height="100dp"
         android:layout_marginTop="@dimen/standard"
         android:layout_marginEnd="@dimen/standard"
         app:shapeAppearanceOverlay="@style/rounded_corner"

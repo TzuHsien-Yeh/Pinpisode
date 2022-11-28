@@ -148,6 +148,7 @@ class SpotifyNoteViewModel(
             SpotifyService.connectToAppRemote(MyApplication.applicationContext()) { isConnected ->
                 if (isConnected) {
                     _isSpotifyConnected.value = true
+                    _status.value = LoadApiStatus.DONE
                 }
             }
         }
@@ -246,14 +247,11 @@ class SpotifyNoteViewModel(
         }
     }
 
-
     fun createNewSpotifyNote(newSpotifyNote: Note) {
         Timber.d("createNewSpotifyNote(newSpotifyNote)")
 
         if (!hasUploaded) {
             coroutineScope.launch {
-
-                _status.value = LoadApiStatus.LOADING
 
                 val result = repository.createNote(
                     source = Source.SPOTIFY.source,
@@ -299,6 +297,8 @@ class SpotifyNoteViewModel(
                     }
                 }
             }
+        } else {
+            _status.value = LoadApiStatus.DONE
         }
 
     }

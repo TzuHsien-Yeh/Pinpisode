@@ -358,6 +358,28 @@ class SpotifyNoteFragment : Fragment() {
             startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
         }
 
+//        /** Loading status **/
+//        viewModel.status.observe(viewLifecycleOwner) {
+//            when(it) {
+//                LoadApiStatus.LOADING -> {
+//                    Timber.d("LoadApiStatus.LOADING")
+//                    findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+//                }
+//                LoadApiStatus.DONE -> {
+//
+//                    Timber.d("LoadApiStatus.DONE")
+//                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+//                        bundleOf("doneLoading" to true))
+//                }
+//                LoadApiStatus.ERROR -> {
+//
+//                    Timber.d("LoadApiStatus.ERROR")
+//                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+//                        bundleOf("doneLoading" to false))
+//                }
+//            }
+//        }
+
         return binding.root
     }
 
