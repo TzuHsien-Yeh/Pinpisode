@@ -11,11 +11,11 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.tzuhsien.immediat"
+        applicationId "com.tzuhsien.pinpisode"
         minSdk 26
         targetSdk 32
-        versionCode 6
-        versionName "1.0.5"
+        versionCode 7
+        versionName "1.0.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

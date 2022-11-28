@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/noteListFragment"
-        android:name="com.tzuhsien.immediat.notelist.NoteListFragment"
+        android:name="com.tzuhsien.pinpisode.notelist.NoteListFragment"
         android:label="fragment_note_list"
         tools:layout="@layout/fragment_note_list" >
         <action
@@ -20,13 +20,13 @@
 
     <fragment
         android:id="@+id/searchFragment"
-        android:name="com.tzuhsien.immediat.search.SearchFragment"
+        android:name="com.tzuhsien.pinpisode.search.SearchFragment"
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" />
 
     <fragment
         android:id="@+id/youTubeNoteFragment"
-        android:name="com.tzuhsien.immediat.youtubenote.YouTubeNoteFragment"
+        android:name="com.tzuhsien.pinpisode.youtubenote.YouTubeNoteFragment"
         android:label="fragment_take_note"
         tools:layout="@layout/fragment_youtube_note">
         <argument
@@ -55,39 +55,39 @@
 
     <dialog
         android:id="@+id/tagDialogFragment"
-        android:name="com.tzuhsien.immediat.tag.TagDialogFragment"
+        android:name="com.tzuhsien.pinpisode.tag.TagDialogFragment"
         android:label="TagDialogFragment" >
 
         <argument android:name="note_key"
-            app:argType="com.tzuhsien.immediat.data.model.Note"
+            app:argType="com.tzuhsien.pinpisode.data.model.Note"
             app:nullable="false"/>
     </dialog>
 
     <action android:id="@+id/action_global_tagDialogFragment" app:destination="@id/tagDialogFragment" />
     <fragment
         android:id="@+id/signInFragment"
-        android:name="com.tzuhsien.immediat.signin.SignInFragment"
+        android:name="com.tzuhsien.pinpisode.signin.SignInFragment"
         android:label="fragment_sign_in"
         tools:layout="@layout/fragment_sign_in" /><action android:id="@+id/action_global_signInFragment" app:destination="@id/signInFragment"/>
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.tzuhsien.immediat.profile.ProfileFragment"
+        android:name="com.tzuhsien.pinpisode.profile.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" />
     <dialog
         android:id="@+id/coauthorDialogFragment"
-        android:name="com.tzuhsien.immediat.coauthor.CoauthorDialogFragment"
+        android:name="com.tzuhsien.pinpisode.coauthor.CoauthorDialogFragment"
         android:label="fragment_coauthor_dialog"
         tools:layout="@layout/fragment_coauthor_dialog" >
 
         <argument android:name="note_key"
-            app:argType="com.tzuhsien.immediat.data.model.Note"
+            app:argType="com.tzuhsien.pinpisode.data.model.Note"
             app:nullable="false"/>
 
     </dialog>
     <fragment
         android:id="@+id/spotifyNoteFragment"
-        android:name="com.tzuhsien.immediat.spotifynote.SpotifyNoteFragment"
+        android:name="com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragment"
         android:label="fragment_spotify_note"
         tools:layout="@layout/fragment_spotify_note">
 
@@ -111,7 +111,7 @@
     <action android:id="@+id/action_global_spotifyNoteFragment" app:destination="@id/spotifyNoteFragment"/>
     <fragment
         android:id="@+id/notificationFragment"
-        android:name="com.tzuhsien.immediat.notification.NotificationFragment"
+        android:name="com.tzuhsien.pinpisode.notification.NotificationFragment"
         android:label="fragment_notification"
         tools:layout="@layout/fragment_notification" />
 
@@ -125,7 +125,7 @@
 
     <dialog
         android:id="@+id/loadingDialog"
-        android:name="com.tzuhsien.immediat.loading.LoadingDialog"
+        android:name="com.tzuhsien.pinpisode.loading.LoadingDialog"
         android:label="dialog_loading"
         tools:layout="@layout/dialog_loading" />
 
