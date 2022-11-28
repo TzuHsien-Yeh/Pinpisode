@@ -122,8 +122,12 @@
 
     <action android:id="@+id/action_global_noteListFragment"
         app:destination="@id/noteListFragment" />
+
     <dialog
-        android:id="@+id/messageDialog"
-        android:name="com.tzuhsien.immediat.dialog.MessageDialog"
-        android:label="MessageDialog" /><action android:id="@+id/action_global_messageDialog" app:destination="@id/messageDialog"/>
+        android:id="@+id/loadingDialog"
+        android:name="com.tzuhsien.immediat.loading.LoadingDialog"
+        android:label="dialog_loading"
+        tools:layout="@layout/dialog_loading" />
+
+    <action android:id="@+id/action_global_loadingDialog" app:destination="@id/loadingDialog"/>
 </navigation>

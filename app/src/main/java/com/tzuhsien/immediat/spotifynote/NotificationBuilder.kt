@@ -4,7 +4,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
+import android.graphics.BitmapFactory
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
@@ -28,14 +28,19 @@ class NotificationBuilder {
             notificationView.setViewVisibility(R.id.btn_clipping, View.GONE)
         }
 
+        val bmp = BitmapFactory.decodeResource(context.resources, R.mipmap.launcher)
+
         return NotificationCompat.Builder(context, channelId)
             .setAutoCancel(false)
             .setOngoing(true)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setCustomContentView(notificationView)
+            .setBadgeIconType(NotificationCompat.BADGE_ICON_NONE)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setContentTitle(context.getString(R.string.app_name))
-            .setColor(Color.TRANSPARENT)
-            .setSmallIcon(R.drawable.ic_clip) // TODO: Change to monochrome image shape
+            .setColor(context.getColor(R.color.beige))
+            .setSmallIcon(R.drawable.pinpisode_clipart)
+//            .setLargeIcon(bmp)
             .build()
     }
 

@@ -6,13 +6,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/card_sp_latest_episode"
         android:layout_width="194dp"
         android:layout_height="match_parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:cardElevation="@dimen/card_view_elevation"
         app:cardCornerRadius="10dp"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/background_color_to_theme"
         app:cardMaxElevation="@dimen/card_view_elevation"
         app:cardPreventCornerOverlap="true"
         app:cardUseCompatPadding="true">

@@ -61,8 +61,10 @@ class SpotifyTimeItemAdapter(
             binding.textTimeStart.setOnClickListener {
                 uiState.onTimeClick(timeItem)
             }
-
             binding.textTimeEnd.setOnClickListener {
+                uiState.onTimeClick(timeItem)
+            }
+            binding.extraSpaceForClickToPlay.setOnClickListener {
                 uiState.onTimeClick(timeItem)
             }
 

@@ -78,28 +78,29 @@ class SearchFragment : Fragment() {
          * Search result of url (specified sourceId)
          * */
         viewModel.ytVideoData.observe(viewLifecycleOwner, Observer {
-           it?.let {
-               if (it.items.isNotEmpty()) {
+            it?.let {
+                if (it.items.isNotEmpty()) {
 
-                   val item = it.items[0]
+                    val item = it.items[0]
 
-                   binding.textSearchResult.visibility = View.VISIBLE
-                   binding.cardSingleVideoResult.visibility = View.VISIBLE
-                   binding.textTitle.text = item.snippet.title
-                   Glide.with(this)
-                       .load(item.snippet.thumbnails.high.url)
-                       .into(binding.imgThumbnail)
-                   binding.textChannelName.text = item.snippet.channelTitle
-                   binding.textPublishedTime.text = item.snippet.publishedAt.utcToLocalTime()
-                   viewModel.ytSingleResultId = item.id // including video sourceId
+                    binding.textSearchResult.visibility = View.VISIBLE
+                    binding.cardSingleVideoResult.visibility = View.VISIBLE
+                    binding.textTitle.text = item.snippet.title
+                    Glide.with(this)
+                        .load(item.snippet.thumbnails.high.url)
+                        .into(binding.imgThumbnail)
+                    binding.textChannelName.text = item.snippet.channelTitle
+                    binding.textPublishedTime.text = item.snippet.publishedAt.utcToLocalTime()
+                    viewModel.ytSingleResultId = item.id // video sourceId
 
-                   binding.icYoutube.visibility = View.GONE
-                   binding.textTrendingOnYoutube.visibility = View.GONE
-                   binding.recyclerviewYtTrending.visibility = View.GONE
-               } else {
-                   binding.cardSingleVideoResult.visibility = View.GONE
-               }
-           }
+                    // Hide other views
+                    hideRecommendationViews()
+                    binding.cardSingleSpotifyResult.visibility = View.GONE
+                    binding.tabLayoutSearchResults.visibility = View.GONE
+                } else {
+                    binding.cardSingleVideoResult.visibility = View.GONE
+                }
+            }
         })
         binding.cardSingleVideoResult.setOnClickListener {
             viewModel.navigateToYoutubeNote(viewModel.ytSingleResultId!!)
@@ -116,15 +117,14 @@ class SearchFragment : Fragment() {
                 Glide.with(binding.imgSpotifySource)
                     .load(it.images[0].url)
                     .into(binding.imgSpotifySource)
-
                 viewModel.spotifySingleResultId = it.uri.extractSpotifySourceId()
 
-                binding.icYoutube.visibility = View.GONE
-                binding.textTrendingOnYoutube.visibility = View.GONE
-                binding.recyclerviewYtTrending.visibility = View.GONE
-                binding.textNewOnSpotify.visibility = View.GONE
-                binding.recyclerviewSpLatestContent.visibility = View.GONE
-                }
+                // Hide other views
+                hideRecommendationViews()
+                binding.cardSingleVideoResult.visibility = View.GONE
+                binding.tabLayoutSearchResults.visibility = View.GONE
+
+            }
         }
 
         binding.cardSingleSpotifyResult.setOnClickListener {
@@ -138,26 +138,19 @@ class SearchFragment : Fragment() {
         setUpViewPager()
         setUpTabLayout()
         viewModel.searchQuery.observe(viewLifecycleOwner) {
-            it?.let {
-                Timber.d("query = $it, parentFragmentManager.setFragmentResult")
-                requireActivity().supportFragmentManager.setFragmentResult("requestKey1", bundleOf("query" to it))
-                requireActivity().supportFragmentManager.setFragmentResult("requestKey2", bundleOf("query" to it))
+            Timber.d("query = $it, parentFragmentManager.setFragmentResult")
+            requireActivity().supportFragmentManager.setFragmentResult("requestKey1",
+                bundleOf("query" to it))
+            requireActivity().supportFragmentManager.setFragmentResult("requestKey2",
+                bundleOf("query" to it))
+
+            if (null != it) {
+                hideRecommendationViews()
+                binding.cardSingleVideoResult.visibility = View.GONE
+                binding.cardSingleSpotifyResult.visibility = View.GONE
             }
 
             binding.tabLayoutSearchResults.visibility = if (null != it) View.VISIBLE else View.GONE
-
-            if (null != it) {
-                binding.icYoutube.visibility = View.GONE
-                binding.textTrendingOnYoutube.visibility = View.GONE
-                binding.recyclerviewYtTrending.visibility = View.GONE
-
-                binding.icSpotify.visibility = View.GONE
-                binding.textNewOnSpotify.visibility = View.GONE
-                binding.viewGroupSpNotAuthorized.visibility = View.GONE
-                binding.recyclerviewSpLatestContent.visibility = View.GONE
-                binding.textSpotifyMessage.visibility = View.GONE
-            }
-
         }
 
         /**
@@ -171,7 +164,7 @@ class SearchFragment : Fragment() {
 
         // Check if Spotify auth token available and if the user want to auth
         viewModel.isAuthRequired.observe(viewLifecycleOwner) {
-            when(it) {
+            when (it) {
                 null -> {
                     if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
                         viewModel.getSpotifySavedShowLatestEpisodes()
@@ -199,8 +192,6 @@ class SearchFragment : Fragment() {
         viewModel.spotifyLatestEpisodesList.observe(viewLifecycleOwner) {
             Timber.d("viewModel.spotifyLatestEpisodesList.observe: $it")
             spLatestContentAdapter.submitList(it)
-
-            binding.recyclerviewSpLatestContent.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
         }
         viewModel.spotifyMsg.observe(viewLifecycleOwner) {
             it?.let {
@@ -234,6 +225,18 @@ class SearchFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun hideRecommendationViews() {
+        binding.icYoutube.visibility = View.GONE
+        binding.textTrendingOnYoutube.visibility = View.GONE
+        binding.recyclerviewYtTrending.visibility = View.GONE
+
+        binding.icSpotify.visibility = View.GONE
+        binding.textNewOnSpotify.visibility = View.GONE
+        binding.viewGroupSpNotAuthorized.visibility = View.GONE
+        binding.recyclerviewSpLatestContent.visibility = View.GONE
+        binding.textSpotifyMessage.visibility = View.GONE
     }
 
     private fun setUpTabLayout() {
@@ -317,7 +320,7 @@ class SearchFragment : Fragment() {
                 showLoginActivityToken.launch(getLoginActivityTokenIntent(authorizationResponse.code))
             }
             AuthorizationResponse.Type.ERROR -> {
-            Timber.d("AuthorizationResponse.Type.ERROR")
+                Timber.d("AuthorizationResponse.Type.ERROR")
             }
             // Handle the Error
 
@@ -331,15 +334,15 @@ class SearchFragment : Fragment() {
             activity,
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
                 .setScopes(
-                arrayOf(
+                    arrayOf(
 //                    "user-read-playback-state",
 //                        "user-modify-playback-state",
 //                    "user-read-currently-playing",
 //                    "app-remote-control",
-                    "user-read-playback-position",
-                    "user-library-read"
+                        "user-read-playback-position",
+                        "user-library-read"
+                    )
                 )
-            )
                 .setCustomParam("grant_type", "authorization_code")
                 .setCustomParam("code", code)
                 .setCustomParam("code_verifier", CODE_VERIFIER)

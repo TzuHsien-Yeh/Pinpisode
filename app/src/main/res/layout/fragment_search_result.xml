@@ -62,6 +62,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Authorize to search on Spotify"
+                android:textColor="@color/brown_walnut"
                 android:textAllCaps="false"
                 style="@style/yt_medium_19sp"
                 android:layout_marginStart="6dp"

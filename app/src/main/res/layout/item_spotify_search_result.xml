@@ -12,7 +12,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:cardElevation="@dimen/card_view_elevation"
         app:cardCornerRadius="10dp"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/background_color_to_theme"
         app:cardMaxElevation="@dimen/card_view_elevation"
         app:cardPreventCornerOverlap="true"
         app:cardUseCompatPadding="true">

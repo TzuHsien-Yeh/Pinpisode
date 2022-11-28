@@ -34,8 +34,8 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         get() = _spotifyEpisodeData
 
     // Search by keywords
-    private val _searchQuery = MutableLiveData<String>(null)
-    val searchQuery: LiveData<String>
+    private val _searchQuery = MutableLiveData<String?>(null)
+    val searchQuery: LiveData<String?>
         get() = _searchQuery
 
 
@@ -139,31 +139,43 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.getUserSavedShows(UserManager.userSpotifyAuthToken)
+            if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
 
-            when (result) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
+                val result = repository.getUserSavedShows(UserManager.userSpotifyAuthToken)
 
-                    if (result.data.items.isEmpty()) {
-                        _spotifyMsg.value = "You haven't saved any show yet"
-                    } else {
-                        getShowEpisodesById(result.data.items)
+                when (result) {
+                    is Result.Success -> {
+                        _error.value = null
+                        _status.value = LoadApiStatus.DONE
+
+                        if (result.data.items.isEmpty()) {
+                            _spotifyMsg.value = "You haven't saved any show yet"
+                        } else {
+                            getShowEpisodesById(result.data.items)
+                        }
                     }
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                    Timber.d("getSpotifySavedShowLatestEpisodes is Result.Error: ${result.exception.toString()}")
-                }
-                else -> {
-                    _error.value = Util.getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
+                    is Result.Fail -> {
+                        _error.value = result.error
+                        _status.value = LoadApiStatus.ERROR
+
+                        if (result.error == "The access token expired") {
+                            _isAuthRequired.value = true
+                        } else {
+                            _spotifyMsg.value = result.error
+                        }
+
+                        Timber.d("getUserSavedShows is Result.Fail [msg]: ${result.error}")
+                    }
+                    is Result.Error -> {
+                        _error.value = result.exception.toString()
+                        _status.value = LoadApiStatus.ERROR
+
+                        Timber.d("getSpotifySavedShowLatestEpisodes is Result.Error: ${result.exception}")
+                    }
+                    else -> {
+                        _error.value = Util.getString(R.string.unknown_error)
+                        _status.value = LoadApiStatus.ERROR
+                    }
                 }
             }
         }
@@ -218,10 +230,13 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     fun findMediaSource(query: String) {
         // Check if the query is a YouTube url
         if (query.contains(youtubeWatchUrl) || query.contains(youtubeShareLink)) {
+
             val videoId = query.extractYoutubeVideoId()
             if (videoId.isNotEmpty()) {
                 getYoutubeVideoInfoById(videoId)
             }
+            _searchQuery.value = null
+
         } else if (query.contains(spotifyShareLink) || query.contains(spotifyUri)) {
             // If the query is a  Spotify link, request auth token to proceed to search
             _isAuthRequired.value = UserManager.userSpotifyAuthToken.isEmpty()
@@ -234,10 +249,12 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                     getTrackInfoById(sourceId.substringAfter("track"))
                 }
             }
+
+            _searchQuery.value = null
+
         } else {
             _searchQuery.value = query
         }
-
     }
 
     private fun getEpisodeInfoById(id: String) {
@@ -277,15 +294,11 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                     }
                 }
             }
-        } else {
-
-            // TODO: PROMPT TO AUTH
         }
-
     }
 
     private fun getTrackInfoById(id: String) {
-
+        // TODO: get track info
     }
 
     private fun getYoutubeVideoInfoById(videoId: String) {

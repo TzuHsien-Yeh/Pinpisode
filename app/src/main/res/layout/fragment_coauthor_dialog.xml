@@ -5,7 +5,9 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="center"
-    android:padding="@dimen/standard"
+    android:paddingHorizontal="@dimen/standard"
+    android:paddingTop="14dp"
+    android:paddingBottom="18dp"
     android:background="@drawable/bg_dialog"
     tools:context=".coauthor.CoauthorDialogFragment">
 
@@ -40,7 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        style="@style/yt_medium_14sp_text"
+        style="@style/yt_bold_17sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@+id/text_note_owner"
         android:text="@string/coauthor"/>
@@ -76,7 +78,7 @@
         app:queryHint="Find user by email"
         app:theme="@style/search_view_style"
         app:queryBackground="@null"
-        app:background="@null"
+        android:background="@drawable/bg_searchview"
         app:iconifiedByDefault="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -128,12 +130,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
         android:layout_marginBottom="12dp"
-        android:textSize="12sp"
         android:textAlignment="center"
+        android:textColor="@color/brown_walnut"
         android:background="@drawable/bg_small_radius_rounded_corner"
         android:paddingHorizontal="@dimen/standard"
         android:paddingVertical="8dp"
-        style="@style/yt_bold_20sp"
+        style="@style/yt_bold_17sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/img_owner_pic"
@@ -144,7 +146,8 @@
         android:id="@+id/text_result_msg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="@dimen/standard"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="@dimen/standard"
         android:textAlignment="center"
         style="@style/yt_bold_20sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -152,6 +155,5 @@
         app:layout_constraintTop_toBottomOf="@id/search_user_by_email"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:text="@string/user_not_found"/>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

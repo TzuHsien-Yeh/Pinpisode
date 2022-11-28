@@ -43,7 +43,11 @@ class SearchResultFragment : Fragment() {
                 "requestKey1",
                 this
             ) { _, bundle ->
-                viewModel.searchOnYouTube(bundle.getString("query"))
+                if (null != bundle.getString("query")) {
+                    viewModel.searchOnYouTube(bundle.getString("query"))
+                } else {
+                    viewModel.emptySearchResultLists()
+                }
                 Timber.d("setFragmentResultListener: ${bundle.getString("query")}")
             }
         } else {
@@ -52,8 +56,12 @@ class SearchResultFragment : Fragment() {
                 "requestKey2",
                 this
             ) { _, bundle ->
-                viewModel.searchOnSpotify(bundle.getString("query"))
-                viewModel.queryKeyword = bundle.getString("query")
+                if (null != bundle.getString("query")) {
+                    viewModel.searchOnSpotify(bundle.getString("query"))
+                    viewModel.queryKeyword = bundle.getString("query")
+                } else {
+                    viewModel.emptySearchResultLists()
+                }
                 Timber.d("setFragmentResultListener: ${bundle.getString("query")}")
             }
         }
@@ -94,149 +102,149 @@ class SearchResultFragment : Fragment() {
             }
         }
 
-            viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner) {
-                it?.let {
-                    findNavController().navigate(
-                        YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
-                            videoIdKey = it
-                        )
+        viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner) {
+            it?.let {
+                findNavController().navigate(
+                    YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
+                        videoIdKey = it
                     )
-                    viewModel.doneNavigation()
-                }
+                )
+                viewModel.doneNavigation()
             }
+        }
 
-            viewModel.navigateToSpotifyNote.observe(viewLifecycleOwner) {
-                it?.let {
-                    Timber.d("viewModel.navigateToSpotifyNote.observe: $it")
-                    findNavController().navigate(
-                        SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
-                            sourceIdKey = it
-                        )
+        viewModel.navigateToSpotifyNote.observe(viewLifecycleOwner) {
+            it?.let {
+                Timber.d("viewModel.navigateToSpotifyNote.observe: $it")
+                findNavController().navigate(
+                    SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+                        sourceIdKey = it
                     )
-                    viewModel.doneNavigation()
-                }
+                )
+                viewModel.doneNavigation()
             }
+        }
         return binding.root
     }
 
-        /**
-         *  Spotify Auth flow
-         * */
-        companion object {
-            const val CLIENT_ID = "f6095c97a1ab4a7fb88b5ac5f2ba606d"
-            const val REDIRECT_URI = "pinpisode://callback"
+    /**
+     *  Spotify Auth flow
+     * */
+    companion object {
+        const val CLIENT_ID = "f6095c97a1ab4a7fb88b5ac5f2ba606d"
+        const val REDIRECT_URI = "pinpisode://callback"
 
-            val CODE_VERIFIER = getCodeVerifier()
+        val CODE_VERIFIER = getCodeVerifier()
 
-            private fun getCodeVerifier(): String {
-                val secureRandom = SecureRandom()
-                val code = ByteArray(64)
-                secureRandom.nextBytes(code)
-                return Base64.encodeToString(
-                    code,
-                    Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-                )
-            }
-
-            fun getCodeChallenge(verifier: String): String {
-                val bytes = verifier.toByteArray()
-                val messageDigest = MessageDigest.getInstance("SHA-256")
-                messageDigest.update(bytes, 0, bytes.size)
-                val digest = messageDigest.digest()
-                return Base64.encodeToString(
-                    digest,
-                    Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-                )
-            }
+        private fun getCodeVerifier(): String {
+            val secureRandom = SecureRandom()
+            val code = ByteArray(64)
+            secureRandom.nextBytes(code)
+            return Base64.encodeToString(
+                code,
+                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
+            )
         }
 
-        fun getLoginActivityCodeIntent(): Intent =
-            AuthorizationClient.createLoginActivityIntent(
-                activity,
-                AuthorizationRequest.Builder(CLIENT_ID,
-                    AuthorizationResponse.Type.CODE,
-                    REDIRECT_URI)
-                    .setScopes(
-                        arrayOf(
+        fun getCodeChallenge(verifier: String): String {
+            val bytes = verifier.toByteArray()
+            val messageDigest = MessageDigest.getInstance("SHA-256")
+            messageDigest.update(bytes, 0, bytes.size)
+            val digest = messageDigest.digest()
+            return Base64.encodeToString(
+                digest,
+                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
+            )
+        }
+    }
+
+    fun getLoginActivityCodeIntent(): Intent =
+        AuthorizationClient.createLoginActivityIntent(
+            activity,
+            AuthorizationRequest.Builder(CLIENT_ID,
+                AuthorizationResponse.Type.CODE,
+                REDIRECT_URI)
+                .setScopes(
+                    arrayOf(
 //                            "user-read-currently-playing",
 //                            "app-remote-control",
 //                            "user-follow-read",
-                            "user-read-playback-position",
-                            "user-library-read",
-                        )
+                        "user-read-playback-position",
+                        "user-library-read",
                     )
-                    .setCustomParam("code_challenge_method", "S256")
-                    .setCustomParam("code_challenge", getCodeChallenge(CODE_VERIFIER))
-                    .build()
-            )
+                )
+                .setCustomParam("code_challenge_method", "S256")
+                .setCustomParam("code_challenge", getCodeChallenge(CODE_VERIFIER))
+                .build()
+        )
 
-        private val showLoginActivityCode = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result: ActivityResult ->
+    private val showLoginActivityCode = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
 
-            val authorizationResponse =
-                AuthorizationClient.getResponse(result.resultCode, result.data)
+        val authorizationResponse =
+            AuthorizationClient.getResponse(result.resultCode, result.data)
 
-            when (authorizationResponse.type) {
-                AuthorizationResponse.Type.CODE -> {
-                    // Here You will get the authorization code which you
-                    // can get with authorizationResponse.code
+        when (authorizationResponse.type) {
+            AuthorizationResponse.Type.CODE -> {
+                // Here You will get the authorization code which you
+                // can get with authorizationResponse.code
 
-                    showLoginActivityToken.launch(getLoginActivityTokenIntent(authorizationResponse.code))
-                }
-                AuthorizationResponse.Type.ERROR -> {
-                    Timber.d("AuthorizationResponse.Type.ERROR")
-                }
-                // Handle the Error
-
-                else -> {}
-                // Probably interruption
+                showLoginActivityToken.launch(getLoginActivityTokenIntent(authorizationResponse.code))
             }
-        }
+            AuthorizationResponse.Type.ERROR -> {
+                Timber.d("AuthorizationResponse.Type.ERROR")
+            }
+            // Handle the Error
 
-        fun getLoginActivityTokenIntent(code: String): Intent =
-            AuthorizationClient.createLoginActivityIntent(
-                activity,
-                AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
-                    .setScopes(
-                        arrayOf(
+            else -> {}
+            // Probably interruption
+        }
+    }
+
+    fun getLoginActivityTokenIntent(code: String): Intent =
+        AuthorizationClient.createLoginActivityIntent(
+            activity,
+            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
+                .setScopes(
+                    arrayOf(
 //                            "user-read-currently-playing",
 //                            "app-remote-control",
 //                            "user-follow-read",
-                            "user-read-playback-position",
-                            "user-library-read",
-                        )
+                        "user-read-playback-position",
+                        "user-library-read",
                     )
-                    .setCustomParam("grant_type", "authorization_code")
-                    .setCustomParam("code", code)
-                    .setCustomParam("code_verifier", CODE_VERIFIER)
-                    .build()
-            )
+                )
+                .setCustomParam("grant_type", "authorization_code")
+                .setCustomParam("code", code)
+                .setCustomParam("code_verifier", CODE_VERIFIER)
+                .build()
+        )
 
-        private val showLoginActivityToken = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result: ActivityResult ->
+    private val showLoginActivityToken = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
 
-            val authorizationResponse =
-                AuthorizationClient.getResponse(result.resultCode, result.data)
+        val authorizationResponse =
+            AuthorizationClient.getResponse(result.resultCode, result.data)
 
-            when (authorizationResponse.type) {
-                AuthorizationResponse.Type.TOKEN -> {
-                    // Here You can get access to the authorization token
-                    // with authorizationResponse.token
+        when (authorizationResponse.type) {
+            AuthorizationResponse.Type.TOKEN -> {
+                // Here You can get access to the authorization token
+                // with authorizationResponse.token
 
-                    Timber.d("showLoginActivityToken authorizationResponse.expiresIn: ${authorizationResponse.expiresIn}")
-                    Timber.d("authorizationResponse.accessToken = ${authorizationResponse.accessToken}")
-                    UserManager.userSpotifyAuthToken = authorizationResponse.accessToken
-                    viewModel.doneRequestSpotifyAuthToken()
-                }
-                AuthorizationResponse.Type.ERROR -> {
-                    Timber.d("showLoginActivityToken : AuthorizationResponse.Type.ERROR")
-                }
-                // Handle Error
-                else -> {}
-                // Probably interruption
+                Timber.d("showLoginActivityToken authorizationResponse.expiresIn: ${authorizationResponse.expiresIn}")
+                Timber.d("authorizationResponse.accessToken = ${authorizationResponse.accessToken}")
+                UserManager.userSpotifyAuthToken = authorizationResponse.accessToken
+                viewModel.doneRequestSpotifyAuthToken()
             }
+            AuthorizationResponse.Type.ERROR -> {
+                Timber.d("showLoginActivityToken : AuthorizationResponse.Type.ERROR")
+            }
+            // Handle Error
+            else -> {}
+            // Probably interruption
         }
+    }
 
 }

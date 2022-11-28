@@ -200,6 +200,11 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
         viewModelJob.cancel()
     }
 
+    fun emptySearchResultLists() {
+        _ytSearchResultList.value = listOf()
+        _spotifySearchResultList.value = listOf()
+    }
+
 }
 
 data class SearchResultUiState(

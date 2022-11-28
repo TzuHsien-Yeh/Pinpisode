@@ -5,7 +5,6 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
@@ -34,6 +33,8 @@ import com.tzuhsien.immediat.ext.extractSpotifySourceId
 import com.tzuhsien.immediat.ext.formatDuration
 import com.tzuhsien.immediat.ext.getVmFactory
 import com.tzuhsien.immediat.ext.parseSpotifyImageUri
+import com.tzuhsien.immediat.spotifynote.SpotifyService.pause
+import com.tzuhsien.immediat.spotifynote.SpotifyService.resume
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekBack
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekForward
 import com.tzuhsien.immediat.spotifynote.SpotifyService.seekTo
@@ -75,11 +76,8 @@ class SpotifyNoteFragment : Fragment() {
 
             if (it) {
                 SpotifyService.play(SPOTIFY_URI + viewModel.sourceId)
-
                 Timber.d("SpotifyService.play(${SPOTIFY_URI + viewModel.sourceId})")
 
-
-                Timber.e("fragment subscribe")
                 SpotifyService.subscribeToPlayerState { state ->
                     Timber.d("SpotifyService.subscribeToPlayerState:  $state ")
                     updateSeekbar(state)
@@ -178,91 +176,49 @@ class SpotifyNoteFragment : Fragment() {
         trackProgressBar =
             TrackProgressBar(binding.seekTo) { seekToPosition: Long -> seekTo(seekToPosition) }
 
-
-        /**
-         *  Update UI according to current position
-         * **/
-        viewModel.currentPosition.observe(viewLifecycleOwner) { currentSec ->
-            // Text of time to show progress
-            binding.textCurrentSecond.text = currentSec.formatDuration()
-        }
-
         /**
          *  Take timestamps / clips buttons
          * */
         binding.btnTakeTimestamp.setOnClickListener {
             Timber.d("binding.btnTakeTimestamp.setOnClickListener clicked")
-//            viewModel.createTimeItem((viewModel.currentSecond / 1000).toFloat(), null)
             takeTimestamp()
         }
-
-//        val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
 
         binding.btnClip.setOnClickListener {
             when (viewModel.startOrStopToggle) {
                 0 -> {
-//                    viewModel.startAt = (viewModel.currentSecond / 1000).toFloat()
-//                    viewModel.startOrStopToggle = 1
-//                    binding.btnClip.apply {
-//                        setImageResource(R.drawable.ic_clipping_stop)
-//                        startAnimation(animation)
-//                    }
                     startClipping()
                     Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
                 }
                 1 -> {
                     endClipping()
                     Timber.d("btnClip second time clicked, viewModel.endAt = ${viewModel.endAt}")
-//                    viewModel.endAt = (viewModel.currentSecond / 1000).toFloat()
-//                    binding.btnClip.setImageResource(R.drawable.ic_clip)
-//                    binding.btnClip.animation = null
-//                    viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
-//                    viewModel.startOrStopToggle = 0
                 }
             }
         }
-
 
         /**
          *  Play the time items
          * **/
         viewModel.playStart.observe(viewLifecycleOwner) { startAt ->
             startAt?.let {
-                SpotifyService.seekTo((it * 1000).toLong())
-                SpotifyService.resume()
-                viewModel.clearPlayingMomentStart()
-                Timber.d("viewModel.playStart.observe startAt: $startAt")
+                seekTo(startAt)
+                resume()
             }
         }
 
-        // count down to stop if it is a clip
-        viewModel.clipLength.observe(viewLifecycleOwner) { clipLength ->
+        viewModel.currentPosition.observe(viewLifecycleOwner) { currentSec ->
+            // Update current position text
+            binding.textCurrentSecond.text = currentSec.formatDuration()
 
-            if (null != clipLength) {
-                object : CountDownTimer((clipLength * 1000).toLong(), 500) {
-                    override fun onTick(millisUntilFinished: Long) {
-                        viewModel.clearPlayingMomentEnd()
-                        Timber.d("countDownTimer onTick, clip length: $clipLength")
-//                        // cancel the countDownTimer once another time item clicked
-//                        viewModel.playStart.observe(viewLifecycleOwner) {
-//
-//                            Timber.d("viewModel.playStart in countDownTimer : $it")
-//                            it?.let {
-//                                cancel()
-//                                Timber.d("countDownTimer canceled: viewModel.playStart: $it")
-//                            }
-//                        }
-                    }
-
-                    // Callback function, fired when the time is up
-                    override fun onFinish() {
-                        SpotifyService.pause()
-                    }
-                }.start()
-
+            viewModel.playEnd?.let {
+                if (it <= currentSec) {
+                    pause()
+                    viewModel.clearPlayingMomentStart()
+                    viewModel.clearPlayingMomentEnd()
+                }
             }
         }
-
 
         /**
          * Digest of the video (editText)
@@ -402,6 +358,28 @@ class SpotifyNoteFragment : Fragment() {
             startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
         }
 
+//        /** Loading status **/
+//        viewModel.status.observe(viewLifecycleOwner) {
+//            when(it) {
+//                LoadApiStatus.LOADING -> {
+//                    Timber.d("LoadApiStatus.LOADING")
+//                    findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+//                }
+//                LoadApiStatus.DONE -> {
+//
+//                    Timber.d("LoadApiStatus.DONE")
+//                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+//                        bundleOf("doneLoading" to true))
+//                }
+//                LoadApiStatus.ERROR -> {
+//
+//                    Timber.d("LoadApiStatus.ERROR")
+//                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+//                        bundleOf("doneLoading" to false))
+//                }
+//            }
+//        }
+
         return binding.root
     }
 
@@ -488,7 +466,6 @@ class SpotifyNoteFragment : Fragment() {
         val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
 
         binding.btnClip.apply {
-            setImageResource(R.drawable.ic_clipping_stop)
             startAnimation(animation)
         }
         viewModel.startOrStopToggle = 1

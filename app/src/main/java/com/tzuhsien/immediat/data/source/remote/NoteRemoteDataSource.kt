@@ -523,7 +523,10 @@ object NoteRemoteDataSource : DataSource {
             val doc = FirebaseFirestore.getInstance().collection(PATH_NOTES).document(noteId)
 
             doc
-                .update(KEY_AUTHORS, authors.toList())
+                .update(
+                    KEY_AUTHORS, authors.toList(),
+                    KEY_LAST_EDIT_TIME, Calendar.getInstance().timeInMillis
+                )
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         continuation.resume(Result.Success(true))
@@ -813,7 +816,7 @@ object NoteRemoteDataSource : DataSource {
             val result = SpotifyApi.retrofitService.searchOnSpotify(
                 bearerWithToken = SPOTIFY_BEARER + authToken,
                 type = SPOTIFY_PARAM_TYPE,
-                limit = 12,
+                limit = 20,
                 query = query
             )
             Result.Success(result)
@@ -832,12 +835,15 @@ object NoteRemoteDataSource : DataSource {
         return try {
             val result = SpotifyApi.retrofitService.getUserSavedShows(
                 bearerWithToken = SPOTIFY_BEARER + authToken,
-                limit = 8
+                limit = 10
             )
+            result.error?.let {
+                Result.Fail(it.message)
+            }
             Result.Success(result)
 
         } catch (e: Exception) {
-            Timber.w(" exception=${e.message}")
+            Timber.w(" exception=${e.message}, ${e.localizedMessage}, ${e.cause}, ${e.stackTrace} ")
             Result.Error(e)
         }
     }
