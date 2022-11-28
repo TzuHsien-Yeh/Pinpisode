@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.tzuhsien.immediat">
+    package="com.tzuhsien.pinpisode">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
-        android:name=".MyApplication"
+        android:name="com.tzuhsien.pinpisode.MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -20,7 +20,7 @@
         tools:node="merge">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.tzuhsien.pinpisode.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustPan"
             android:launchMode="singleTop"
@@ -54,9 +54,9 @@
 
         </activity>
 
-        <service android:name=".spotifynote.SpotifyNoteService"/>
+        <service android:name="com.tzuhsien.pinpisode.spotifynote.SpotifyNoteService"/>
 
-        <receiver android:name=".spotifynote.TimestampReceiver"/>
+        <receiver android:name="com.tzuhsien.pinpisode.spotifynote.TimestampReceiver"/>
 
     </application>
 
