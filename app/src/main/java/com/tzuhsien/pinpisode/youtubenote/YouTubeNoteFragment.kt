@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -106,19 +107,21 @@ class YouTubeNoteFragment : Fragment() {
                             viewModel.startAt = second
                             viewModel.startOrStopToggle = 1
                             binding.btnClip.apply {
-                                setImageResource(R.drawable.ic_clipping_stop)
                                 startAnimation(animation)
                             }
                             Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
                         }
                         1 -> {
-                            viewModel.endAt = second
+                            if(second < viewModel.startAt) {
+                                Toast.makeText(context, getString(R.string.clip_end_before_start_warning), Toast.LENGTH_SHORT).show()
+                            } else {
+                                viewModel.endAt = second
+                                binding.btnClip.animation = null
+                                viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
+                                viewModel.startOrStopToggle = 0
+                            }
                             Timber.d("btnClip second time clicked, viewModel.endAt = ${viewModel.endAt}")
 
-                            binding.btnClip.setImageResource(R.drawable.ic_clip)
-                            binding.btnClip.animation = null
-                            viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
-                            viewModel.startOrStopToggle = 0
                         }
                     }
                 }
@@ -153,27 +156,6 @@ class YouTubeNoteFragment : Fragment() {
             }
         }
 
-
-        /**
-         *  Edit or read only mode
-         * */
-        viewModel.canEdit.observe(viewLifecycleOwner) {
-            binding.editDigest.isEnabled = it
-            if (it) {
-                binding.editDigest.visibility = View.VISIBLE
-                binding.editDigest.hint = getString(R.string.input_video_summary)
-            } else if (viewModel.noteToBeUpdated?.digest.isNullOrEmpty()) {
-                binding.editDigest.visibility = View.GONE
-            } else {
-                binding.editDigest.visibility = View.VISIBLE
-                binding.editDigest.hint = getString(R.string.input_video_summary)
-            }
-
-            binding.icAddTag.isEnabled = it
-            binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
-            binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
-        }
-
         /**
          *  RecyclerView views
          * */
@@ -185,14 +167,10 @@ class YouTubeNoteFragment : Fragment() {
                 return listOf(deleteButton)
             }
         })
-        itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
+//        itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
 
-
-        val adapter = TimeItemAdapter(
-            uiState = viewModel.uiState
-        )
+        val adapter = TimeItemAdapter(uiState = viewModel.uiState)
         binding.recyclerViewTimeItems.adapter = adapter
-
         viewModel.timeItemLiveDataReassigned.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
             if (timeItemLiveDataAssigned == true) {
                 viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer { list ->
@@ -209,11 +187,24 @@ class YouTubeNoteFragment : Fragment() {
                             }
                         }
                     }
-
                 })
             }
         }
 
+        /**
+         *  Edit or read only mode
+         * */
+        viewModel.canEdit.observe(viewLifecycleOwner) {
+            binding.editDigest.isEnabled = it
+            binding.editDigest.hint = if (it) getString(R.string.input_video_summary) else null
+            binding.icAddTag.isEnabled = it
+            binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
+            binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
+            if (it) {
+                // attach swipe to delete helper
+                itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
+            }
+        }
 
         /**
          *  Buttons on the bottom of the page: Toggle the display of timeItems

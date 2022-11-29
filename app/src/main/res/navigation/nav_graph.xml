@@ -41,7 +41,7 @@
 
         <deepLink
             android:autoVerify="true"
-            app:uri="http://pinpisode/youtube_note/{note_id_key}/{video_id_key}" />
+            app:uri="https://pinpisode/youtube_note/{note_id_key}/{video_id_key}" />
 
         <action
             android:id="@+id/action_youTubeNoteFragment_to_noteListFragment"
@@ -103,7 +103,7 @@
 
         <deepLink
             android:autoVerify="true"
-            app:uri="http://pinpisode/spotify_note/{note_id_key}/{source_id_key}" />
+            app:uri="https://pinpisode/spotify_note/{note_id_key}/{source_id_key}" />
 
     </fragment>
 

@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -120,12 +121,13 @@ class SpotifyNoteFragment : Fragment() {
                     }
 
                 }
-
-                Intent(context, SpotifyNoteService::class.java).apply {
-                    action = SpotifyNoteService.ACTION_START
-                    context?.startService(this)
+                if (viewModel.isViewerCanEdit) {
+                    Intent(context, SpotifyNoteService::class.java).apply {
+                        action = SpotifyNoteService.ACTION_START
+                        context?.startService(this)
+                    }
+                    registerTimestampReceiver()
                 }
-                registerTimestampReceiver()
             }
         }
 
@@ -239,25 +241,6 @@ class SpotifyNoteFragment : Fragment() {
                 }
             }
         }
-        /**
-         *  Edit or read only mode
-         * */
-        viewModel.canEdit.observe(viewLifecycleOwner) {
-            binding.editDigest.isEnabled = it
-            if (it) {
-                binding.editDigest.visibility = View.VISIBLE
-                binding.editDigest.hint = getString(R.string.input_video_summary)
-            } else if (viewModel.noteToBeUpdated?.digest.isNullOrEmpty()) {
-                binding.editDigest.visibility = View.GONE
-            } else {
-                binding.editDigest.visibility = View.VISIBLE
-                binding.editDigest.hint = getString(R.string.input_video_summary)
-            }
-
-            binding.icAddTag.isEnabled = it
-            binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
-            binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
-        }
 
         /**
          *  RecyclerView views
@@ -271,7 +254,6 @@ class SpotifyNoteFragment : Fragment() {
                 return listOf(deleteButton)
             }
         })
-        itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
 
         val adapter = SpotifyTimeItemAdapter(
             uiState = viewModel.uiState
@@ -299,6 +281,25 @@ class SpotifyNoteFragment : Fragment() {
             }
         }
 
+        /**
+         *  Edit or read only mode
+         * */
+        viewModel.canEdit.observe(viewLifecycleOwner) {
+            binding.editDigest.isEnabled = it
+            binding.editDigest.hint = if (it) getString(R.string.input_video_summary) else null
+            binding.icAddTag.isEnabled = it
+            binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
+            binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
+            if (it) {
+                // attach swipe to delete helper
+                itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
+            } else {
+                Intent(context, SpotifyNoteService::class.java).apply {
+                    this.action = SpotifyNoteService.ACTION_STOP
+                    context?.startService(this)
+                }
+            }
+        }
 
         /**
          *  Buttons on the bottom of the page: Toggle the display of timeItems
@@ -478,15 +479,18 @@ class SpotifyNoteFragment : Fragment() {
 
     private fun endClipping() {
         Timber.d("clipEnd")
-        viewModel.endAt = (viewModel.currentSecond / 1000).toFloat()
-        binding.btnClip.setImageResource(R.drawable.ic_clip)
-        binding.btnClip.animation = null
-        viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
-        viewModel.startOrStopToggle = 0
+        if((viewModel.currentSecond / 1000).toFloat() < viewModel.startAt) {
+            Toast.makeText(context, getString(R.string.clip_end_before_start_warning), Toast.LENGTH_SHORT).show()
+        } else {
+            viewModel.endAt = (viewModel.currentSecond / 1000).toFloat()
+            binding.btnClip.animation = null
+            viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
+            viewModel.startOrStopToggle = 0
 
-        Intent(context, SpotifyNoteService::class.java).apply {
-            this.action = SpotifyNoteService.ACTION_DONE_CLIPPING
-            context?.startService(this)
+            Intent(context, SpotifyNoteService::class.java).apply {
+                this.action = SpotifyNoteService.ACTION_DONE_CLIPPING
+                context?.startService(this)
+            }
         }
     }
 

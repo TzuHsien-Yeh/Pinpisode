@@ -49,7 +49,7 @@ class TagDialogFragment : AppCompatDialogFragment() {
         }
 
         binding.editAddNewTag.doAfterTextChanged {
-            viewModel.inputNewTag = it.toString()
+            viewModel.inputNewTag = it.toString().trim()
         }
         binding.btnAddNewTag.setOnClickListener {
             if (!viewModel.inputNewTag.isNullOrEmpty()) {

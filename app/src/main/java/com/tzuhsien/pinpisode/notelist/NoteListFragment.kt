@@ -172,14 +172,14 @@ class NoteListFragment : Fragment() {
                 if (null != viewModel.selectedTag) {
                     noteAdapter.submitList(list.filter { it.tags.contains(viewModel.selectedTag) })
                     coroutineScope.launch {
-                        delay(100L)
+                        delay(200L)
                         binding.recyclerviewNoteList.scrollToPosition(0)
                     }
 
                 } else {
                     noteAdapter.submitList(list)
                     coroutineScope.launch {
-                        delay(100L)
+                        delay(200L)
                         binding.recyclerviewNoteList.scrollToPosition(0)
                     }
                 }

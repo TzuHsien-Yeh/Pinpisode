@@ -12,6 +12,7 @@ import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tzuhsien.pinpisode.data.source.local.UserManager
@@ -30,6 +31,8 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MainViewModel> { getVmFactory() }
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
+
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
@@ -61,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             Timber.plant(Timber.DebugTree())
         }
 
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        navController = findNavController(R.id.nav_host_fragment_activity_main)
 
         /** Read intent data if the activity has not been created when getting intent from other app **/
         Timber.d("onCreate CALLED")
@@ -154,6 +157,9 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onBackPressed() {
+        navController.navigateUp()
+    }
     /**
      *  EditText behavior in MainActivity (exit edit mode when the user touched other places)
      * */
@@ -185,7 +191,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleIntent(intentExtras: Bundle) {
 
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        navController = findNavController(R.id.nav_host_fragment_activity_main)
 
         /**
          * Check and handle sign in status

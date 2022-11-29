@@ -99,9 +99,11 @@ class SpotifyNoteViewModel(
     val canEdit: LiveData<Boolean>
         get() = _canEdit
 
+    // For deciding whether to launch foreground service after spotify connection
+    var isViewerCanEdit: Boolean = true
+
     // state of displaying options:
     var displayState: TimeItemDisplay = TimeItemDisplay.ALL
-
 
     val uiState = SpotifyNoteUiState(
         onItemTitleChanged = { item ->
@@ -136,6 +138,7 @@ class SpotifyNoteViewModel(
             getNoteInfoById() // one time query
         } else {
             _canEdit.value = true
+            isViewerCanEdit = true
             checkSpotifyNoteExistence(sourceId)
         }
     }
@@ -306,6 +309,7 @@ class SpotifyNoteViewModel(
     private fun checkIfViewerCanEdit(isInAuthors: Boolean) {
         _canEdit.value = isInAuthors
         uiState.canEdit = isInAuthors
+        isViewerCanEdit = isInAuthors
     }
     /** End of initialization of the note **/
 

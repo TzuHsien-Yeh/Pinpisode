@@ -162,6 +162,11 @@ class SearchFragment : Fragment() {
             ytTrendingAdapter.submitList(it)
         }
 
+        viewModel.showSpotifyAuthView.observe(viewLifecycleOwner) {
+            binding.viewGroupSpNotAuthorized.visibility =
+                if (it) View.VISIBLE else if (UserManager.userSpotifyAuthToken.isEmpty()) View.VISIBLE else View.GONE
+        }
+
         // Check if Spotify auth token available and if the user want to auth
         viewModel.isAuthRequired.observe(viewLifecycleOwner) {
             when (it) {
@@ -320,11 +325,14 @@ class SearchFragment : Fragment() {
                 showLoginActivityToken.launch(getLoginActivityTokenIntent(authorizationResponse.code))
             }
             AuthorizationResponse.Type.ERROR -> {
+                binding.viewGroupSpNotAuthorized.visibility = View.VISIBLE
                 Timber.d("AuthorizationResponse.Type.ERROR")
             }
             // Handle the Error
 
-            else -> {}
+            else -> {
+                binding.viewGroupSpNotAuthorized.visibility = View.VISIBLE
+            }
             // Probably interruption
         }
     }

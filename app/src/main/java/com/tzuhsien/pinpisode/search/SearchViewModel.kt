@@ -55,6 +55,10 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     val isAuthRequired: LiveData<Boolean?>
         get() = _isAuthRequired
 
+    private val _showSpotifyAuthView = MutableLiveData<Boolean>()
+    val showSpotifyAuthView: LiveData<Boolean>
+        get() = _showSpotifyAuthView
+
     val uiState = SearchUiState(
         onYoutubeItemClick = { item ->
             navigateToYoutubeNote(item.id.videoId)
@@ -158,13 +162,13 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                         _error.value = result.error
                         _status.value = LoadApiStatus.ERROR
 
-                        if (result.error == "The access token expired") {
-                            _isAuthRequired.value = true
-                        } else {
-                            _spotifyMsg.value = result.error
-                        }
+                    _spotifyMsg.value = result.error
+
 
                         Timber.d("getUserSavedShows is Result.Fail [msg]: ${result.error}")
+                    }
+                    is Result.SpotifyAuthError -> {
+                        _showSpotifyAuthView.value = true
                     }
                     is Result.Error -> {
                         _error.value = result.exception.toString()
