@@ -3,9 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/drawable/bg_small_radius_rounded_corner.xml" value="0.171" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/chip_tag.xml" value="0.22083333333333333" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/custom_snack_bar.xml" value="0.4574961360123648" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/dialog_tag.xml" value="0.22083333333333333" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_search.xml" value="0.19519927536231885" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_spotify_note.xml" value="0.24682971014492755" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_youtube_note.xml" value="0.17552083333333332" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/item_spotify_latest_content.xml" value="0.1947463768115942" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/item_yt_trending.xml" value="0.19519927536231885" />

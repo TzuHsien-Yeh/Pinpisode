@@ -5,17 +5,14 @@ import android.graphics.Bitmap
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
+import com.spotify.android.appremote.api.error.CouldNotFindSpotifyApp
+import com.spotify.android.appremote.api.error.NotLoggedInException
 import com.spotify.protocol.client.Subscription
 import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.PlayerContext
 import com.spotify.protocol.types.PlayerState
 import com.spotify.protocol.types.Repeat
 import timber.log.Timber
-
-
-enum class PlayingState {
-    PAUSED, PLAYING, STOPPED
-}
 
 private const val STEP_MS = 15000L
 
@@ -31,39 +28,35 @@ object SpotifyService {
     private var playerStateSubscription: Subscription<PlayerState>? = null
     private var playerContextSubscription: Subscription<PlayerContext>? = null
 
-//    suspend fun connectToAppRemote(): Result<SpotifyAppRemote> =
-//        suspendCoroutine { cont ->
-//            SpotifyAppRemote.connect(
-//                MyApplication.applicationContext(),
-//                connectionParams,
-//                object : Connector.ConnectionListener {
-//                    override fun onConnected(spotifyAppRemote: SpotifyAppRemote) {
-//                        this@SpotifyService.spotifyAppRemote = spotifyAppRemote
-//                        cont.resume(Result.Success(spotifyAppRemote))
-//                    }
-//
-//                    override fun onFailure(error: Throwable) {
-//                        cont.resume(Result.Fail(error.message!!))
-//                    }
-//                })
-//        }
-
-    fun connectToAppRemote(context: Context, handler: (connected: Boolean) -> Unit) {
+    fun connectToAppRemote(context: Context, handler: (connected: ConnectState) -> Unit) {
 
         if (spotifyAppRemote?.isConnected == true) {
-            handler(true)
+            handler(ConnectState.CONNECTED)
             return
         }
 
         val connectionListener = object : Connector.ConnectionListener {
             override fun onConnected(spAppRemote: SpotifyAppRemote) {
                 spotifyAppRemote = spAppRemote
-                handler(true)
+                handler(ConnectState.CONNECTED)
             }
 
             override fun onFailure(throwable: Throwable) {
-                Timber.e("SpotifyService", throwable.message, throwable)
-                handler(false)
+                Timber.e("SpotifyService: t $throwable, c ${throwable.cause}, m ${throwable.message}, l ${throwable.localizedMessage}")
+
+                when (throwable) {
+                    is CouldNotFindSpotifyApp -> {
+                        handler(ConnectState.NOT_INSTALLED)
+                    }
+                    is NotLoggedInException -> {
+                        handler(ConnectState.NOT_LOGGED_IN)
+                        Timber.e("SpotifyService: NotLoggedInException")
+                    }
+                    else -> {
+                        handler(ConnectState.UNKNOWN_ERROR)
+                    }
+                }
+
             }
         }
         SpotifyAppRemote.connect(context, connectionParams, connectionListener)

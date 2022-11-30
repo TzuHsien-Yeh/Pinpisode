@@ -3,6 +3,7 @@ package com.tzuhsien.pinpisode.search
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.*
@@ -162,9 +163,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                         _error.value = result.error
                         _status.value = LoadApiStatus.ERROR
 
-                    _spotifyMsg.value = result.error
-
-
+                        _spotifyMsg.value = result.error
                         Timber.d("getUserSavedShows is Result.Fail [msg]: ${result.error}")
                     }
                     is Result.SpotifyAuthError -> {
@@ -206,6 +205,11 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                     is Result.Fail -> {
                         _error.value = episodeResult.error
                         _status.value = LoadApiStatus.ERROR
+                        _spotifyMsg.value = episodeResult.error
+                        Timber.d("getUserSavedShows is Result.Fail [msg]: ${episodeResult.error}")
+                    }
+                    is Result.SpotifyAuthError -> {
+                        _showSpotifyAuthView.value = true
                     }
                     is Result.Error -> {
                         _error.value = episodeResult.exception.toString()
@@ -249,8 +253,8 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             if (sourceId.isNotEmpty()) {
                 if (sourceId.contains("episode:")) {
                     getEpisodeInfoById(sourceId.substringAfter("episode:"))
-                } else if (sourceId.contains("track:")) {
-                    getTrackInfoById(sourceId.substringAfter("track"))
+                } else {
+                    _showMsg.value = MyApplication.applicationContext().getString(R.string.episode_not_found)
                 }
             }
 
@@ -282,8 +286,12 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                         _error.value = result.error
                         _status.value = LoadApiStatus.ERROR
 
-                        // Show msg if source not found (result list is empty)
+                        // Show msg if http exception or source not found (result list is empty)
                         _showMsg.value = result.error
+                        null
+                    }
+                    is Result.SpotifyAuthError -> {
+                        _isAuthRequired.value = result.expired
                         null
                     }
                     is Result.Error -> {
@@ -299,10 +307,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                 }
             }
         }
-    }
-
-    private fun getTrackInfoById(id: String) {
-        // TODO: get track info
     }
 
     private fun getYoutubeVideoInfoById(videoId: String) {

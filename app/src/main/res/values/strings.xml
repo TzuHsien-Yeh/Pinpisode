@@ -47,4 +47,8 @@
 
     <string name="take_timestamp">Take Timestamp</string>
     <string name="clip_end_before_start_warning">A clip should end later than its start</string>
+    <string name="episode_not_found">Episode not found</string>
+    <string name="error_msg_spotify_not_installed">Error:\nPlease install Spotify app on this device to access Spotify related features</string>
+    <string name="error_msg_spotify_not_logged_in">Error:\nPlease log in to Spotify to access Spotify related features</string>
+    <string name="error_connecting_to_spotify">Error connecting to Spotify</string>
 </resources>

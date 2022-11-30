@@ -149,11 +149,13 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
                         Timber.d("spotifySearchResults: ${result.data}")
 
                         putSpResultToItemList(result.data)
-
                     }
                     is Result.Fail -> {
                         _error.value = result.error
                         _status.value = LoadApiStatus.ERROR
+                    }
+                    is Result.SpotifyAuthError -> {
+                        _needSpotifyAuth.value = result.expired
                     }
                     is Result.Error -> {
                         _error.value = result.exception.toString()

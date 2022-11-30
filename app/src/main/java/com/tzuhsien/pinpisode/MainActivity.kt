@@ -33,7 +33,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
 
-
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         /** Read intent data **/

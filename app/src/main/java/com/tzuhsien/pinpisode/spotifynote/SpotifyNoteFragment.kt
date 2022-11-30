@@ -45,6 +45,7 @@ import timber.log.Timber
 import java.security.MessageDigest
 import java.security.SecureRandom
 
+
 class SpotifyNoteFragment : Fragment() {
     private val viewModel by viewModels<SpotifyNoteViewModel> {
         getVmFactory(
@@ -357,6 +358,35 @@ class SpotifyNoteFragment : Fragment() {
                     getString(R.string.spotify_note_uri, viewModel.noteId, viewModel.sourceId))
             }
             startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
+        }
+
+        /**
+         * Toast to warn about Spotify error
+         * */
+        viewModel.connectErrorMsg.observe(viewLifecycleOwner) {
+            if (null != it) {
+                binding.errorMsg.text = it
+                binding.errorMsg.visibility = View.VISIBLE
+            } else {
+                binding.errorMsg.visibility = View.GONE
+            }
+
+//            it?.let {
+//                val customSnack= Snackbar.make(requireView(), "",Snackbar.LENGTH_LONG)
+//                val layout = customSnack.view as Snackbar.SnackbarLayout
+//                val bind = CustomSnackBarBinding.inflate(layoutInflater)
+//                bind.textSnackBar.text = it
+//                layout.addView(bind.root)
+//                customSnack.view.layoutParams = (customSnack.view.layoutParams as FrameLayout.LayoutParams)
+//                    .apply {
+//                        gravity = Gravity.TOP
+//                        gravity = Gravity.CENTER_HORIZONTAL
+//                        width = ViewGroup.LayoutParams.WRAP_CONTENT
+//                        topMargin = 180
+//                    }
+//                layout.setBackgroundColor(Color.TRANSPARENT)
+//                customSnack.show()
+//            }
         }
 
 //        /** Loading status **/

@@ -64,7 +64,7 @@ class SearchFragment : Fragment() {
             if (null != it) {
                 binding.textResourceNotFound.text = it
                 binding.textResourceNotFound.visibility = View.VISIBLE
-
+                hideRecommendationViews()
                 Timber.d("not available")
             } else {
                 binding.textResourceNotFound.visibility = View.GONE

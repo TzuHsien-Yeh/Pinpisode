@@ -799,12 +799,27 @@ object NoteRemoteDataSource : DataSource {
             )
 
             Timber.d("getSpotifyEpisodeInfo: $result")
+            if (result.uri.isEmpty()) {
+                Result.Fail(MyApplication.applicationContext().getString(R.string.episode_not_found))
+            }
 
             Result.Success(result)
 
-        } catch (e: Exception) {
-            Timber.w(" exception=${e.message}")
-            Result.Error(e)
+        } catch (e: HttpException) {
+            when(e.code()) {
+                401 -> {
+                    Result.SpotifyAuthError(true)
+                }
+                429 -> {
+                    Result.Fail("The app has exceeded its rate limits.")
+                }
+                403 -> {
+                    Result.Fail("Bad OAuth request. Contact Pinpisode developer")
+                }
+                else -> {
+                    Result.Fail("Unknown error")
+                }
+            }
         }
     }
 
@@ -822,9 +837,21 @@ object NoteRemoteDataSource : DataSource {
             )
             Result.Success(result)
 
-        } catch (e: Exception) {
-            Timber.w(" exception=${e.message}")
-            Result.Error(e)
+        } catch (e: HttpException) {
+            when(e.code()) {
+                401 -> {
+                    Result.SpotifyAuthError(true)
+                }
+                429 -> {
+                    Result.Fail("The app has exceeded its rate limits.")
+                }
+                403 -> {
+                    Result.Fail("Bad OAuth request. Contact Pinpisode developer")
+                }
+                else -> {
+                    Result.Fail("Unknown error")
+                }
+            }
         }
     }
 
@@ -883,9 +910,21 @@ object NoteRemoteDataSource : DataSource {
             )
             Result.Success(result)
 
-        } catch (e: Exception) {
-            Timber.w(" exception=${e.message}")
-            Result.Error(e)
+        } catch (e: HttpException) {
+            when(e.code()) {
+                401 -> {
+                    Result.SpotifyAuthError(true)
+                }
+                429 -> {
+                    Result.Fail("The app has exceeded its rate limits.")
+                }
+                403 -> {
+                    Result.Fail("Bad OAuth request. Contact Pinpisode developer")
+                }
+                else -> {
+                    Result.Fail("Unknown error")
+                }
+            }
         }
     }
 

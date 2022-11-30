@@ -105,6 +105,10 @@ class SpotifyNoteViewModel(
     // state of displaying options:
     var displayState: TimeItemDisplay = TimeItemDisplay.ALL
 
+    private var _connectErrorMsg = MutableLiveData<String?>()
+    val connectErrorMsg: LiveData<String?>
+        get() = _connectErrorMsg
+
     val uiState = SpotifyNoteUiState(
         onItemTitleChanged = { item ->
             updateTimeItem(item)
@@ -148,10 +152,25 @@ class SpotifyNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            SpotifyService.connectToAppRemote(MyApplication.applicationContext()) { isConnected ->
-                if (isConnected) {
-                    _isSpotifyConnected.value = true
-                    _status.value = LoadApiStatus.DONE
+            SpotifyService.connectToAppRemote(MyApplication.applicationContext()) { connection ->
+                when (connection) {
+                    ConnectState.CONNECTED -> {
+                        _isSpotifyConnected.value = true
+                        _status.value = LoadApiStatus.DONE
+                        _connectErrorMsg.value = null
+                    }
+                    ConnectState.NOT_INSTALLED -> {
+                        Timber.d("ConnectState.NOT_installed")
+                        _connectErrorMsg.value = ConnectState.NOT_INSTALLED.msg
+                    }
+                    ConnectState.NOT_LOGGED_IN -> {
+                        Timber.d("ConnectState.NOT_LOGGED_IN")
+                        _connectErrorMsg.value = ConnectState.NOT_LOGGED_IN.msg
+                    }
+                    ConnectState.UNKNOWN_ERROR -> {
+                        Timber.d("ConnectState.UNKNOWN")
+                        _connectErrorMsg.value = ConnectState.UNKNOWN_ERROR.msg
+                    }
                 }
             }
         }
