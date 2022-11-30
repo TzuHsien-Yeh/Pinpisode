@@ -249,7 +249,12 @@ class SpotifyNoteFragment : Fragment() {
         // Swipe to delete
         binding.recyclerViewTimeItems.addItemDecoration(DividerItemDecoration(context,
             DividerItemDecoration.VERTICAL))
-        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(binding.recyclerViewTimeItems) {
+        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(
+            binding.recyclerViewTimeItems,
+            swipeOutListener = OnSwipeOutListener {
+                viewModel.deleteTimeItem(it)
+            }
+        ) {
             override fun instantiateUnderlayButton(position: Int): List<UnderlayButton> {
                 val deleteButton = deleteButton(position)
                 return listOf(deleteButton)
@@ -444,7 +449,7 @@ class SpotifyNoteFragment : Fragment() {
         return SwipeHelper.UnderlayButton(
             MyApplication.applicationContext(),
             getString(R.string.delete),
-            14.0f,
+            15.0f,
             android.R.color.holo_red_light,
             object : SwipeHelper.UnderlayButtonClickListener {
                 override fun onClick() {

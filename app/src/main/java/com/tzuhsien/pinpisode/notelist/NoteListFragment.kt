@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -20,8 +19,6 @@ import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentNoteListBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.parseDuration
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
-import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.notification.NotificationFragmentDirections
 import com.tzuhsien.pinpisode.signin.SignInFragmentDirections
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
@@ -156,11 +153,18 @@ class NoteListFragment : Fragment() {
 
         // Swipe to delete
         binding.recyclerviewNoteList.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(binding.recyclerviewNoteList) {
+        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(
+            binding.recyclerviewNoteList,
+            swipeOutListener = OnSwipeOutListener {
+                Timber.d("swipeOutListener = OnSwipeOutListener position = $it")
+                viewModel.deleteOrQuitCoauthoringNote(it)
+            }
+        ) {
             override fun instantiateUnderlayButton(position: Int): List<UnderlayButton> {
                 val deleteButton = deleteButton(position)
                 return listOf(deleteButton)
             }
+
         })
 
         itemTouchHelper.attachToRecyclerView(binding.recyclerviewNoteList)
@@ -227,22 +231,22 @@ class NoteListFragment : Fragment() {
             binding.badgeNotificationNotEmpty.visibility = if (it.isNotEmpty()) View.VISIBLE else View.GONE
         }
 
-        /** Loading status **/
-        viewModel.status.observe(viewLifecycleOwner) {
-            when(it) {
-                LoadApiStatus.LOADING -> {
-                    findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
-                }
-                LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
-                }
-                LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
-                }
-            }
-        }
+//        /** Loading status **/
+//        viewModel.status.observe(viewLifecycleOwner) {
+//            when(it) {
+//                LoadApiStatus.LOADING -> {
+//                    findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+//                }
+//                LoadApiStatus.DONE -> {
+//                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+//                        bundleOf("doneLoading" to true))
+//                }
+//                LoadApiStatus.ERROR -> {
+//                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+//                        bundleOf("doneLoading" to false))
+//                }
+//            }
+//        }
 
         return binding.root
     }
@@ -257,7 +261,7 @@ class NoteListFragment : Fragment() {
         return SwipeHelper.UnderlayButton(
             MyApplication.applicationContext(),
             getString(R.string.quit),
-            14.0f,
+            16.0f,
             android.R.color.holo_red_light,
             object : SwipeHelper.UnderlayButtonClickListener {
                 override fun onClick() {

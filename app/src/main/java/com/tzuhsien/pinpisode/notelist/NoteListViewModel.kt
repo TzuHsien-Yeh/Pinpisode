@@ -42,6 +42,9 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     val uiState = NoteListUiState(
         onNoteClicked = { note ->
             navigateToNotePage(note)
+        },
+        onNoteQuit = { position ->
+            deleteOrQuitCoauthoringNote(position)
         }
     )
 
@@ -248,7 +251,12 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
 
     fun deleteOrQuitCoauthoringNote(noteIndex: Int) {
+        Timber.d("deleteOrQuitCoauthoringNote: noteIndex = $noteIndex")
+
         val noteToBeRemoved = liveNoteList.value?.get(noteIndex)
+        Timber.d("deleteOrQuitCoauthoringNote: noteToBeRemoved = $noteToBeRemoved")
+
+
         if (noteToBeRemoved?.ownerId == UserManager.userId) {
             deleteNote(noteToBeRemoved!!)
         } else {
@@ -316,5 +324,6 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 }
 
 data class NoteListUiState(
-    val onNoteClicked: (Note) -> Unit
+    val onNoteClicked: (Note) -> Unit,
+    val onNoteQuit: (Int) -> Unit
 )
