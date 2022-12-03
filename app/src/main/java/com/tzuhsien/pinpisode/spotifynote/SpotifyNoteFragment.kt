@@ -70,6 +70,7 @@ class SpotifyNoteFragment : Fragment() {
 
         viewModel.isSpotifyConnected.observe(viewLifecycleOwner) { it ->
             Timber.d("viewModel.isSpotifyConnected.observe: $it")
+            viewModel.clearConnectionErrorMsg()
             binding.playPauseButton.isEnabled = it
             binding.seekBackButton.isEnabled = it
             binding.seekForwardButton.isEnabled = it

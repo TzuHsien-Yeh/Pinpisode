@@ -16,13 +16,14 @@
     <color name="dark_mode_grey">#2a2a2a</color>
     <color name="light_beige">#fff8e6</color>
     <color name="beige">#EDDBC0</color>
+    <color name="brown_walnut">#604432</color>
 
 <!--    translucent colors-->
     <color name="transparent">#00000000</color>
     <color name="translucent">#30000000</color>
     <color name="translucent_40">#66000000</color>
     <color name="translucent_80">#cc000000</color>
-    <color name="brown_walnut">#604432</color>
+    <color name="translucent_dd">#dd000000</color>
 
 <!--    color for component-->
     <color name="selected_tag_background">#EDDBC0</color>
@@ -35,4 +36,5 @@
     <color name="ic_floating_action_btn_to_theme">#fff8e6</color>
     <color name="audio_player_color_to_theme">#FF000000</color>
     <color name="background_color_black_white">#FFFFFFFF</color>
+    <color name="back_icon_color_to_theme">#3b3b3b</color>
 </resources>

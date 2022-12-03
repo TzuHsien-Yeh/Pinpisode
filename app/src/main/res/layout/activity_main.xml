@@ -19,6 +19,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"/>
 
+        <ImageView
+            android:id="@+id/helper_icon"
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:layout_gravity="end"
+            app:tint="@color/text_color_to_theme"
+            android:layout_marginEnd="@dimen/standard"
+            android:src="@drawable/ic_help"/>
+
     </androidx.appcompat.widget.Toolbar>
 
     <fragment

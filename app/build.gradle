@@ -113,4 +113,7 @@ dependencies {
 
     // Lottie
     implementation "com.airbnb.android:lottie:$version_lottie"
+
+    // Spotlight
+    implementation 'com.github.takusemba:spotlight:2.0.5'
 }

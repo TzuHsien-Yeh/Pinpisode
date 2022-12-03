@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -19,6 +20,8 @@ import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentNoteListBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.parseDuration
+import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.notification.NotificationFragmentDirections
 import com.tzuhsien.pinpisode.signin.SignInFragmentDirections
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
@@ -231,22 +234,24 @@ class NoteListFragment : Fragment() {
             binding.badgeNotificationNotEmpty.visibility = if (it.isNotEmpty()) View.VISIBLE else View.GONE
         }
 
-//        /** Loading status **/
-//        viewModel.status.observe(viewLifecycleOwner) {
-//            when(it) {
-//                LoadApiStatus.LOADING -> {
-//                    findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
-//                }
-//                LoadApiStatus.DONE -> {
-//                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-//                        bundleOf("doneLoading" to true))
-//                }
-//                LoadApiStatus.ERROR -> {
-//                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-//                        bundleOf("doneLoading" to false))
-//                }
-//            }
-//        }
+        /** Loading status **/
+        viewModel.status.observe(viewLifecycleOwner) {
+            when(it) {
+                LoadApiStatus.LOADING -> {
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    }
+                }
+                LoadApiStatus.DONE -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to true))
+                }
+                LoadApiStatus.ERROR -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to false))
+                }
+            }
+        }
 
         return binding.root
     }

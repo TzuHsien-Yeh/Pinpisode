@@ -23,6 +23,7 @@ import com.google.firebase.ktx.Firebase
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.FragmentSignInBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.guide.NoteListGuideFragmentDirections
 import timber.log.Timber
 
 
@@ -121,6 +122,11 @@ class SignInFragment : Fragment() {
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
                     viewModel.updateUser(task.result.user!!, account)
+
+                    if (task.result.additionalUserInfo?.isNewUser == true) {
+                        findNavController().navigate(NoteListGuideFragmentDirections.actionGlobalNoteListGuideFragment())
+                    }
+
                 } else {
                     //handle error
                     Timber.d("firebaseAuthWithGoogle: Failed!")

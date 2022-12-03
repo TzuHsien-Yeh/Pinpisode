@@ -156,7 +156,7 @@
         android:maxLength="35"
         android:maxLines="1"
         android:inputType="text"
-        android:hint="@string/input_video_summary"
+        android:hint="@string/input_summary"
         style="@style/source_title_style"
         android:background="@color/transparent"
         app:layout_constraintStart_toEndOf="@+id/ic_decoration"

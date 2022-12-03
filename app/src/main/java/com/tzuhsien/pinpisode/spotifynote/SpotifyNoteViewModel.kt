@@ -511,6 +511,10 @@ class SpotifyNoteViewModel(
         positionHandler.postDelayed(positionUpdateRunnable, 200)
     }
 
+    fun clearConnectionErrorMsg() {
+        _connectErrorMsg.value = null
+    }
+
 }
 
 data class SpotifyNoteUiState(

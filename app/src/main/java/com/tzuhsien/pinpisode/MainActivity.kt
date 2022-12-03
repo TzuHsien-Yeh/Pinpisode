@@ -20,6 +20,7 @@ import com.tzuhsien.pinpisode.databinding.ActivityMainBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.extractYoutubeVideoId
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.guide.NoteListGuideFragmentDirections
 import com.tzuhsien.pinpisode.notelist.NoteListFragmentDirections
 import com.tzuhsien.pinpisode.signin.SignInFragmentDirections
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
@@ -35,8 +36,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        /** Read intent data **/
 
+        /** Read intent data **/
         Timber.d("onNewIntent CALLED")
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
@@ -91,6 +92,7 @@ class MainActivity : AppCompatActivity() {
         binding.toolbar.navigationIcon = null
         binding.toolbarText.text = getString(R.string.pin_your_episodes)
 
+
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             when (destination.id) {
 
@@ -98,29 +100,50 @@ class MainActivity : AppCompatActivity() {
                     binding.toolbar.visibility = View.VISIBLE
                     binding.toolbar.navigationIcon = null
                     binding.toolbarText.text = getString(R.string.pin_your_episodes)
+                    binding.helperIcon.visibility = View.VISIBLE
+                    binding.helperIcon.setOnClickListener {
+                        if (navController.currentDestination?.id != R.id.noteListGuideFragment) {
+                            controller.navigate(NoteListGuideFragmentDirections.actionGlobalNoteListGuideFragment())
+                        }
+                    }
                 }
 
                 R.id.searchFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.helperIcon.visibility = View.GONE
+                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+                    binding.toolbar.navigationIcon?.apply {
+                        alpha = 130
+                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
+                    }
+
                     binding.toolbar.setNavigationOnClickListener {
-                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                        onBackPressed()
                     }
                     binding.toolbarText.text = getString(R.string.find_your_episodes)
                 }
 
                 R.id.profileFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.helperIcon.visibility = View.GONE
+                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+                    binding.toolbar.navigationIcon?.apply {
+                        alpha = 130
+                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
+                    }
                     binding.toolbar.setNavigationOnClickListener {
-                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                        onBackPressed()
                     }
                     binding.toolbarText.text = getString(R.string.profile)
                 }
 
                 R.id.youTubeNoteFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+                    binding.toolbar.navigationIcon?.apply {
+                        alpha = 130
+                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
+                    }
                     binding.toolbar.setNavigationOnClickListener {
                         navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
                     }
@@ -129,7 +152,11 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.spotifyNoteFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+                    binding.toolbar.navigationIcon?.apply {
+                        alpha = 130
+                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
+                    }
                     binding.toolbar.setNavigationOnClickListener {
                         navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
                     }
@@ -144,7 +171,12 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.notificationFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.helperIcon.visibility = View.GONE
+                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+                    binding.toolbar.navigationIcon?.apply {
+                        alpha = 130
+                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
+                    }
                     binding.toolbar.setNavigationOnClickListener {
                         navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
                     }
@@ -159,6 +191,7 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         navController.navigateUp()
     }
+
     /**
      *  EditText behavior in MainActivity (exit edit mode when the user touched other places)
      * */
