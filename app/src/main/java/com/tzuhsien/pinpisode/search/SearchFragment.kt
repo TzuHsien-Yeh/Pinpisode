@@ -18,12 +18,15 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSearchBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.utcToLocalTime
+import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.search.result.ViewPagerAdapter
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.pinpisode.youtubenote.YouTubeNoteFragmentDirections
@@ -226,6 +229,25 @@ class SearchFragment : Fragment() {
                     )
                 )
                 viewModel.doneNavigation()
+            }
+        }
+
+        /** Loading status **/
+        viewModel.status.observe(viewLifecycleOwner) {
+            when(it) {
+                LoadApiStatus.LOADING -> {
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    }
+                }
+                LoadApiStatus.DONE -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to true))
+                }
+                LoadApiStatus.ERROR -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to false))
+                }
             }
         }
 

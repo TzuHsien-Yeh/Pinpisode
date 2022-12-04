@@ -8,16 +8,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSearchResultBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.pinpisode.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
@@ -124,6 +128,26 @@ class SearchResultFragment : Fragment() {
                 viewModel.doneNavigation()
             }
         }
+
+        /** Loading status **/
+        viewModel.status.observe(viewLifecycleOwner) {
+            when(it) {
+                LoadApiStatus.LOADING -> {
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    }
+                }
+                LoadApiStatus.DONE -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to true))
+                }
+                LoadApiStatus.ERROR -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to false))
+                }
+            }
+        }
+
         return binding.root
     }
 

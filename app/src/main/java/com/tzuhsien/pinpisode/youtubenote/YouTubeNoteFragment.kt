@@ -273,7 +273,9 @@ class YouTubeNoteFragment : Fragment() {
         viewModel.status.observe(viewLifecycleOwner) {
             when(it) {
                 LoadApiStatus.LOADING -> {
-                    findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    }
                 }
                 LoadApiStatus.DONE -> {
                     requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",

@@ -247,6 +247,7 @@ class SpotifyNoteViewModel(
                         _shouldCreateNewNote.value = true
                     } else {
                         // the note already exist, save one time note info, check if user is in author list, and start listening to live data
+                        noteId = result.data.id
                         noteToBeUpdated = result.data
                         checkIfViewerCanEdit(result.data.authors.contains(UserManager.userId))
                         getLiveNoteById(result.data.id)

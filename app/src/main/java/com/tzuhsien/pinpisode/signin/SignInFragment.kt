@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -24,6 +25,8 @@ import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.FragmentSignInBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.guide.NoteListGuideFragmentDirections
+import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.network.LoadApiStatus
 import timber.log.Timber
 
 
@@ -58,6 +61,25 @@ class SignInFragment : Fragment() {
         viewModel.navigateUp.observe(viewLifecycleOwner) {
             it?.let {
                 findNavController().navigate(SignInFragmentDirections.actionGlobalNoteListFragment())
+            }
+        }
+
+        /** Loading status **/
+        viewModel.status.observe(viewLifecycleOwner) {
+            when(it) {
+                LoadApiStatus.LOADING -> {
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    }
+                }
+                LoadApiStatus.DONE -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to true))
+                }
+                LoadApiStatus.ERROR -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to false))
+                }
             }
         }
 
