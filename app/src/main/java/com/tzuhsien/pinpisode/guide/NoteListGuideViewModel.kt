@@ -43,28 +43,28 @@ class NoteListGuideViewModel : ViewModel() {
     fun showNext() {
         when(trickNumber) {
             1 -> {
-                showFirstTrick()
                 trickNumber = 2
+                showFirstTrick()
             }
             2 -> {
-                showSecondTrick()
                 trickNumber = 3
+                showSecondTrick()
             }
             3 -> {
-                showThirdTrick()
                 trickNumber = 4
+                showThirdTrick()
             }
             4 -> {
-                showForthTrick()
                 trickNumber = 5
+                showForthTrick()
             }
             5 -> {
-                showFifthTrick()
                 trickNumber = 6
+                showFifthTrick()
             }
             6 -> {
-                showSixthTrick()
                 trickNumber = 7
+                showSixthTrick()
             }
             7 -> {
                 dismissGuide()

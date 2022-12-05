@@ -36,7 +36,7 @@ class NoteListFragment : Fragment() {
         getVmFactory()
     }
     private lateinit var binding: FragmentNoteListBinding
-    val scrollJob = Job()
+    private val scrollJob = Job()
     val coroutineScope = CoroutineScope(scrollJob + Dispatchers.Main)
 
     override fun onCreateView(
@@ -259,7 +259,6 @@ class NoteListFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         scrollJob.cancel()
-
     }
 
     fun deleteButton(position: Int) : SwipeHelper.UnderlayButton {

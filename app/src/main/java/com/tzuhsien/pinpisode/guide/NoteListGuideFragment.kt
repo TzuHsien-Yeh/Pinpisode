@@ -1,7 +1,6 @@
 package com.tzuhsien.pinpisode.guide
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +15,7 @@ import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Sort
 import com.tzuhsien.pinpisode.databinding.DialogNoteListGuideBinding
 import com.tzuhsien.pinpisode.notelist.NoteListFragmentDirections
+import kotlinx.coroutines.*
 import timber.log.Timber
 
 
@@ -23,6 +23,9 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
 
     private lateinit var viewModel: NoteListGuideViewModel
     private lateinit var binding: DialogNoteListGuideBinding
+
+    private val animJob = Job()
+    val coroutineScope = CoroutineScope(animJob + Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,7 +111,6 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
         viewModel.isToShowHowToSort.observe(viewLifecycleOwner) {
             binding.textHowToSortNote.visibility = if (it) View.VISIBLE else View.GONE
             initializeSortAnimSetting(it)
-
             if (it) {
                 sortAnimation()
                 binding.arrow.visibility = View.GONE
@@ -183,7 +185,7 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
 
             if (it) {
                 binding.imgLogoPinpisode.visibility = View.VISIBLE
-                    binding.arrow.apply {
+                binding.arrow.apply {
                     visibility = View.VISIBLE
                     rotation = -50f
                 }
@@ -243,43 +245,46 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
 
         Timber.d("sortAnimation, viewModel.trickNumber == ${viewModel.trickNumber}")
 
-        viewModel.isToShowHowToSort.observe(viewLifecycleOwner) {
-            if (it) {
-                Handler().postDelayed(
-                    {
-                        binding.cardSelectedTag.visibility = View.VISIBLE
-                        binding.SecondTagInRecyclerview.visibility = View.GONE
-                        binding.cardSelectedTag.alpha = 1f
-                        binding.cardNote.visibility = View.GONE
+        coroutineScope.launch {
+            delay(800)
+            binding.cardSelectedTag.visibility = View.VISIBLE
+            binding.SecondTagInRecyclerview.visibility = View.GONE
+            binding.cardSelectedTag.alpha = 1f
+            binding.cardNote.visibility = View.GONE
 
-                        Handler().postDelayed({
-                            binding.sortAsc.alpha = 0.5f
-                            binding.sortDesc.alpha = 1f
-
-                            Handler().postDelayed({
-                                binding.textSortOptions.text = Sort.DURATION.VALUE
-
-                                Handler().postDelayed({
-                                    binding.textSortOptions.text = Sort.TIME_LEFT.VALUE
-
-                                    Handler().postDelayed({
-                                        resetSort()
-                                        sortAnimation()
-                                    }, 800)
-
-                                }, 800)
-
-                            }, 800)
-
-                        }, 800)
-                    },
-                    800
-                )
+            if (viewModel.trickNumber != 4) {
+                resetSort()
+                animJob.cancel()
             }
+            delay(800)
+            binding.sortAsc.alpha = 0.5f
+            binding.sortDesc.alpha = 1f
+
+            if (viewModel.trickNumber != 4) {
+                resetSort()
+                animJob.cancel()
+            }
+            delay(800)
+            binding.textSortOptions.text = Sort.DURATION.VALUE
+
+            if (viewModel.trickNumber != 4) {
+                animJob.cancel()
+                resetSort()
+            }
+            delay(800)
+            binding.textSortOptions.text = Sort.TIME_LEFT.VALUE
+
+            if (viewModel.trickNumber != 4) {
+                animJob.cancel()
+                resetSort()
+            }
+            delay(800)
+            resetSort()
+            sortAnimation()
         }
     }
 
-    private fun resetSort(){
+    private fun resetSort() {
         binding.cardNote.visibility = View.VISIBLE
         binding.SecondTagInRecyclerview.visibility = View.VISIBLE
         binding.cardSelectedTag.visibility = View.GONE
@@ -289,9 +294,13 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
     }
 
     override fun dismiss() {
-        Timber.d("dismiss")
+        Timber.d("dismissed")
         findNavController().navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
-//        super.dismiss()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        animJob.cancel()
     }
 
 }
