@@ -2,6 +2,7 @@ package com.tzuhsien.pinpisode.notelist
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
@@ -22,20 +23,59 @@ import timber.log.Timber
 
 class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
-    private var _liveNoteList = MutableLiveData<List<Note>>()
+    private var _liveNoteList = repository.getAllLiveNotes()
     val liveNoteList: LiveData<List<Note>>
         get() = _liveNoteList
 
-    var set = mutableSetOf<String>()
+    val noteListToDisplay = Transformations.map(liveNoteList) { list ->
+        val toDisplay =
+            if (null != selectedTag) list.filter { it.tags.contains(selectedTag) } else list
 
-    private val _tagSet = MutableLiveData<Set<String>>()
-    val tagSet: LiveData<Set<String>>
-        get() = _tagSet
+        when (sortOption) {
+            Sort.LAST_EDIT -> {
+                if (isAscending) {
+                    // The more recently edited note has larger time in millis
+                    toDisplay.sortedByDescending { it.lastEditTime }
+                } else {
+                    toDisplay.sortedBy { it.lastEditTime }
+                }
+            }
+            Sort.DURATION -> {
+                if (isAscending) {
+                    toDisplay.sortedBy { it.duration.parseDuration() }
+                } else {
+                    toDisplay.sortedByDescending { it.duration.parseDuration() }
+                }
+            }
+            Sort.TIME_LEFT -> {
+                if (isAscending) {
+                    toDisplay.sortedBy {
+                        (it.duration.parseDuration()?.minus(it.lastTimestamp.toLong() * 1000))
+                    }
+                } else {
+                    toDisplay.sortedByDescending {
+                        (it.duration.parseDuration()?.minus(it.lastTimestamp.toLong() * 1000))
+                    }
+                }
+            }
+        }
+    }
+
+    val tagsToDisplay = Transformations.map(liveNoteList) { notes ->
+        val set = mutableSetOf<String>()
+        for (note in notes) {
+            for (tag in note.tags) {
+                set.add(tag)
+            }
+        }
+        set.filter { it != selectedTag }
+    }
 
     var selectedTag: String? = null
 
-    var isAscending: Boolean = true // 0: Ascending order; 1: Descending
+    var isAscending: Boolean = true
 
+    var sortOption: Sort = Sort.LAST_EDIT
 
     var invitationList = repository.getLiveIncomingCoauthorInvitations()
 
@@ -67,49 +107,42 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     val navigateToSpotifyNote: LiveData<Note?>
         get() = _navigateToSpotifyNote
 
-    init {
-        Timber.d("[Timber NoteListViewModel: ${UserManager.userId}, ${UserManager.userName}, ${UserManager.userEmail}")
-        getAllLiveNotes()
-        _tagSet.value = UserManager.tagSet
-    }
+    fun updateInfoFromYouTube(note: Note) {
 
-    private fun getAllLiveNotes() {
-        _status.value = LoadApiStatus.DONE
-        _liveNoteList = repository.getAllLiveNotes()
-    }
+        if (note.source == Source.YOUTUBE.source && note.duration.parseDuration() == 0L) {
 
-    fun updateInfoFromYouTube(noteId: String, note: Note) {
-        coroutineScope.launch {
+            coroutineScope.launch {
 
-            _status.value = LoadApiStatus.LOADING
+                _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.getYouTubeVideoInfoById(note.sourceId)) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
-                    if (result.data.items[0].contentDetails?.duration != note.duration) {
-                        val noteToUpdate = Note()
-                        noteToUpdate.duration = result.data.items[0].contentDetails!!.duration
-                        noteToUpdate.thumbnail = result.data.items[0].snippet.thumbnails.high.url
-                        noteToUpdate.title = result.data.items[0].snippet.title
-                        updateYouTubeInfo(noteId, noteToUpdate)
+                when (val result = repository.getYouTubeVideoInfoById(note.sourceId)) {
+                    is Result.Success -> {
+                        _error.value = null
+
+                        if (result.data.items[0].contentDetails?.duration != note.duration) {
+                            val noteToUpdate = Note()
+                            noteToUpdate.duration = result.data.items[0].contentDetails!!.duration
+                            noteToUpdate.thumbnail =
+                                result.data.items[0].snippet.thumbnails.high.url
+                            noteToUpdate.title = result.data.items[0].snippet.title
+                            updateYouTubeInfo(note.id, noteToUpdate)
+                        } else {
+
+                            _status.value = LoadApiStatus.DONE
+                        }
                     }
-                    result.data
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                else -> {
-                    _error.value = Util.getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
-                    null
+                    is Result.Fail -> {
+                        _error.value = result.error
+                        _status.value = LoadApiStatus.ERROR
+                    }
+                    is Result.Error -> {
+                        _error.value = result.exception.toString()
+                        _status.value = LoadApiStatus.ERROR
+                    }
+                    else -> {
+                        _error.value = Util.getString(R.string.unknown_error)
+                        _status.value = LoadApiStatus.ERROR
+                    }
                 }
             }
         }
@@ -127,7 +160,6 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
-                    result.data
                 }
                 is Result.Fail -> {
                     _error.value = result.error
@@ -145,16 +177,6 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun getAllTags(notes: List<Note>) {
-        val set = mutableSetOf<String>()
-        for (note in notes) {
-            for (tag in note.tags) {
-                set.add(tag)
-            }
-        }
-        _tagSet.value = set
-    }
-
     private fun navigateToNotePage(note: Note) {
         when (note.source) {
             Source.YOUTUBE.source -> {
@@ -165,50 +187,6 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                 _navigateToSpotifyNote.value = note
             }
         }
-
-    }
-
-    fun tagSelected(tag: String?) {
-        selectedTag = tag
-
-        // invoke live data change
-        _tagSet.value = _tagSet.value
-        _liveNoteList.value = _liveNoteList.value
-    }
-
-    fun sortNotes(by: Sort) {
-        when (by) {
-            Sort.LAST_EDIT -> {
-                _liveNoteList.value = if (isAscending) {
-                    _liveNoteList.value?.sortedByDescending { it.lastEditTime }
-                } else {
-                    _liveNoteList.value?.sortedBy { it.lastEditTime }
-                }
-            }
-            Sort.DURATION -> {
-                _liveNoteList.value = if (isAscending) {
-                    _liveNoteList.value?.sortedBy { it.duration.parseDuration() }
-                } else {
-                    _liveNoteList.value?.sortedByDescending { it.duration.parseDuration() }
-                }
-            }
-            Sort.TIME_LEFT -> {
-                _liveNoteList.value = if (isAscending) {
-                    _liveNoteList.value?.sortedBy {
-                        (it.duration.parseDuration()?.minus(it.lastTimestamp.toLong() * 1000))
-                    }
-                } else {
-                    _liveNoteList.value?.sortedByDescending {
-                        (it.duration.parseDuration()?.minus(it.lastTimestamp.toLong() * 1000))
-                    }
-                }
-            }
-
-        }
-    }
-
-    fun changeOrderDirection() {
-        _liveNoteList.value = _liveNoteList.value?.reversed()
     }
 
     fun doneNavigationToNote() {
@@ -219,30 +197,27 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     fun updateLocalUserId() {
 
         if (null == UserManager.userId) {
+
             coroutineScope.launch {
                 _status.value = LoadApiStatus.LOADING
 
-                when(val currentUserResult = repository.getCurrentUser()) {
+                when (val currentUserResult = repository.getCurrentUser()) {
                     is Result.Success -> {
                         _error.value = null
                         _status.value = LoadApiStatus.DONE
                         UserManager.userId = currentUserResult.data?.id
-                        currentUserResult.data
                     }
                     is Result.Fail -> {
                         _error.value = currentUserResult.error
                         _status.value = LoadApiStatus.ERROR
-                        null
                     }
                     is Result.Error -> {
                         _error.value = currentUserResult.exception.toString()
                         _status.value = LoadApiStatus.ERROR
-                        null
                     }
                     else -> {
                         _error.value = MyApplication.instance.getString(R.string.unknown_error)
                         _status.value = LoadApiStatus.ERROR
-                        null
                     }
                 }
             }
@@ -253,9 +228,8 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     fun deleteOrQuitCoauthoringNote(noteIndex: Int) {
         Timber.d("deleteOrQuitCoauthoringNote: noteIndex = $noteIndex")
 
-        val noteToBeRemoved = liveNoteList.value?.get(noteIndex)
+        val noteToBeRemoved = noteListToDisplay.value?.get(noteIndex)
         Timber.d("deleteOrQuitCoauthoringNote: noteToBeRemoved = $noteToBeRemoved")
-
 
         if (noteToBeRemoved?.ownerId == UserManager.userId) {
             deleteNote(noteToBeRemoved!!)
@@ -273,7 +247,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         coroutineScope.launch {
             _status.value = LoadApiStatus.LOADING
 
-            when(val result = repository.deleteUserFromAuthors(
+            when (val result = repository.deleteUserFromAuthors(
                 noteId = noteToBeRemoved.id,
                 authors = newAuthorList
             )) {
@@ -301,7 +275,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         coroutineScope.launch {
             _status.value = LoadApiStatus.LOADING
 
-            when(val result = repository.deleteNote(noteId = noteToBeRemoved.id)) {
+            when (val result = repository.deleteNote(noteId = noteToBeRemoved.id)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -321,9 +295,37 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
             }
         }
     }
+
+    fun tagSelected(tag: String?) {
+        selectedTag = tag
+
+        // notify live data change
+        _liveNoteList.value = _liveNoteList.value
+    }
+
+    fun sort(sort: Sort) {
+        sortOption = sort
+
+        // default order direction for each sorting option
+        isAscending = when (sort) {
+            Sort.LAST_EDIT -> true
+            Sort.DURATION -> true
+            Sort.TIME_LEFT -> false
+        }
+
+        // notify live data change
+        _liveNoteList.value = _liveNoteList.value
+    }
+
+    fun changeSortDirection() {
+        isAscending = !isAscending
+
+        // notify live data change
+        _liveNoteList.value = _liveNoteList.value
+    }
 }
 
 data class NoteListUiState(
     val onNoteClicked: (Note) -> Unit,
-    val onNoteQuit: (Int) -> Unit
+    val onNoteQuit: (Int) -> Unit,
 )

@@ -19,7 +19,6 @@ import com.tzuhsien.pinpisode.data.model.Sort
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentNoteListBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.ext.parseDuration
 import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.notification.NotificationFragmentDirections
@@ -44,8 +43,6 @@ class NoteListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        Timber.d("Timber[${this::class.simpleName}] NoteListFragment[onCreateView]: ${UserManager.userId}")
-
         /**
          * Check and handle sign in status
          * */
@@ -58,21 +55,12 @@ class NoteListFragment : Fragment() {
         binding = FragmentNoteListBinding.inflate(layoutInflater)
 
         /**
-         *  Navigation Buttons
+         * Update YouTube live event duration from yt api
          * */
-        Glide.with(binding.imgPicToProfile)
-            .load(UserManager.userPic)
-            .into(binding.imgPicToProfile)
-        binding.textUserName.text = UserManager.userName
-        binding.imgPicToProfile.setOnClickListener {
-            findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToProfileFragment())
-        }
-        binding.textUserName.setOnClickListener {
-            findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToProfileFragment())
-        }
-
-        binding.btnToSearchPage.setOnClickListener {
-            findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToSearchFragment())
+        viewModel.liveNoteList.observe(viewLifecycleOwner) {
+            for (note in it) {
+                viewModel.updateInfoFromYouTube(note)
+            }
         }
 
         /**
@@ -84,13 +72,9 @@ class NoteListFragment : Fragment() {
             viewModel.tagSelected(it)
         })
         binding.recyclerviewTag.adapter = tagAdapter
-        viewModel.tagSet.observe(viewLifecycleOwner, Observer { set ->
-            if (null != set) {
-                tagAdapter.submitList(set.filter { it != viewModel.selectedTag }.sorted().toList())
-            } else {
-                tagAdapter.submitList(set)
-            }
-        })
+        viewModel.tagsToDisplay.observe(viewLifecycleOwner) { set ->
+            tagAdapter.submitList(set)
+        }
         binding.cardSelectedTag.setOnClickListener {
             it.visibility = View.GONE
             viewModel.tagSelected(null)
@@ -99,52 +83,43 @@ class NoteListFragment : Fragment() {
         /**
          * Sorting and ordering
          * */
-        var sortState = 0
-
         binding.textSortOptions.text = Sort.LAST_EDIT.VALUE
         binding.sortAsc.alpha = 1F
         binding.sortDesc.alpha = 0.5F
         binding.cardSortBy.setOnClickListener {
-            when (sortState) {
-                0 -> {
+            when (viewModel.sortOption) {
+                Sort.LAST_EDIT -> {
+                    // Change to sort by duration onClick
                     binding.textSortOptions.text = Sort.DURATION.VALUE
                     binding.sortAsc.alpha = 1F
                     binding.sortDesc.alpha = 0.5F
-                    viewModel.isAscending = true
-                    viewModel.sortNotes(Sort.DURATION)
-                    sortState = 1
+                    viewModel.sort(Sort.DURATION)
                 }
-                1 -> {
+                Sort.DURATION -> {
                     binding.textSortOptions.text = Sort.TIME_LEFT.VALUE
                     binding.sortAsc.alpha = 0.5F
                     binding.sortDesc.alpha = 1F
-                    viewModel.isAscending = false
-                    viewModel.sortNotes(Sort.TIME_LEFT)
-                    sortState = 2
+                    viewModel.sort(Sort.TIME_LEFT)
                 }
-                2 -> {
+                Sort.TIME_LEFT -> {
                     binding.textSortOptions.text = Sort.LAST_EDIT.VALUE
                     binding.sortAsc.alpha = 1F
                     binding.sortDesc.alpha = 0.5F
-                    viewModel.isAscending = true
-                    viewModel.sortNotes(Sort.LAST_EDIT)
-                    sortState = 0
+                    viewModel.sort(Sort.LAST_EDIT)
                 }
             }
         }
         binding.btnSwitchDirection.setOnClickListener {
-            if (binding.sortAsc.alpha != 1F) {
+            if (viewModel.isAscending) {
                 //change to DESC
-                viewModel.isAscending = false
-                viewModel.changeOrderDirection()
                 binding.sortAsc.alpha = 1F
                 binding.sortDesc.alpha = 0.5F
+                viewModel.changeSortDirection()
             } else {
                 //change to ASC
-                viewModel.isAscending = true
-                viewModel.changeOrderDirection()
                 binding.sortAsc.alpha = 0.5F
                 binding.sortDesc.alpha = 1F
+                viewModel.changeSortDirection()
             }
         }
 
@@ -159,7 +134,6 @@ class NoteListFragment : Fragment() {
         val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(
             binding.recyclerviewNoteList,
             swipeOutListener = OnSwipeOutListener {
-                Timber.d("swipeOutListener = OnSwipeOutListener position = $it")
                 viewModel.deleteOrQuitCoauthoringNote(it)
             }
         ) {
@@ -172,31 +146,41 @@ class NoteListFragment : Fragment() {
 
         itemTouchHelper.attachToRecyclerView(binding.recyclerviewNoteList)
 
-        viewModel.liveNoteList.observe(viewLifecycleOwner) { list ->
-            Timber.d("viewModel.liveNoteList.observe: $list")
-            list?.let {
-                viewModel.getAllTags(list)
-                if (null != viewModel.selectedTag) {
-                    noteAdapter.submitList(list.filter { it.tags.contains(viewModel.selectedTag) })
-                    coroutineScope.launch {
-                        delay(200L)
-                        binding.recyclerviewNoteList.scrollToPosition(0)
-                    }
-
-                } else {
-                    noteAdapter.submitList(list)
-                    coroutineScope.launch {
-                        delay(200L)
-                        binding.recyclerviewNoteList.scrollToPosition(0)
-                    }
-                }
-
-                for (note in list) {
-                    if (note.duration.parseDuration() == 0L) {
-                        viewModel.updateInfoFromYouTube(note.id, note)
-                    }
-                }
+        viewModel.noteListToDisplay.observe(viewLifecycleOwner) { list ->
+            noteAdapter.submitList(list)
+            coroutineScope.launch {
+                delay(200L)
+                binding.recyclerviewNoteList.scrollToPosition(0)
             }
+        }
+
+        /**
+         *  Navigation
+         * */
+        // Profile page
+        Glide.with(binding.imgPicToProfile)
+            .load(UserManager.userPic)
+            .into(binding.imgPicToProfile)
+        binding.textUserName.text = UserManager.userName
+        binding.imgPicToProfile.setOnClickListener {
+            findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToProfileFragment())
+        }
+        binding.textUserName.setOnClickListener {
+            findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToProfileFragment())
+        }
+
+        // Search page
+        binding.btnToSearchPage.setOnClickListener {
+            findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToSearchFragment())
+        }
+
+        // Notification page
+        binding.btnNotificationBell.setOnClickListener {
+            findNavController().navigate(NotificationFragmentDirections.actionGlobalNotificationFragment())
+        }
+        /** Show badge if there's any incoming coauthor invitations **/
+        viewModel.invitationList.observe(viewLifecycleOwner) {
+            binding.badgeNotificationNotEmpty.visibility = if (it.isNotEmpty()) View.VISIBLE else View.GONE
         }
 
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
@@ -223,19 +207,9 @@ class NoteListFragment : Fragment() {
             }
         }
 
-        /**
-         * Notification
-         * */
-        binding.btnNotificationBell.setOnClickListener {
-            findNavController().navigate(NotificationFragmentDirections.actionGlobalNotificationFragment())
-        }
-
-        viewModel.invitationList.observe(viewLifecycleOwner) {
-            binding.badgeNotificationNotEmpty.visibility = if (it.isNotEmpty()) View.VISIBLE else View.GONE
-        }
-
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
+            Timber.d("viewModel.status.observe: $it")
             when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
@@ -243,10 +217,12 @@ class NoteListFragment : Fragment() {
                     }
                 }
                 LoadApiStatus.DONE -> {
+                    Timber.d("LoadApiStatus.DONE")
                     requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
                         bundleOf("doneLoading" to true))
                 }
                 LoadApiStatus.ERROR -> {
+                    Timber.d("LoadApiStatus.ERROR")
                     requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
                         bundleOf("doneLoading" to false))
                 }
@@ -273,6 +249,5 @@ class NoteListFragment : Fragment() {
                 }
             })
     }
-
 
 }
