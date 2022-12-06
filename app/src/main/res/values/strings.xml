@@ -67,5 +67,6 @@
     <string name="how_to_quit_notes">Finally, swipe left to quit your own notes or quit coauthoring others\'</string>
     <string name="guide_closure_words">If you want to brush up on these tricks, tap on the help icon.</string>
     <string name="let_s_start_your_episodes">Let\'s start your episodes!</string>
+    <string name="pinpisode_uri">https://pinpisode/</string>
 
 </resources>

@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
+import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.model.UserInfo
 import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.network.LoadApiStatus
@@ -18,9 +19,20 @@ import kotlinx.coroutines.launch
 
 class SignInViewModel(private val repository: Repository): ViewModel() {
 
-    private val _navigateUp = MutableLiveData<UserInfo?>(null)
-    val navigateUp: LiveData<UserInfo?>
+    var source: String? = null
+    var sourceId: String? = null
+
+    private val _navigateUp = MutableLiveData(false)
+    val navigateUp: LiveData<Boolean>
         get() = _navigateUp
+
+    private val _navigateToYtNote = MutableLiveData<String?>(null)
+    val navigateToYtNote: LiveData<String?>
+        get() = _navigateToYtNote
+
+    private val _navigateToSpNote = MutableLiveData<String?>(null)
+    val navigateToSpNote: LiveData<String?>
+        get() = _navigateToSpNote
 
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
@@ -73,12 +85,12 @@ class SignInViewModel(private val repository: Repository): ViewModel() {
         coroutineScope.launch {
             _status.value = LoadApiStatus.LOADING
 
-            _navigateUp.value = when(val currentUserResult = repository.getCurrentUser()) {
+            when(val currentUserResult = repository.getCurrentUser()) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
 
-                    currentUserResult.data
+                    navigate()
                 }
                 is Result.Fail -> {
                     _error.value = currentUserResult.error
@@ -99,8 +111,22 @@ class SignInViewModel(private val repository: Repository): ViewModel() {
         }
     }
 
+    private fun navigate() {
+        when(source) {
+            Source.YOUTUBE.source -> _navigateToYtNote.value = sourceId
+            Source.SPOTIFY.source -> _navigateToSpNote.value = sourceId
+            null -> _navigateUp.value = true
+        }
+     }
+
     override fun onCleared() {
         super.onCleared()
         viewModelJob.cancel()
+    }
+
+    fun doneNavigation() {
+        _navigateUp.value = false
+        _navigateToYtNote.value = null
+        _navigateToSpNote.value = null
     }
 }

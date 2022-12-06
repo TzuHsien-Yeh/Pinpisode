@@ -71,7 +71,20 @@
         android:id="@+id/signInFragment"
         android:name="com.tzuhsien.pinpisode.signin.SignInFragment"
         android:label="fragment_sign_in"
-        tools:layout="@layout/fragment_sign_in" />
+        tools:layout="@layout/fragment_sign_in">
+
+        <argument android:name="source"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+
+        <argument android:name="source_id"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+
+    </fragment>
+
     <action
         android:id="@+id/action_global_signInFragment"
         app:destination="@id/signInFragment" />

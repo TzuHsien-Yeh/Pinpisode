@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.FragmentSignInBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
@@ -45,7 +46,6 @@ class SignInFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-
         // Build a GoogleSignInClient with the options specified by gso.
         googleSignInClient = GoogleSignIn.getClient(requireContext(), getGSO())
 
@@ -58,9 +58,33 @@ class SignInFragment : Fragment() {
         binding.btnSignIn.setOnClickListener { signIn() }
         auth = Firebase.auth
 
+        viewModel.source = SignInFragmentArgs.fromBundle(requireArguments()).source
+        viewModel.sourceId = SignInFragmentArgs.fromBundle(requireArguments()).sourceId
+
+        Timber.d("source: ${viewModel.source}, sourceId: ${viewModel.sourceId}")
+
         viewModel.navigateUp.observe(viewLifecycleOwner) {
+            Timber.d("viewModel.navigateUp: $it")
+            if (it) {
+                findNavController().navigate(NavGraphDirections.actionGlobalNoteListFragment())
+                viewModel.doneNavigation()
+            }
+        }
+
+        viewModel.navigateToYtNote.observe(viewLifecycleOwner) {
+            Timber.d("navigateToYtNote: $it")
             it?.let {
-                findNavController().navigate(SignInFragmentDirections.actionGlobalNoteListFragment())
+                findNavController().navigate(NavGraphDirections.actionGlobalYouTubeNoteFragment(videoIdKey = it))
+                viewModel.doneNavigation()
+            }
+        }
+
+        viewModel.navigateToSpNote.observe(viewLifecycleOwner) {
+
+            Timber.d("navigateToSpNote: $it")
+            it?.let {
+                findNavController().navigate(NavGraphDirections.actionGlobalSpotifyNoteFragment(sourceIdKey = it))
+                viewModel.doneNavigation()
             }
         }
 

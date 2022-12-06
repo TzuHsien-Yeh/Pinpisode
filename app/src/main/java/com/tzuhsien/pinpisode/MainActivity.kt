@@ -15,7 +15,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.tzuhsien.pinpisode.data.source.local.UserManager
+import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.databinding.ActivityMainBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.extractYoutubeVideoId
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
         intent?.data?.let {
-            if (it.toString().contains("http://pinpisode/")) {
+            if (it.toString().contains(getString(R.string.pinpisode_uri))) {
                 navController.handleDeepLink(intent)
                 Timber.d("[onNewIntent] handleDeepLink called")
             }
@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
         intent?.extras?.let {
             handleIntent(it)
-            Timber.d("[onNewIntent] handleIntent called: extra = ${it.toString()}")
+            Timber.d("[onNewIntent] handleIntent called: extra = $it")
         }
     }
 
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
         if (null != intent) {
             intent.data?.let {
-                if (it.toString().contains("http://pinpisode/")) {
+                if (it.toString().contains(getString(R.string.pinpisode_uri))) {
                     navController.handleDeepLink(intent)
                     Timber.d("[onCreate] handleDeepLink called")
                 }
@@ -225,47 +225,91 @@ class MainActivity : AppCompatActivity() {
 
         navController = findNavController(R.id.nav_host_fragment_activity_main)
 
-        /**
-         * Check and handle sign in status
-         * */
-        if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
-            Timber.d("[${this::class.simpleName}]: null == GoogleSignIn.getLastSignedInAccount(applicationContext)")
-            navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment())
-        } else {
-            viewModel.updateLocalUserId()
-        }
+        intentExtras.getString(Intent.EXTRA_TEXT)?.let { extra ->
+            if (extra.contains("spotify")) {
+                // Handle Spotify intent
+                val sourceId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
 
-        if (UserManager.userId != null) {
-            intentExtras.getString(Intent.EXTRA_TEXT)?.let { extra ->
-                if (extra.contains("spotify")) {
-                    // Handle Spotify intent
-
-                    val sourceId =
-                        intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
-                    sourceId?.let { it ->
-
-                        Timber.d("HANDLE spotify INTENT FUN intent extras : $it")
-
+                sourceId?.let { it ->
+                    Timber.d("intentExtras.getString(Intent.EXTRA_TEXT)sourceId = $sourceId")
+                    /** Check and handle sign in status **/
+                    if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
+                        navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment(
+                            source = Source.SPOTIFY.source,
+                            sourceId = it
+                        ))
+                    } else {
+                        viewModel.updateLocalUserId()
                         navController.navigate(
                             SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
                                 sourceIdKey = it)
                         )
                     }
+                }
 
-                } else {
-                    // Handle YouTube intent
-                    val videoId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
-                    videoId?.let {
-                        Timber.d("HANDLE youtube INTENT FUN intent extras : $it")
+            } else {
+                // Handle YouTube intent
+                val videoId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
 
+                videoId?.let {
+                    Timber.d("HANDLE youtube INTENT FUN intent extras : $it")
+                    /** Check and handle sign in status **/
+                    if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
+                        navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment(
+                            source = Source.YOUTUBE.source,
+                            sourceId = it
+                        ))
+                    } else {
+                        viewModel.updateLocalUserId()
                         navController.navigate(
-                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = it)
+                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
+                                videoIdKey = it)
                         )
                     }
                 }
-
             }
-        }
 
+//        /**
+//         * Check and handle sign in status
+//         * */
+//        if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
+//            Timber.d("[${this::class.simpleName}]: null == GoogleSignIn.getLastSignedInAccount(applicationContext)")
+//            navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment())
+//        } else {
+//            viewModel.updateLocalUserId()
+//        }
+//
+//        if (UserManager.userId != null) {
+//            intentExtras.getString(Intent.EXTRA_TEXT)?.let { extra ->
+//                if (extra.contains("spotify")) {
+//                    // Handle Spotify intent
+//
+//                    val sourceId =
+//                        intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
+//                    sourceId?.let { it ->
+//
+//                        Timber.d("HANDLE spotify INTENT FUN intent extras : $it")
+//
+//                        navController.navigate(
+//                            SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+//                                sourceIdKey = it)
+//                        )
+//                    }
+//
+//                } else {
+//                    // Handle YouTube intent
+//                    val videoId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
+//                    videoId?.let {
+//                        Timber.d("HANDLE youtube INTENT FUN intent extras : $it")
+//
+//                        navController.navigate(
+//                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = it)
+//                        )
+//                    }
+//                }
+//
+//            }
+//        }
+        }
     }
 }
