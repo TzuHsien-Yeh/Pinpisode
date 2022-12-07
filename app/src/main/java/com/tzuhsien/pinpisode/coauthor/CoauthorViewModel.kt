@@ -19,13 +19,11 @@ import kotlinx.coroutines.launch
 
 class CoauthorViewModel(private val repository: Repository, val note: Note) : ViewModel() {
 
+    val isUserTheOwner = UserManager.userId == note.ownerId
+
     private val _foundUser = MutableLiveData<UserInfo?>()
     val foundUser: LiveData<UserInfo?>
         get() = _foundUser
-
-    private val _isInviteSuccess = MutableLiveData<Boolean>(false)
-    val isInviteSuccess: LiveData<Boolean>
-        get() = _isInviteSuccess
 
     private val _resultMsg = MutableLiveData<String?>(null)
     val resultMsg: LiveData<String?>
@@ -33,13 +31,11 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
 
     private val _noteOwner = MutableLiveData<UserInfo>()
     val noteOwner: LiveData<UserInfo>
-            get() = _noteOwner
+        get() = _noteOwner
 
     private val _quitCoauthoringResult = MutableLiveData<String>(null)
     val quitCoauthoringResult: LiveData<String>
         get() = _quitCoauthoringResult
-
-
 
     private var _liveCoauthorInfo = MutableLiveData<List<UserInfo>>()
     val liveCoauthorInfo: LiveData<List<UserInfo>>
@@ -66,7 +62,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
         coroutineScope.launch {
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.getUserInfoById(note.ownerId!!)
+            val result = repository.getUserInfoById(note.ownerId)
 
             _noteOwner.value = when (result) {
                 is Result.Success -> {
@@ -139,9 +135,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = foundUser.value?.let { repository.sendCoauthorInvitation(note, it.id) }
-
-            _isInviteSuccess.value = when (result) {
+            when (val result = foundUser.value?.let { repository.sendCoauthorInvitation(note, it.id) }) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -153,17 +147,14 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
-                    false
                 }
                 is Result.Error -> {
                     _error.value = result.exception.toString()
                     _status.value = LoadApiStatus.ERROR
-                    false
                 }
                 else -> {
                     _error.value = Util.getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
-                    false
                 }
             }
         }
@@ -181,7 +172,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
         coroutineScope.launch {
             _status.value = LoadApiStatus.LOADING
 
-            when(val result = repository.deleteUserFromAuthors(
+            _quitCoauthoringResult.value = when(val result = repository.deleteUserFromAuthors(
                 noteId = note.id,
                 authors = newAuthorList
             )) {
@@ -189,22 +180,30 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
 
-                    _quitCoauthoringResult.value = result.data
+                    result.data
                 }
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
+                    null
                 }
                 is Result.Error -> {
                     _error.value = result.exception.toString()
                     _status.value = LoadApiStatus.ERROR
+                    null
                 }
                 else -> {
                     _error.value = MyApplication.instance.getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
+                    null
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
     }
 
 }

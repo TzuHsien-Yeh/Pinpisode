@@ -11,10 +11,10 @@ import androidx.core.view.children
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Sort
 import com.tzuhsien.pinpisode.databinding.DialogNoteListGuideBinding
-import com.tzuhsien.pinpisode.notelist.NoteListFragmentDirections
 import kotlinx.coroutines.*
 import timber.log.Timber
 
@@ -29,25 +29,21 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(DialogFragment.STYLE_NO_FRAME, com.tzuhsien.pinpisode.R.style.GuideDialog)
+        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.GuideDialog)
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
+
         binding = DialogNoteListGuideBinding.inflate(layoutInflater)
+
         viewModel = ViewModelProvider(this).get(NoteListGuideViewModel::class.java)
 
-        binding.root.setOnClickListener {
-            viewModel.showNext()
-        }
+        binding.root.setOnClickListener { viewModel.showNext() }
 
-        val viewList = mutableListOf<View>()
-        binding.viewGroupNoteListElements.children.forEach {
-            viewList.add(it)
-        }
-        viewList.forEach { it.alpha = 0.05f }
+        binding.viewGroupNoteListElements.children.forEach { it.alpha = 0.05f }
 
         viewModel.isToShowWelcome.observe(viewLifecycleOwner) {
             binding.textStartGuideGreeting.visibility = if (it) View.VISIBLE else View.GONE
@@ -58,54 +54,22 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
         viewModel.isToShowAddNotes.observe(viewLifecycleOwner) {
             binding.imgShareFromYt.visibility = if (it) View.VISIBLE else View.GONE
             binding.textAddNoteBySharing.visibility = if (it) View.VISIBLE else View.GONE
-            if (it) {
-                binding.arrow.visibility = View.VISIBLE
-                binding.arrow.setAnimation(R.raw.arrow)
-                binding.arrow.rotation = 108f
+            binding.lottieTouchEffect.visibility =  if (it) View.VISIBLE else View.GONE
 
-                binding.lottieTouchEffect.visibility = View.VISIBLE
+            if (it) {
                 binding.lottieTouchEffect.setAnimation(R.raw.click_effect)
-            } else {
-                binding.lottieTouchEffect.visibility = View.GONE
+                binding.arrow.apply {
+                    visibility = View.VISIBLE
+                    setAnimation(R.raw.arrow)
+                    rotation = 108f
+                }
             }
         }
 
         viewModel.isToShowSearch.observe(viewLifecycleOwner) {
             binding.textToSearchPage.visibility = if (it) View.VISIBLE else View.GONE
             binding.btnToSearchPage.alpha = if (it) 1f else 0.1f
-            if (it) {
-                binding.arrow.apply {
-                    visibility = View.VISIBLE
-                    rotation = 60f
-
-                    val constraintLayout: ConstraintLayout = binding.root
-                    val constraintSet = ConstraintSet()
-                    constraintSet.clone(constraintLayout)
-                    constraintSet.connect(binding.arrow.id,
-                        ConstraintSet.END,
-                        binding.btnToSearchPage.id,
-                        ConstraintSet.END,
-                        0)
-                    constraintSet.connect(binding.arrow.id,
-                        ConstraintSet.TOP,
-                        binding.textToSearchPage.id,
-                        ConstraintSet.BOTTOM,
-                        0)
-                    constraintSet.connect(binding.arrow.id,
-                        ConstraintSet.BOTTOM,
-                        binding.btnToSearchPage.id,
-                        ConstraintSet.BOTTOM,
-                        30)
-                    constraintSet.connect(binding.arrow.id,
-                        ConstraintSet.START,
-                        binding.textToSearchPage.id,
-                        ConstraintSet.START,
-                        35)
-                    constraintSet.setHorizontalBias(binding.arrow.id, 0.92f)
-                    constraintSet.setVerticalBias(binding.arrow.id, 0f)
-                    constraintSet.applyTo(constraintLayout)
-                }
-            }
+            if (it) pointToSearchBtn()
         }
 
         viewModel.isToShowHowToSort.observe(viewLifecycleOwner) {
@@ -115,45 +79,14 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
                 sortAnimation()
                 binding.arrow.visibility = View.GONE
             }
-            Timber.d("viewModel.isToShowHowToSort.observe: trickNumber = ${viewModel.trickNumber}")
         }
 
         viewModel.isToShowCoauthorInvitation.observe(viewLifecycleOwner) {
-            Timber.d("viewModel.isToShowCoauthorInvitation.observe: $it")
             binding.textCoauthorInvitation.visibility = if (it) View.VISIBLE else View.GONE
             binding.btnNotificationBell.alpha = if (it) 1f else 0.1f
             if (it) {
                 binding.cardSelectedTag.visibility = View.GONE
-                binding.arrow.apply {
-                    visibility = View.VISIBLE
-                    rotation = -50f
-                }
-
-                val constraintLayout: ConstraintLayout = binding.root
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(constraintLayout)
-                constraintSet.connect(binding.arrow.id,
-                    ConstraintSet.TOP,
-                    binding.btnNotificationBell.id,
-                    ConstraintSet.BOTTOM,
-                    0)
-                constraintSet.connect(binding.arrow.id,
-                    ConstraintSet.BOTTOM,
-                    binding.textCoauthorInvitation.id,
-                    ConstraintSet.TOP,
-                    30)
-                constraintSet.connect(binding.arrow.id,
-                    ConstraintSet.START,
-                    ConstraintSet.PARENT_ID,
-                    ConstraintSet.START,
-                    0)
-                constraintSet.connect(binding.arrow.id,
-                    ConstraintSet.END,
-                    ConstraintSet.PARENT_ID,
-                    ConstraintSet.END,
-                    12)
-                constraintSet.setHorizontalBias(binding.arrow.id, 0.88f)
-                constraintSet.applyTo(constraintLayout)
+                pointToNotificationBellIcon()
             }
         }
 
@@ -185,37 +118,7 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
 
             if (it) {
                 binding.imgLogoPinpisode.visibility = View.VISIBLE
-                binding.arrow.apply {
-                    visibility = View.VISIBLE
-                    rotation = -50f
-                }
-
-                val constraintLayout: ConstraintLayout = binding.root
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(constraintLayout)
-                constraintSet.connect(binding.arrow.id,
-                    ConstraintSet.TOP,
-                    ConstraintSet.PARENT_ID,
-                    ConstraintSet.TOP,
-                    0)
-                constraintSet.connect(binding.arrow.id,
-                    ConstraintSet.BOTTOM,
-                    ConstraintSet.PARENT_ID,
-                    ConstraintSet.BOTTOM,
-                    0)
-                constraintSet.connect(binding.arrow.id,
-                    ConstraintSet.START,
-                    ConstraintSet.PARENT_ID,
-                    ConstraintSet.START,
-                    0)
-                constraintSet.connect(binding.arrow.id,
-                    ConstraintSet.END,
-                    ConstraintSet.PARENT_ID,
-                    ConstraintSet.END,
-                    0)
-                constraintSet.setHorizontalBias(binding.arrow.id, 0.92f)
-                constraintSet.setVerticalBias(binding.arrow.id, 0f)
-                constraintSet.applyTo(constraintLayout)
+                pointToHelpIconOnToolbar()
             }
         }
 
@@ -226,6 +129,40 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
             }
         }
         return binding.root
+    }
+
+    private fun pointToSearchBtn() {
+        binding.arrow.apply {
+            visibility = View.VISIBLE
+            rotation = 60f
+
+            val constraintLayout: ConstraintLayout = binding.root
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(constraintLayout)
+            constraintSet.connect(binding.arrow.id,
+                ConstraintSet.END,
+                binding.btnToSearchPage.id,
+                ConstraintSet.END,
+                0)
+            constraintSet.connect(binding.arrow.id,
+                ConstraintSet.TOP,
+                binding.textToSearchPage.id,
+                ConstraintSet.BOTTOM,
+                0)
+            constraintSet.connect(binding.arrow.id,
+                ConstraintSet.BOTTOM,
+                binding.btnToSearchPage.id,
+                ConstraintSet.BOTTOM,
+                30)
+            constraintSet.connect(binding.arrow.id,
+                ConstraintSet.START,
+                binding.textToSearchPage.id,
+                ConstraintSet.START,
+                35)
+            constraintSet.setHorizontalBias(binding.arrow.id, 0.92f)
+            constraintSet.setVerticalBias(binding.arrow.id, 0f)
+            constraintSet.applyTo(constraintLayout)
+        }
     }
 
     private fun initializeSortAnimSetting(ready: Boolean) {
@@ -239,7 +176,6 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
         binding.cardSortBy.alpha = if (ready) 1f else 0.1f
         binding.textSortOptions.text = Sort.LAST_EDIT.VALUE
     }
-
 
     private fun sortAnimation() {
 
@@ -293,9 +229,76 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
         binding.textSortOptions.text = Sort.LAST_EDIT.VALUE
     }
 
+    private fun pointToNotificationBellIcon() {
+        binding.arrow.apply {
+            visibility = View.VISIBLE
+            rotation = -50f
+        }
+
+        val constraintLayout: ConstraintLayout = binding.root
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(constraintLayout)
+        constraintSet.connect(binding.arrow.id,
+            ConstraintSet.TOP,
+            binding.btnNotificationBell.id,
+            ConstraintSet.BOTTOM,
+            0)
+        constraintSet.connect(binding.arrow.id,
+            ConstraintSet.BOTTOM,
+            binding.textCoauthorInvitation.id,
+            ConstraintSet.TOP,
+            30)
+        constraintSet.connect(binding.arrow.id,
+            ConstraintSet.START,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.START,
+            0)
+        constraintSet.connect(binding.arrow.id,
+            ConstraintSet.END,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.END,
+            12)
+        constraintSet.setHorizontalBias(binding.arrow.id, 0.88f)
+        constraintSet.applyTo(constraintLayout)
+    }
+
+    private fun pointToHelpIconOnToolbar() {
+        binding.arrow.apply {
+            visibility = View.VISIBLE
+            rotation = -50f
+        }
+
+        val constraintLayout: ConstraintLayout = binding.root
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(constraintLayout)
+        constraintSet.connect(binding.arrow.id,
+            ConstraintSet.TOP,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.TOP,
+            0)
+        constraintSet.connect(binding.arrow.id,
+            ConstraintSet.BOTTOM,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.BOTTOM,
+            0)
+        constraintSet.connect(binding.arrow.id,
+            ConstraintSet.START,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.START,
+            0)
+        constraintSet.connect(binding.arrow.id,
+            ConstraintSet.END,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.END,
+            0)
+        constraintSet.setHorizontalBias(binding.arrow.id, 0.92f)
+        constraintSet.setVerticalBias(binding.arrow.id, 0f)
+        constraintSet.applyTo(constraintLayout)
+    }
+
     override fun dismiss() {
         Timber.d("dismissed")
-        findNavController().navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+        findNavController().navigate(NavGraphDirections.actionGlobalNoteListFragment())
     }
 
     override fun onStop() {

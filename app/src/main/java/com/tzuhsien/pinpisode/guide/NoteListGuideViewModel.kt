@@ -8,35 +8,35 @@ class NoteListGuideViewModel : ViewModel() {
 
     var trickNumber = 1
 
-    private val _isToShowWelcome = MutableLiveData<Boolean>(true)
+    private val _isToShowWelcome = MutableLiveData(true)
     val isToShowWelcome: LiveData<Boolean>
         get() = _isToShowWelcome
 
-    private val _isToShowAddNotes = MutableLiveData<Boolean>(false)
+    private val _isToShowAddNotes = MutableLiveData(false)
     val isToShowAddNotes: LiveData<Boolean>
         get() = _isToShowAddNotes
 
-    private val _isToShowSearch = MutableLiveData<Boolean>(false)
+    private val _isToShowSearch = MutableLiveData(false)
     val isToShowSearch: LiveData<Boolean>
         get() = _isToShowSearch
 
-    private val _isToShowHowToSort = MutableLiveData<Boolean>(false)
+    private val _isToShowHowToSort = MutableLiveData(false)
     val isToShowHowToSort: LiveData<Boolean>
         get() = _isToShowHowToSort
 
-    private val _isToShowCoauthorInvitation = MutableLiveData<Boolean>(false)
+    private val _isToShowCoauthorInvitation = MutableLiveData(false)
     val isToShowCoauthorInvitation: LiveData<Boolean>
         get() = _isToShowCoauthorInvitation
 
-    private val _isToShowQuit = MutableLiveData<Boolean>(false)
+    private val _isToShowQuit = MutableLiveData(false)
     val isToShowQuit: LiveData<Boolean>
         get() = _isToShowQuit
 
-    private val _isToShowClosure = MutableLiveData<Boolean>(false)
+    private val _isToShowClosure = MutableLiveData(false)
     val isToShowClosure: LiveData<Boolean>
         get() = _isToShowClosure
 
-    private val _leave = MutableLiveData<Boolean>(false)
+    private val _leave = MutableLiveData(false)
     val leave: LiveData<Boolean>
         get() = _leave
 
@@ -72,14 +72,6 @@ class NoteListGuideViewModel : ViewModel() {
         }
     }
 
-    private fun dismissGuide() {
-        _leave.value = true
-    }
-
-    fun doneDismissGuide() {
-        _leave.value = false
-    }
-
     private fun showFirstTrick() {
         _isToShowWelcome.value = false
         _isToShowAddNotes.value = true
@@ -108,6 +100,14 @@ class NoteListGuideViewModel : ViewModel() {
     private fun showSixthTrick() {
         _isToShowQuit.value = false
         _isToShowClosure.value = true
+    }
+
+    private fun dismissGuide() {
+        _leave.value = true
+    }
+
+    fun doneDismissGuide() {
+        _leave.value = false
     }
 
 }
