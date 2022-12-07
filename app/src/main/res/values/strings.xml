@@ -8,9 +8,9 @@
     <string name="manage_tags_for_this_note">Manage tags for this note</string>
     <string name="id_edit_add_tag">edit_add_tag</string>
     <string name="add_new_tag">Add new tag</string>
-    <string name="youtube_note_uri">https://pinpisode/youtube_note/%1s/%2s</string>
-    <string name="spotify_note_uri">https://pinpisode/spotify_note/%1s/%2s</string>
-    <string name="send_to">Share link with</string>
+<!--    <string name="youtube_note_uri">https://pinpisode/youtube_note/%1s/%2s</string>-->
+<!--    <string name="spotify_note_uri">https://pinpisode/spotify_note/%1s/%2s</string>-->
+    <string name="share_msg_subject">Check out this Pinpisode note on the %1s: [%2s]!</string>
     <string name="input_video_summary">Input video summary</string>
     <string name="moment">Moment</string>
     <string name="add_some_notes">Add some notes</string>
@@ -67,6 +67,6 @@
     <string name="how_to_quit_notes">Finally, swipe left to quit your own notes or quit coauthoring others\'</string>
     <string name="guide_closure_words">If you want to brush up on these tricks, tap on the help icon.</string>
     <string name="let_s_start_your_episodes">Let\'s start your episodes!</string>
-    <string name="pinpisode_uri">https://pinpisode/</string>
+    <string name="pinpisode_uri">https://pinpisode.page.link/</string>
 
 </resources>

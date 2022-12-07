@@ -170,6 +170,7 @@ class YouTubeNoteViewModel(
                     } else {
                         // the note already exist, save one time note info, check if user is in author list, and start listening to live data
                         noteToBeUpdated = result.data
+                        Timber.d("result.data.authors.contains(UserManager.userId): ${result.data.authors.contains(UserManager.userId)} UserManager.userId = ${UserManager.userId}")
                         checkIfViewerCanEdit(result.data.authors.contains(UserManager.userId))
                         getLiveNoteById(result.data.id)
                         getLiveTimeItemsResult(result.data.id)

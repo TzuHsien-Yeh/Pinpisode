@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.annotation.NonNull
+import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -31,6 +32,7 @@ import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteService
 import com.tzuhsien.pinpisode.tag.TagDialogFragmentDirections
+import com.tzuhsien.pinpisode.util.SharingLinkGenerator
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import timber.log.Timber
 
@@ -261,12 +263,8 @@ class YouTubeNoteFragment : Fragment() {
          *  Buttons on the bottom of the page: Share this note
          * */
         binding.icShare.setOnClickListener {
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                type="text/plain"
-                putExtra(Intent.EXTRA_TEXT, getString(R.string.youtube_note_uri, viewModel.noteId, videoId))
-            }
-            startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
+            shareNoteLink()
+
         }
 
         /** Loading status **/
@@ -289,6 +287,32 @@ class YouTubeNoteFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun shareNoteLink() {
+        SharingLinkGenerator.generateSharingLink(
+                deepLink = "${SharingLinkGenerator.PREFIX}/youtube_note/${viewModel.noteId}/${viewModel.videoId}".toUri(),
+                previewImageLink = viewModel.noteToBeUpdated?.thumbnail?.toUri()
+            ) { generatedLink ->
+            Timber.d("generatedLink = $generatedLink")
+                shareDeepLink(generatedLink)
+            }
+    }
+
+    private fun shareDeepLink(deepLink: String) {
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "text/plain"
+            putExtra(
+                Intent.EXTRA_SUBJECT,
+                getString(R.string.share_msg_subject,
+                    "YouTube video",
+                    viewModel.noteToBeUpdated?.title)
+            )
+            putExtra(Intent.EXTRA_TEXT, deepLink)
+        }
+
+        startActivity(Intent.createChooser(intent, null))
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

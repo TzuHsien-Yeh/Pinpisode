@@ -66,7 +66,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
         coroutineScope.launch {
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.getUserInfoById(note.ownerId)
+            val result = repository.getUserInfoById(note.ownerId!!)
 
             _noteOwner.value = when (result) {
                 is Result.Success -> {

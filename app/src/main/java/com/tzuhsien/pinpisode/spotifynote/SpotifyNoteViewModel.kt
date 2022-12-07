@@ -273,6 +273,11 @@ class SpotifyNoteViewModel(
     fun createNewSpotifyNote(newSpotifyNote: Note) {
         Timber.d("createNewSpotifyNote(newSpotifyNote)")
 
+        newSpotifyNote.apply {
+            ownerId = UserManager.userId!!
+            authors = listOf(UserManager.userId!!)
+        }
+
         if (!hasUploaded) {
             coroutineScope.launch {
 

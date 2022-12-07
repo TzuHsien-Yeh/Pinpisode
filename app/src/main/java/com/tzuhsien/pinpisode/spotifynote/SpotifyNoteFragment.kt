@@ -13,6 +13,7 @@ import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -43,6 +44,7 @@ import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekBack
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekForward
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekTo
 import com.tzuhsien.pinpisode.tag.TagDialogFragmentDirections
+import com.tzuhsien.pinpisode.util.SharingLinkGenerator
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import timber.log.Timber
 import java.security.MessageDigest
@@ -126,12 +128,22 @@ class SpotifyNoteFragment : Fragment() {
                     }
 
                 }
+
+
+                Timber.d("viewModel.isViewerCanEdit = ${viewModel.isViewerCanEdit}")
                 if (viewModel.isViewerCanEdit) {
                     Intent(context, SpotifyNoteService::class.java).apply {
                         action = SpotifyNoteService.ACTION_START
                         context?.startService(this)
                     }
                     registerTimestampReceiver()
+                } else {
+
+                    Timber.d(" viewModel.isSpotifyConnected.observe, ACTION_STOP")
+                    Intent(context, SpotifyNoteService::class.java).apply {
+                        action = SpotifyNoteService.ACTION_STOP
+                        context?.startService(this)
+                    }
                 }
             }
         }
@@ -303,11 +315,6 @@ class SpotifyNoteFragment : Fragment() {
             if (it) {
                 // attach swipe to delete helper
                 itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
-            } else {
-                Intent(context, SpotifyNoteService::class.java).apply {
-                    this.action = SpotifyNoteService.ACTION_STOP
-                    context?.startService(this)
-                }
             }
         }
 
@@ -360,13 +367,7 @@ class SpotifyNoteFragment : Fragment() {
          *  Buttons on the bottom of the page: Share this note
          * */
         binding.icShare.setOnClickListener {
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT,
-                    getString(R.string.spotify_note_uri, viewModel.noteId, viewModel.sourceId))
-            }
-            startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
+            shareNoteLink()
         }
 
         /**
@@ -400,7 +401,7 @@ class SpotifyNoteFragment : Fragment() {
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            when(it) {
+            when (it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
                         findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
@@ -418,6 +419,32 @@ class SpotifyNoteFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun shareNoteLink() {
+        SharingLinkGenerator.generateSharingLink(
+            deepLink = "${SharingLinkGenerator.PREFIX}/spotify_note/${viewModel.noteId}/${viewModel.sourceId}".toUri(),
+            previewImageLink = viewModel.noteToBeUpdated?.thumbnail?.toUri()
+        ) { generatedLink ->
+            Timber.d("generatedLink = $generatedLink")
+            shareDeepLink(generatedLink)
+        }
+    }
+
+    private fun shareDeepLink(deepLink: String) {
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "text/plain"
+            putExtra(
+                Intent.EXTRA_SUBJECT,
+                getString(R.string.share_msg_subject,
+                    "Spotify podcast",
+                    viewModel.noteToBeUpdated?.title)
+            )
+            putExtra(Intent.EXTRA_TEXT, deepLink)
+        }
+
+        startActivity(Intent.createChooser(intent, null))
     }
 
     private fun updateSeekbar(playerState: PlayerState) {
@@ -480,11 +507,18 @@ class SpotifyNoteFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         SpotifyService.disconnect()
+        Timber.d("onDestroy, ACTION_STOP")
         Intent(context, SpotifyNoteService::class.java).apply {
-            action = SpotifyNoteService.ACTION_STOP
-            context?.startService(this)
+                action = SpotifyNoteService.ACTION_STOP
+                context?.startService(this)
         }
-        context?.unregisterReceiver(timestampReceiver)
+
+        try {
+            context?.unregisterReceiver(timestampReceiver)
+        } catch (e: IllegalArgumentException) {
+            // Do nothing if the receiver not registered
+        }
+
         Timber.d("onDestroy() CALLED")
     }
 
@@ -515,8 +549,10 @@ class SpotifyNoteFragment : Fragment() {
 
     private fun endClipping() {
         Timber.d("clipEnd")
-        if((viewModel.currentSecond / 1000).toFloat() < viewModel.startAt) {
-            Toast.makeText(context, getString(R.string.clip_end_before_start_warning), Toast.LENGTH_SHORT).show()
+        if ((viewModel.currentSecond / 1000).toFloat() < viewModel.startAt) {
+            Toast.makeText(context,
+                getString(R.string.clip_end_before_start_warning),
+                Toast.LENGTH_SHORT).show()
         } else {
             viewModel.endAt = (viewModel.currentSecond / 1000).toFloat()
             binding.btnClip.animation = null

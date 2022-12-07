@@ -201,9 +201,7 @@ object NoteRemoteDataSource : DataSource {
             val doc = notes.document()
 
             note.id = doc.id
-
             note.source = source
-
             note.lastEditTime = Calendar.getInstance().timeInMillis
 
             doc
@@ -602,7 +600,7 @@ object NoteRemoteDataSource : DataSource {
             val newInvitation = Invitation(
                 id = doc.id,
                 note = note,
-                inviterId = note.ownerId,
+                inviterId = note.ownerId!!,
                 inviteeId = inviteeId,
                 time = Calendar.getInstance().timeInMillis
             )
