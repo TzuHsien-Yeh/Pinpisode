@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.DialogFragment
 import com.tzuhsien.pinpisode.R
@@ -38,25 +37,14 @@ class LoadingDialog : AppCompatDialogFragment() {
                 }
                 false -> {
                     Timber.d("ERROR")
-                } // show pic to notify error
+                }
             }
         }
-
-        val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
-
-//        Glide.with(binding.imgLoading)
-//            .load(R.raw.pinpisode_logo_with_text)
-//            .into(binding.imgLoading)
-
-//        binding.imgLoading.apply {
-//            startAnimation(animation)
-//        }
 
         return binding.root
     }
 
     override fun dismiss() {
-//        Handler().postDelayed({ super.dismiss() }, 500)
         super.dismiss()
         Timber.d("loading dialog dismissed")
     }

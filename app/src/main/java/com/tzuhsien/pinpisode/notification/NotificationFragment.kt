@@ -8,6 +8,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.FragmentNotificationBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
@@ -44,7 +45,9 @@ class NotificationFragment : Fragment() {
         viewModel.status.observe(viewLifecycleOwner) {
             when(it) {
                 LoadApiStatus.LOADING -> {
-                    findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    }
                 }
                 LoadApiStatus.DONE -> {
                     requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",

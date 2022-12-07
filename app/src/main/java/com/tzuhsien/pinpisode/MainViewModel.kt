@@ -1,6 +1,5 @@
 package com.tzuhsien.pinpisode
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -34,7 +33,6 @@ class MainViewModel(private val repository: Repository): ViewModel() {
 
     init {
         Timber.d("Timber init: ${UserManager.userId}")
-        Log.d("Log: [${this::class.simpleName}]", " init: ${UserManager.userId}")
     }
 
     override fun onCleared() {
@@ -59,17 +57,14 @@ class MainViewModel(private val repository: Repository): ViewModel() {
                     is Result.Fail -> {
                         _error.value = currentUserResult.error
                         _status.value = LoadApiStatus.ERROR
-                        null
                     }
                     is Result.Error -> {
                         _error.value = currentUserResult.exception.toString()
                         _status.value = LoadApiStatus.ERROR
-                        null
                     }
                     else -> {
                         _error.value = MyApplication.instance.getString(R.string.unknown_error)
                         _status.value = LoadApiStatus.ERROR
-                        null
                     }
                 }
             }

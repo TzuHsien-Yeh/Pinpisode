@@ -8,7 +8,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.tzuhsien.pinpisode.MyApplication.Companion.applicationContext
@@ -16,6 +15,7 @@ import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentProfileBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.ext.glide
 import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.signin.SignInFragmentDirections
@@ -36,9 +36,7 @@ class ProfileFragment : Fragment() {
         Timber.d("${UserManager.userId},${UserManager.userName},${UserManager.userEmail},${UserManager.userPic}")
         binding.textUserName.text = UserManager.userName
         binding.textUserEmail.text = UserManager.userEmail
-        Glide.with(binding.imgProfilePic)
-            .load(UserManager.userPic)
-            .into(binding.imgProfilePic)
+        binding.imgProfilePic.glide(UserManager.userPic)
 
         binding.logOut.setOnClickListener {
             GoogleSignIn.getClient(applicationContext(), GoogleSignInOptions.DEFAULT_SIGN_IN).signOut()

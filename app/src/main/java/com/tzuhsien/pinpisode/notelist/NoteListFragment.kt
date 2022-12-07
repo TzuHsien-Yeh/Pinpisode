@@ -11,7 +11,6 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
-import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
@@ -19,6 +18,7 @@ import com.tzuhsien.pinpisode.data.model.Sort
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentNoteListBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.ext.glide
 import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.notification.NotificationFragmentDirections
@@ -158,9 +158,7 @@ class NoteListFragment : Fragment() {
          *  Navigation
          * */
         // Profile page
-        Glide.with(binding.imgPicToProfile)
-            .load(UserManager.userPic)
-            .into(binding.imgPicToProfile)
+        binding.imgPicToProfile.glide(UserManager.userPic)
         binding.textUserName.text = UserManager.userName
         binding.imgPicToProfile.setOnClickListener {
             findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToProfileFragment())

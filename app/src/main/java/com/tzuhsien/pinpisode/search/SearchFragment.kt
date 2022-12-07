@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
 import com.google.android.material.tabs.TabLayoutMediator
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
@@ -24,6 +23,7 @@ import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSearchBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.ext.glide
 import com.tzuhsien.pinpisode.ext.utcToLocalTime
 import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
@@ -89,9 +89,7 @@ class SearchFragment : Fragment() {
                     binding.textSearchResult.visibility = View.VISIBLE
                     binding.cardSingleVideoResult.visibility = View.VISIBLE
                     binding.textTitle.text = item.snippet.title
-                    Glide.with(this)
-                        .load(item.snippet.thumbnails.high.url)
-                        .into(binding.imgThumbnail)
+                    binding.imgThumbnail.glide(item.snippet.thumbnails.high.url)
                     binding.textChannelName.text = item.snippet.channelTitle
                     binding.textPublishedTime.text = item.snippet.publishedAt.utcToLocalTime()
                     viewModel.ytSingleResultId = item.id // video sourceId
@@ -117,16 +115,13 @@ class SearchFragment : Fragment() {
                 binding.textSpotifySourceTitle.text = it.name
                 binding.textSpotifyShow.text = it.show?.name
                 binding.textSpotifyPublisher.text = it.show?.publisher
-                Glide.with(binding.imgSpotifySource)
-                    .load(it.images[0].url)
-                    .into(binding.imgSpotifySource)
+                binding.imgSpotifySource.glide(it.images[0].url)
                 viewModel.spotifySingleResultId = it.uri.extractSpotifySourceId()
 
                 // Hide other views
                 hideRecommendationViews()
                 binding.cardSingleVideoResult.visibility = View.GONE
                 binding.tabLayoutSearchResults.visibility = View.GONE
-
             }
         }
 

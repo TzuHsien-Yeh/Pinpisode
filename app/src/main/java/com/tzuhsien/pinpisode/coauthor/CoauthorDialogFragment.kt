@@ -11,11 +11,11 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentCoauthorDialogBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.ext.glide
 import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.notelist.NoteListFragmentDirections
@@ -43,9 +43,7 @@ class CoauthorDialogFragment : DialogFragment() {
         }
 
         viewModel.noteOwner.observe(viewLifecycleOwner) {
-            Glide.with(binding.imgOwnerPic)
-                .load(it?.pic)
-                .into(binding.imgOwnerPic)
+            binding.imgOwnerPic.glide(it.pic)
         }
 
         binding.textCoauthors.text = when (viewModel.note.authors.size) {
@@ -96,9 +94,8 @@ class CoauthorDialogFragment : DialogFragment() {
                 binding.viewGroupUserSearchResult.visibility = View.VISIBLE
                 binding.textSearchResultName.text = it.name
                 binding.textSearchResultEmail.text = it.email
-                Glide.with(binding.imgSearchResultPic)
-                    .load(it.pic)
-                    .into(binding.imgSearchResultPic)
+
+                 binding.imgSearchResultPic.glide(it.pic)
 
                  binding.textResultMsg.visibility = View.GONE
             }

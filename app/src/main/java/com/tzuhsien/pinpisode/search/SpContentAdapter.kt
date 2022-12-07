@@ -5,27 +5,19 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.SpotifyItem
 import com.tzuhsien.pinpisode.databinding.ItemSpotifyLatestContentBinding
+import com.tzuhsien.pinpisode.ext.glide
 
 class SpContentAdapter(
     private val uiState: SearchUiState
 ): ListAdapter<SpotifyItem, SpContentAdapter.SpotifyItemViewHolder>(DiffCallback) {
     class SpotifyItemViewHolder(private val binding: ItemSpotifyLatestContentBinding): RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: SpotifyItem, uiState: SearchUiState){
+        fun bind(item: SpotifyItem){
 
             if (item.images.isNotEmpty()) {
-                Glide.with(binding.imgThumbnail)
-                    .load(item.images[0].url)
-                    .apply(
-                        RequestOptions
-                            .placeholderOf(R.drawable.app_icon)
-                            .error(R.drawable.app_icon)
-                    )
-                    .into(binding.imgThumbnail)
+                binding.imgThumbnail.glide(item.images[0].url)
                 binding.imgThumbnail.alpha = 1F
             } else {
                 binding.imgThumbnail.setImageResource(R.drawable.app_icon)
@@ -55,8 +47,8 @@ class SpContentAdapter(
 
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SpContentAdapter.SpotifyItemViewHolder {
-        return SpContentAdapter.SpotifyItemViewHolder(ItemSpotifyLatestContentBinding.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SpotifyItemViewHolder {
+        return SpotifyItemViewHolder(ItemSpotifyLatestContentBinding.inflate(
             LayoutInflater.from(parent.context), parent, false)
         )
     }
@@ -66,6 +58,6 @@ class SpContentAdapter(
         holder.itemView.setOnClickListener {
             uiState.onSpotifyLatestContentClick(item)
         }
-        holder.bind(item, uiState)
+        holder.bind(item)
     }
 }

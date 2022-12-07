@@ -5,11 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.SpotifyItem
 import com.tzuhsien.pinpisode.databinding.ItemSpotifySearchResultBinding
+import com.tzuhsien.pinpisode.ext.glide
 
 class SpotifySearchResultAdapter(
     private val uiState: SearchResultUiState
@@ -18,23 +17,9 @@ class SpotifySearchResultAdapter(
         fun bind(resultItem: SpotifyItem){
 
             if (resultItem.images.isNotEmpty()) {
-                Glide.with(binding.imgThumbnail)
-                    .load(resultItem.images[0].url)
-                    .apply(
-                        RequestOptions
-                            .placeholderOf(R.drawable.app_icon)
-                            .error(R.drawable.app_icon)
-                    )
-                    .into(binding.imgThumbnail)
+                binding.imgThumbnail.glide(resultItem.images[0].url)
             } else if (!resultItem.album?.images.isNullOrEmpty()) {
-                Glide.with(binding.imgThumbnail)
-                    .load(resultItem.album!!.images[0].url)
-                    .apply(
-                        RequestOptions
-                            .placeholderOf(R.drawable.app_icon)
-                            .error(R.drawable.app_icon)
-                    )
-                    .into(binding.imgThumbnail)
+                binding.imgThumbnail.glide(resultItem.album!!.images[0].url)
             } else {
                 binding.imgThumbnail.setImageResource(R.drawable.app_icon)
             }
@@ -48,14 +33,8 @@ class SpotifySearchResultAdapter(
                 artistList.toString()
             } else { "" }
 
-            binding.textType.text = when (resultItem.type) {
-                "episode" -> "Podcast"
-                "track" -> "Song"
-                else -> ""
-            }
         }
     }
-
 
     companion object DiffCallback : DiffUtil.ItemCallback<SpotifyItem>() {
         override fun areItemsTheSame(oldItem: SpotifyItem, newItem: SpotifyItem): Boolean {
@@ -69,13 +48,13 @@ class SpotifySearchResultAdapter(
 
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SpotifySearchResultAdapter.SpResultViewHolder {
-        return SpotifySearchResultAdapter.SpResultViewHolder(ItemSpotifySearchResultBinding.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SpResultViewHolder {
+        return SpResultViewHolder(ItemSpotifySearchResultBinding.inflate(
             LayoutInflater.from(parent.context), parent, false)
         )
     }
 
-    override fun onBindViewHolder(holder: SpotifySearchResultAdapter.SpResultViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: SpResultViewHolder, position: Int) {
         val item = getItem(position)
         holder.itemView.setOnClickListener {
             uiState.onSpotifyItemClick(item)

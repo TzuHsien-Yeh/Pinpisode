@@ -5,17 +5,15 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.tzuhsien.pinpisode.data.model.UserInfo
 import com.tzuhsien.pinpisode.databinding.ItemAuthorBinding
+import com.tzuhsien.pinpisode.ext.glide
 
 class AuthorAdapter: ListAdapter<UserInfo, AuthorAdapter.AuthorViewHolder>(DiffCallback) {
 
     class AuthorViewHolder(private val binding: ItemAuthorBinding): RecyclerView.ViewHolder(binding.root){
         fun bind(user: UserInfo){
-            Glide.with(binding.imgAuthorPic)
-                .load(user.pic)
-                .into(binding.imgAuthorPic)
+            binding.imgAuthorPic.glide(user.pic)
         }
     }
     companion object DiffCallback : DiffUtil.ItemCallback<UserInfo>() {

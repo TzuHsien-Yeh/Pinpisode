@@ -7,10 +7,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Note
 import com.tzuhsien.pinpisode.databinding.ItemNoteBinding
+import com.tzuhsien.pinpisode.ext.glide
 
 class NoteAdapter (
     private val uiState: NoteListUiState
@@ -19,9 +19,7 @@ class NoteAdapter (
     class NoteViewHolder(private val binding: ItemNoteBinding) : RecyclerView.ViewHolder(binding.root){
         fun bind(note: Note, uiState: NoteListUiState) {
             val context = binding.root.context
-            Glide.with(binding.imgThumbnail)
-                .load(note.thumbnail)
-                .into(binding.imgThumbnail)
+            binding.imgThumbnail.glide(note.thumbnail)
             binding.textSourceTitle.text = note.title
             binding.textDigest.text = note.digest
             val timeAgo = DateUtils.getRelativeTimeSpanString(note.lastEditTime)
