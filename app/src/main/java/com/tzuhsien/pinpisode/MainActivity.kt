@@ -12,13 +12,15 @@ import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.tzuhsien.pinpisode.data.source.local.UserManager
+import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.databinding.ActivityMainBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.extractYoutubeVideoId
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.guide.NoteListGuideFragmentDirections
 import com.tzuhsien.pinpisode.notelist.NoteListFragmentDirections
 import com.tzuhsien.pinpisode.signin.SignInFragmentDirections
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
@@ -30,16 +32,17 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MainViewModel> { getVmFactory() }
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        /** Read intent data **/
 
+        /** Read intent data **/
         Timber.d("onNewIntent CALLED")
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
         intent?.data?.let {
-            if (it.toString().contains("http://pinpisode/")) {
+            if (it.toString().contains(getString(R.string.pinpisode_uri))) {
                 navController.handleDeepLink(intent)
                 Timber.d("[onNewIntent] handleDeepLink called")
             }
@@ -47,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
         intent?.extras?.let {
             handleIntent(it)
-            Timber.d("[onNewIntent] handleIntent called: extra = ${it.toString()}")
+            Timber.d("[onNewIntent] handleIntent called: extra = $it")
         }
     }
 
@@ -61,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             Timber.plant(Timber.DebugTree())
         }
 
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        navController = findNavController(R.id.nav_host_fragment_activity_main)
 
         /** Read intent data if the activity has not been created when getting intent from other app **/
         Timber.d("onCreate CALLED")
@@ -70,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
         if (null != intent) {
             intent.data?.let {
-                if (it.toString().contains("http://pinpisode/")) {
+                if (it.toString().contains(getString(R.string.pinpisode_uri))) {
                     navController.handleDeepLink(intent)
                     Timber.d("[onCreate] handleDeepLink called")
                 }
@@ -89,6 +92,7 @@ class MainActivity : AppCompatActivity() {
         binding.toolbar.navigationIcon = null
         binding.toolbarText.text = getString(R.string.pin_your_episodes)
 
+
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             when (destination.id) {
 
@@ -96,29 +100,50 @@ class MainActivity : AppCompatActivity() {
                     binding.toolbar.visibility = View.VISIBLE
                     binding.toolbar.navigationIcon = null
                     binding.toolbarText.text = getString(R.string.pin_your_episodes)
+                    binding.helperIcon.visibility = View.VISIBLE
+                    binding.helperIcon.setOnClickListener {
+                        if (navController.currentDestination?.id != R.id.noteListGuideFragment) {
+                            controller.navigate(NoteListGuideFragmentDirections.actionGlobalNoteListGuideFragment())
+                        }
+                    }
                 }
 
                 R.id.searchFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.helperIcon.visibility = View.GONE
+                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+                    binding.toolbar.navigationIcon?.apply {
+                        alpha = 130
+                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
+                    }
+
                     binding.toolbar.setNavigationOnClickListener {
-                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                        onBackPressed()
                     }
                     binding.toolbarText.text = getString(R.string.find_your_episodes)
                 }
 
                 R.id.profileFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.helperIcon.visibility = View.GONE
+                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+                    binding.toolbar.navigationIcon?.apply {
+                        alpha = 130
+                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
+                    }
                     binding.toolbar.setNavigationOnClickListener {
-                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                        onBackPressed()
                     }
                     binding.toolbarText.text = getString(R.string.profile)
                 }
 
                 R.id.youTubeNoteFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+                    binding.toolbar.navigationIcon?.apply {
+                        alpha = 130
+                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
+                    }
                     binding.toolbar.setNavigationOnClickListener {
                         navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
                     }
@@ -127,7 +152,11 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.spotifyNoteFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+                    binding.toolbar.navigationIcon?.apply {
+                        alpha = 130
+                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
+                    }
                     binding.toolbar.setNavigationOnClickListener {
                         navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
                     }
@@ -142,7 +171,12 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.notificationFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.icons_24px_back02)
+                    binding.helperIcon.visibility = View.GONE
+                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+                    binding.toolbar.navigationIcon?.apply {
+                        alpha = 130
+                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
+                    }
                     binding.toolbar.setNavigationOnClickListener {
                         navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
                     }
@@ -152,6 +186,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    override fun onBackPressed() {
+        navController.navigateUp()
     }
 
     /**
@@ -185,49 +223,93 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleIntent(intentExtras: Bundle) {
 
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        navController = findNavController(R.id.nav_host_fragment_activity_main)
 
-        /**
-         * Check and handle sign in status
-         * */
-        if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
-            Timber.d("[${this::class.simpleName}]: null == GoogleSignIn.getLastSignedInAccount(applicationContext)")
-            navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment())
-        } else {
-            viewModel.updateLocalUserId()
-        }
+        intentExtras.getString(Intent.EXTRA_TEXT)?.let { extra ->
+            if (extra.contains("spotify")) {
+                // Handle Spotify intent
+                val sourceId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
 
-        if (UserManager.userId != null) {
-            intentExtras.getString(Intent.EXTRA_TEXT)?.let { extra ->
-                if (extra.contains("spotify")) {
-                    // Handle Spotify intent
-
-                    val sourceId =
-                        intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
-                    sourceId?.let { it ->
-
-                        Timber.d("HANDLE spotify INTENT FUN intent extras : $it")
-
+                sourceId?.let { it ->
+                    Timber.d("intentExtras.getString(Intent.EXTRA_TEXT)sourceId = $sourceId")
+                    /** Check and handle sign in status **/
+                    if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
+                        navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment(
+                            source = Source.SPOTIFY.source,
+                            sourceId = it
+                        ))
+                    } else {
+                        viewModel.updateLocalUserId()
                         navController.navigate(
                             SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
                                 sourceIdKey = it)
                         )
                     }
+                }
 
-                } else {
-                    // Handle YouTube intent
-                    val videoId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
-                    videoId?.let {
-                        Timber.d("HANDLE youtube INTENT FUN intent extras : $it")
+            } else {
+                // Handle YouTube intent
+                val videoId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
 
+                videoId?.let {
+                    Timber.d("HANDLE youtube INTENT FUN intent extras : $it")
+                    /** Check and handle sign in status **/
+                    if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
+                        navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment(
+                            source = Source.YOUTUBE.source,
+                            sourceId = it
+                        ))
+                    } else {
+                        viewModel.updateLocalUserId()
                         navController.navigate(
-                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = it)
+                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
+                                videoIdKey = it)
                         )
                     }
                 }
-
             }
-        }
 
+//        /**
+//         * Check and handle sign in status
+//         * */
+//        if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
+//            Timber.d("[${this::class.simpleName}]: null == GoogleSignIn.getLastSignedInAccount(applicationContext)")
+//            navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment())
+//        } else {
+//            viewModel.updateLocalUserId()
+//        }
+//
+//        if (UserManager.userId != null) {
+//            intentExtras.getString(Intent.EXTRA_TEXT)?.let { extra ->
+//                if (extra.contains("spotify")) {
+//                    // Handle Spotify intent
+//
+//                    val sourceId =
+//                        intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
+//                    sourceId?.let { it ->
+//
+//                        Timber.d("HANDLE spotify INTENT FUN intent extras : $it")
+//
+//                        navController.navigate(
+//                            SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+//                                sourceIdKey = it)
+//                        )
+//                    }
+//
+//                } else {
+//                    // Handle YouTube intent
+//                    val videoId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
+//                    videoId?.let {
+//                        Timber.d("HANDLE youtube INTENT FUN intent extras : $it")
+//
+//                        navController.navigate(
+//                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = it)
+//                        )
+//                    }
+//                }
+//
+//            }
+//        }
+        }
     }
 }

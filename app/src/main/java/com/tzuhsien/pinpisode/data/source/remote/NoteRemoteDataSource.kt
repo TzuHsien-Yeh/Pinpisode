@@ -18,6 +18,7 @@ import com.tzuhsien.pinpisode.network.SpotifyApi
 import com.tzuhsien.pinpisode.network.YouTubeApi
 import com.tzuhsien.pinpisode.util.Util.getString
 import com.tzuhsien.pinpisode.util.Util.isInternetConnected
+import retrofit2.HttpException
 import timber.log.Timber
 import java.util.*
 import kotlin.coroutines.resume
@@ -200,9 +201,7 @@ object NoteRemoteDataSource : DataSource {
             val doc = notes.document()
 
             note.id = doc.id
-
             note.source = source
-
             note.lastEditTime = Calendar.getInstance().timeInMillis
 
             doc
@@ -601,7 +600,7 @@ object NoteRemoteDataSource : DataSource {
             val newInvitation = Invitation(
                 id = doc.id,
                 note = note,
-                inviterId = note.ownerId,
+                inviterId = note.ownerId!!,
                 inviteeId = inviteeId,
                 time = Calendar.getInstance().timeInMillis
             )
@@ -798,12 +797,27 @@ object NoteRemoteDataSource : DataSource {
             )
 
             Timber.d("getSpotifyEpisodeInfo: $result")
+            if (result.uri.isEmpty()) {
+                Result.Fail(MyApplication.applicationContext().getString(R.string.episode_not_found))
+            }
 
             Result.Success(result)
 
-        } catch (e: Exception) {
-            Timber.w(" exception=${e.message}")
-            Result.Error(e)
+        } catch (e: HttpException) {
+            when(e.code()) {
+                401 -> {
+                    Result.SpotifyAuthError(true)
+                }
+                429 -> {
+                    Result.Fail("The app has exceeded its rate limits.")
+                }
+                403 -> {
+                    Result.Fail("Bad OAuth request. Contact Pinpisode developer")
+                }
+                else -> {
+                    Result.Fail("Unknown error")
+                }
+            }
         }
     }
 
@@ -821,9 +835,21 @@ object NoteRemoteDataSource : DataSource {
             )
             Result.Success(result)
 
-        } catch (e: Exception) {
-            Timber.w(" exception=${e.message}")
-            Result.Error(e)
+        } catch (e: HttpException) {
+            when(e.code()) {
+                401 -> {
+                    Result.SpotifyAuthError(true)
+                }
+                429 -> {
+                    Result.Fail("The app has exceeded its rate limits.")
+                }
+                403 -> {
+                    Result.Fail("Bad OAuth request. Contact Pinpisode developer")
+                }
+                else -> {
+                    Result.Fail("Unknown error")
+                }
+            }
         }
     }
 
@@ -839,12 +865,33 @@ object NoteRemoteDataSource : DataSource {
             )
             result.error?.let {
                 Result.Fail(it.message)
+                Timber.d("getUserSavedShows: result.error = Result.Fail(${it.message})")
             }
             Result.Success(result)
 
-        } catch (e: Exception) {
-            Timber.w(" exception=${e.message}, ${e.localizedMessage}, ${e.cause}, ${e.stackTrace} ")
-            Result.Error(e)
+        } catch (exception: HttpException) {
+            exception.code()
+
+            Timber.d("getUserSavedShows: exception.code() = ${exception.code()}")
+            Timber.d("getUserSavedShows: exception.response()?.code() = ${exception.response()?.code()}")
+
+            Timber.d("getUserSavedShows: exception.response().errorBody() = ${exception.response()?.errorBody()}")
+            Timber.d("getUserSavedShows: exception.response().body() = ${exception.response()?.body()}")
+
+            when(exception.code()) {
+                401 -> {
+                    Result.SpotifyAuthError(true)
+                }
+                429 -> {
+                    Result.Fail("The app has exceeded its rate limits.")
+                }
+                403 -> {
+                    Result.Fail("Bad OAuth request. Contact Pinpisode developer")
+                }
+                else -> {
+                    Result.Fail("Unknown error")
+                }
+            }
         }
     }
 
@@ -861,9 +908,21 @@ object NoteRemoteDataSource : DataSource {
             )
             Result.Success(result)
 
-        } catch (e: Exception) {
-            Timber.w(" exception=${e.message}")
-            Result.Error(e)
+        } catch (e: HttpException) {
+            when(e.code()) {
+                401 -> {
+                    Result.SpotifyAuthError(true)
+                }
+                429 -> {
+                    Result.Fail("The app has exceeded its rate limits.")
+                }
+                403 -> {
+                    Result.Fail("Bad OAuth request. Contact Pinpisode developer")
+                }
+                else -> {
+                    Result.Fail("Unknown error")
+                }
+            }
         }
     }
 

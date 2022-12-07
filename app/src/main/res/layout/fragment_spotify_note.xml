@@ -20,6 +20,18 @@
             android:src="@drawable/app_icon"/>
 
     <TextView
+        android:id="@+id/error_msg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        style="@style/yt_bold_17sp"
+        android:textAlignment="textStart"
+        android:layout_marginHorizontal="@dimen/standard"
+        tools:text="faueaiohojahvjaev"
+        app:layout_constraintTop_toTopOf="@id/img_cover_art"
+        app:layout_constraintStart_toEndOf="@id/img_cover_art"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
         android:id="@+id/text_source_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -144,7 +156,7 @@
         android:maxLength="35"
         android:maxLines="1"
         android:inputType="text"
-        android:hint="@string/input_video_summary"
+        android:hint="@string/input_summary"
         style="@style/source_title_style"
         android:background="@color/transparent"
         app:layout_constraintStart_toEndOf="@+id/ic_decoration"

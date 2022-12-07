@@ -3,6 +3,27 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/drawable/bg_searchview.xml" value="0.2735" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/drawable/bg_small_radius_rounded_corner.xml" value="0.171" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/activity_main.xml" value="0.33" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/chip_tag.xml" value="0.22083333333333333" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/custom_snack_bar.xml" value="0.4574961360123648" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/dialog_loading.xml" value="0.24334600760456274" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/dialog_note_list_guide.xml" value="0.1" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/dialog_tag.xml" value="0.22083333333333333" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_note_list.xml" value="0.19635416666666666" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_note_list_guide.xml" value="0.10833333333333334" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_note_list_tutorial.xml" value="0.19635416666666666" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_search.xml" value="0.19519927536231885" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_search_result.xml" value="0.11246200607902736" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_spotify_note.xml" value="0.24682971014492755" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_youtube_note.xml" value="0.17552083333333332" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/item_note.xml" value="0.3453125" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/item_spotify_latest_content.xml" value="0.1947463768115942" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/item_tag.xml" value="0.42552083333333335" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/item_yt_trending.xml" value="0.19519927536231885" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/mipmap-anydpi-v26/launcher.xml" value="0.1" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/mipmap-anydpi-v26/launcher_round.xml" value="0.1" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable-v24/bg_dialog_corner.xml" value="0.242" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable-v24/button_dialog_close_ripple.xml" value="0.242" />
         <entry key="..\:/AndroidProjects/imMediAt/app/src/main/res/drawable/bg_dialog.xml" value="0.171" />

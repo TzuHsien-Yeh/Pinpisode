@@ -18,12 +18,15 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSearchBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.utcToLocalTime
+import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.search.result.ViewPagerAdapter
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.pinpisode.youtubenote.YouTubeNoteFragmentDirections
@@ -64,7 +67,7 @@ class SearchFragment : Fragment() {
             if (null != it) {
                 binding.textResourceNotFound.text = it
                 binding.textResourceNotFound.visibility = View.VISIBLE
-
+                hideRecommendationViews()
                 Timber.d("not available")
             } else {
                 binding.textResourceNotFound.visibility = View.GONE
@@ -162,6 +165,11 @@ class SearchFragment : Fragment() {
             ytTrendingAdapter.submitList(it)
         }
 
+        viewModel.showSpotifyAuthView.observe(viewLifecycleOwner) {
+            binding.viewGroupSpNotAuthorized.visibility =
+                if (it) View.VISIBLE else if (UserManager.userSpotifyAuthToken.isEmpty()) View.VISIBLE else View.GONE
+        }
+
         // Check if Spotify auth token available and if the user want to auth
         viewModel.isAuthRequired.observe(viewLifecycleOwner) {
             when (it) {
@@ -221,6 +229,25 @@ class SearchFragment : Fragment() {
                     )
                 )
                 viewModel.doneNavigation()
+            }
+        }
+
+        /** Loading status **/
+        viewModel.status.observe(viewLifecycleOwner) {
+            when(it) {
+                LoadApiStatus.LOADING -> {
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    }
+                }
+                LoadApiStatus.DONE -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to true))
+                }
+                LoadApiStatus.ERROR -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to false))
+                }
             }
         }
 
@@ -320,11 +347,14 @@ class SearchFragment : Fragment() {
                 showLoginActivityToken.launch(getLoginActivityTokenIntent(authorizationResponse.code))
             }
             AuthorizationResponse.Type.ERROR -> {
+                binding.viewGroupSpNotAuthorized.visibility = View.VISIBLE
                 Timber.d("AuthorizationResponse.Type.ERROR")
             }
             // Handle the Error
 
-            else -> {}
+            else -> {
+                binding.viewGroupSpNotAuthorized.visibility = View.VISIBLE
+            }
             // Probably interruption
         }
     }

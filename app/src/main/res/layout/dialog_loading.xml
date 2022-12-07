@@ -20,9 +20,10 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/img_loading"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:src="@drawable/app_icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/bird"
+        app:tint="@color/audio_player_color_to_theme"
         app:shapeAppearanceOverlay="@style/circle"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

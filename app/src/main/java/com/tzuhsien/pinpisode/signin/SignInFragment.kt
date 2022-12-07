@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -20,9 +21,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.FragmentSignInBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.guide.NoteListGuideFragmentDirections
+import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.network.LoadApiStatus
 import timber.log.Timber
 
 
@@ -41,7 +46,6 @@ class SignInFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-
         // Build a GoogleSignInClient with the options specified by gso.
         googleSignInClient = GoogleSignIn.getClient(requireContext(), getGSO())
 
@@ -54,9 +58,52 @@ class SignInFragment : Fragment() {
         binding.btnSignIn.setOnClickListener { signIn() }
         auth = Firebase.auth
 
+        viewModel.source = SignInFragmentArgs.fromBundle(requireArguments()).source
+        viewModel.sourceId = SignInFragmentArgs.fromBundle(requireArguments()).sourceId
+
+        Timber.d("source: ${viewModel.source}, sourceId: ${viewModel.sourceId}")
+
         viewModel.navigateUp.observe(viewLifecycleOwner) {
+            Timber.d("viewModel.navigateUp: $it")
+            if (it) {
+                findNavController().navigate(NavGraphDirections.actionGlobalNoteListFragment())
+                viewModel.doneNavigation()
+            }
+        }
+
+        viewModel.navigateToYtNote.observe(viewLifecycleOwner) {
+            Timber.d("navigateToYtNote: $it")
             it?.let {
-                findNavController().navigate(SignInFragmentDirections.actionGlobalNoteListFragment())
+                findNavController().navigate(NavGraphDirections.actionGlobalYouTubeNoteFragment(videoIdKey = it))
+                viewModel.doneNavigation()
+            }
+        }
+
+        viewModel.navigateToSpNote.observe(viewLifecycleOwner) {
+
+            Timber.d("navigateToSpNote: $it")
+            it?.let {
+                findNavController().navigate(NavGraphDirections.actionGlobalSpotifyNoteFragment(sourceIdKey = it))
+                viewModel.doneNavigation()
+            }
+        }
+
+        /** Loading status **/
+        viewModel.status.observe(viewLifecycleOwner) {
+            when(it) {
+                LoadApiStatus.LOADING -> {
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    }
+                }
+                LoadApiStatus.DONE -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to true))
+                }
+                LoadApiStatus.ERROR -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to false))
+                }
             }
         }
 
@@ -121,6 +168,11 @@ class SignInFragment : Fragment() {
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
                     viewModel.updateUser(task.result.user!!, account)
+
+                    if (task.result.additionalUserInfo?.isNewUser == true) {
+                        findNavController().navigate(NoteListGuideFragmentDirections.actionGlobalNoteListGuideFragment())
+                    }
+
                 } else {
                     //handle error
                     Timber.d("firebaseAuthWithGoogle: Failed!")

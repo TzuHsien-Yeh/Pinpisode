@@ -7,14 +7,18 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.chip.Chip
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.DialogTagBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.network.LoadApiStatus
 import timber.log.Timber
 
 
@@ -49,7 +53,7 @@ class TagDialogFragment : AppCompatDialogFragment() {
         }
 
         binding.editAddNewTag.doAfterTextChanged {
-            viewModel.inputNewTag = it.toString()
+            viewModel.inputNewTag = it.toString().trim()
         }
         binding.btnAddNewTag.setOnClickListener {
             if (!viewModel.inputNewTag.isNullOrEmpty()) {
@@ -83,6 +87,25 @@ class TagDialogFragment : AppCompatDialogFragment() {
                 viewModel.onLeaveCompleted()
             }
         })
+
+        /** Loading status **/
+        viewModel.status.observe(viewLifecycleOwner) {
+            when(it) {
+                LoadApiStatus.LOADING -> {
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    }
+                }
+                LoadApiStatus.DONE -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to true))
+                }
+                LoadApiStatus.ERROR -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to false))
+                }
+            }
+        }
 
         return binding.root
     }

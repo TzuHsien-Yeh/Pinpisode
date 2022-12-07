@@ -22,6 +22,13 @@
         <item name="android:animation">@null</item>
     </style>
 
+    <style name="GuideDialog">
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+        <item name="android:windowBackground">@color/translucent</item>
+        <item name="android:animation">@null</item>
+    </style>
+
     <style name="ChipCustomStyle" parent="@style/Widget.MaterialComponents.Chip.Choice">
         <item name="chipBackgroundColor">@color/chip_background_color_selector</item>
         <item name="android:textColor">@color/chip_text_color_selector</item>

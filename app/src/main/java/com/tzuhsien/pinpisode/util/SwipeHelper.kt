@@ -9,12 +9,14 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import timber.log.Timber
 import java.util.*
 import kotlin.math.abs
-import kotlin.math.max
+
 
 abstract class SwipeHelper(
-    private val recyclerView: RecyclerView
+    private val recyclerView: RecyclerView,
+    private val swipeOutListener: OnSwipeOutListener,
 ) : ItemTouchHelper.SimpleCallback(
     ItemTouchHelper.ACTION_STATE_IDLE,
     ItemTouchHelper.LEFT
@@ -27,6 +29,7 @@ abstract class SwipeHelper(
             return super.add(element)
         }
     }
+
 
     @SuppressLint("ClickableViewAccessibility")
     private val touchListener = View.OnTouchListener { _, event ->
@@ -43,9 +46,11 @@ abstract class SwipeHelper(
     }
 
     private fun recoverSwipedItem() {
+        Timber.d("recoverSwipedItem")
         while (!recoverQueue.isEmpty()) {
             val position = recoverQueue.poll() ?: return
             recyclerView.adapter?.notifyItemChanged(position)
+            Timber.d("recoverSwipedItem, recoverQueue = $position")
         }
     }
 
@@ -53,18 +58,23 @@ abstract class SwipeHelper(
         canvas: Canvas,
         buttons: List<UnderlayButton>,
         itemView: View,
-        dX: Float
+        dX: Float,
     ) {
         var right = itemView.right
+        Timber.d("itemView.right = ${itemView.right}")
         buttons.forEach { button ->
+            Timber.d("width = ${button.intrinsicWidth / buttons.intrinsicWidth() * abs(dX)}")
+            Timber.d("button.intrinsicWidth: ${button.intrinsicWidth}/buttons.intrinsicWidth(): ${buttons.intrinsicWidth()}")
             val width = button.intrinsicWidth / buttons.intrinsicWidth() * abs(dX)
             val left = right - width
+            Timber.d("left = $left")
             button.draw(
                 canvas,
                 RectF(left, itemView.top.toFloat(), right.toFloat(), itemView.bottom.toFloat())
             )
 
             right = left.toInt()
+            Timber.d("right = $right")
         }
     }
 
@@ -75,22 +85,39 @@ abstract class SwipeHelper(
         dX: Float,
         dY: Float,
         actionState: Int,
-        isCurrentlyActive: Boolean
+        isCurrentlyActive: Boolean,
     ) {
         val position = viewHolder.adapterPosition
         var maxDX = dX
         val itemView = viewHolder.itemView
 
+        Timber.w("actionState = $actionState")
+
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+            Timber.d("dX = $dX ")
             if (dX < 0) {
                 if (!buttonsBuffer.containsKey(position)) {
+
+                    Timber.d("!buttonsBuffer.containsKey(position): ${
+                        instantiateUnderlayButton(position)
+                    }")
                     buttonsBuffer[position] = instantiateUnderlayButton(position)
                 }
 
                 val buttons = buttonsBuffer[position] ?: return
                 if (buttons.isEmpty()) return
-                maxDX = max(-buttons.intrinsicWidth(), dX)
-                drawButtons(c, buttons, itemView, maxDX)
+//                maxDX = max(-buttons.intrinsicWidth(), dX)
+
+                drawButtons(c, buttons, itemView, dX)
+
+                Timber.d("position: $position,swipedPosition:  $swipedPosition, viewHolder.adapterPosition: ${viewHolder.adapterPosition} ")
+
+                if (dX == -1080F && !isCurrentlyActive && swipedPosition != -1) {
+                    Timber.d("dX == -1080F && !isCurrentlyActive> position: $position,swipedPosition:  $swipedPosition")
+                    swipeOutListener.onSwipeOut(swipedPosition)
+                    swipedPosition = -1
+                    Timber.d("swipeOutListener.onSwipeOut(swipedPosition)")
+                }
             }
         }
 
@@ -108,8 +135,9 @@ abstract class SwipeHelper(
     override fun onMove(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder,
-        target: RecyclerView.ViewHolder
+        target: RecyclerView.ViewHolder,
     ): Boolean {
+        Timber.d("onMove")
         return false
     }
 
@@ -117,7 +145,16 @@ abstract class SwipeHelper(
         val position = viewHolder.adapterPosition
         if (swipedPosition != position) recoverQueue.add(swipedPosition)
         swipedPosition = position
+
         recoverSwipedItem()
+    }
+
+    override fun isLongPressDragEnabled(): Boolean {
+        return false
+    }
+
+    class OnSwipeOutListener(val swipeOutListener: (position: Int) -> Unit) {
+        fun onSwipeOut(position: Int) = swipeOutListener(position)
     }
 
     abstract fun instantiateUnderlayButton(position: Int): List<UnderlayButton>
@@ -132,11 +169,12 @@ abstract class SwipeHelper(
         private val title: String,
         textSize: Float,
         @ColorRes private val colorRes: Int,
-        private val clickListener: UnderlayButtonClickListener
+        private val clickListener: UnderlayButtonClickListener,
     ) {
         private var clickableRegion: RectF? = null
-        private val textSizeInPixel: Float = textSize * context.resources.displayMetrics.density // dp to px
-        private val horizontalPadding = 50.0f
+        private val textSizeInPixel: Float =
+            textSize * context.resources.displayMetrics.density // dp to px
+        private val horizontalPadding = 100.0f
         val intrinsicWidth: Float
 
         init {
@@ -152,6 +190,7 @@ abstract class SwipeHelper(
         fun draw(canvas: Canvas, rect: RectF) {
             val paint = Paint()
 
+            Timber.d("class UnderlayButton draw")
             // Draw background
             paint.color = ContextCompat.getColor(context, colorRes)
             canvas.drawRect(rect, paint)
@@ -160,7 +199,7 @@ abstract class SwipeHelper(
             paint.color = ContextCompat.getColor(context, android.R.color.white)
             paint.textSize = textSizeInPixel
             paint.typeface = Typeface.DEFAULT_BOLD
-            paint.textAlign = Paint.Align.LEFT
+            paint.textAlign = Paint.Align.CENTER
 
             val titleBounds = Rect()
             paint.getTextBounds(title, 0, title.length, titleBounds)
@@ -172,14 +211,13 @@ abstract class SwipeHelper(
         }
 
         fun handle(event: MotionEvent) {
-            clickableRegion?.let {
-                if (it.contains(event.x, event.y)) {
-                    clickListener.onClick()
-                }
-            }
+//            clickableRegion?.let {
+//                if (it.contains(event.x, event.y)) {
+//                    clickListener.onClick()
+//                }
+//            }
         }
     }
-    //endregion
 }
 
 private fun List<SwipeHelper.UnderlayButton>.intrinsicWidth(): Float {

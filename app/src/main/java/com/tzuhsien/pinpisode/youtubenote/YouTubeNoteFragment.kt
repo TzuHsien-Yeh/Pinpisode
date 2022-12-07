@@ -8,7 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.annotation.NonNull
+import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -30,6 +32,7 @@ import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteService
 import com.tzuhsien.pinpisode.tag.TagDialogFragmentDirections
+import com.tzuhsien.pinpisode.util.SharingLinkGenerator
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import timber.log.Timber
 
@@ -106,19 +109,21 @@ class YouTubeNoteFragment : Fragment() {
                             viewModel.startAt = second
                             viewModel.startOrStopToggle = 1
                             binding.btnClip.apply {
-                                setImageResource(R.drawable.ic_clipping_stop)
                                 startAnimation(animation)
                             }
                             Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
                         }
                         1 -> {
-                            viewModel.endAt = second
+                            if(second < viewModel.startAt) {
+                                Toast.makeText(context, getString(R.string.clip_end_before_start_warning), Toast.LENGTH_SHORT).show()
+                            } else {
+                                viewModel.endAt = second
+                                binding.btnClip.animation = null
+                                viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
+                                viewModel.startOrStopToggle = 0
+                            }
                             Timber.d("btnClip second time clicked, viewModel.endAt = ${viewModel.endAt}")
 
-                            binding.btnClip.setImageResource(R.drawable.ic_clip)
-                            binding.btnClip.animation = null
-                            viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
-                            viewModel.startOrStopToggle = 0
                         }
                     }
                 }
@@ -153,46 +158,26 @@ class YouTubeNoteFragment : Fragment() {
             }
         }
 
-
-        /**
-         *  Edit or read only mode
-         * */
-        viewModel.canEdit.observe(viewLifecycleOwner) {
-            binding.editDigest.isEnabled = it
-            if (it) {
-                binding.editDigest.visibility = View.VISIBLE
-                binding.editDigest.hint = getString(R.string.input_video_summary)
-            } else if (viewModel.noteToBeUpdated?.digest.isNullOrEmpty()) {
-                binding.editDigest.visibility = View.GONE
-            } else {
-                binding.editDigest.visibility = View.VISIBLE
-                binding.editDigest.hint = getString(R.string.input_video_summary)
-            }
-
-            binding.icAddTag.isEnabled = it
-            binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
-            binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
-        }
-
         /**
          *  RecyclerView views
          * */
         // Swipe to delete
         binding.recyclerViewTimeItems.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(binding.recyclerViewTimeItems) {
+        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(
+            binding.recyclerViewTimeItems,
+            swipeOutListener = OnSwipeOutListener {
+                viewModel.deleteTimeItem(it)
+            }
+        ) {
             override fun instantiateUnderlayButton(position: Int): List<UnderlayButton> {
                 val deleteButton = deleteButton(position)
                 return listOf(deleteButton)
             }
         })
-        itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
+//        itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
 
-
-        val adapter = TimeItemAdapter(
-            uiState = viewModel.uiState
-        )
+        val adapter = TimeItemAdapter(uiState = viewModel.uiState)
         binding.recyclerViewTimeItems.adapter = adapter
-
         viewModel.timeItemLiveDataReassigned.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
             if (timeItemLiveDataAssigned == true) {
                 viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer { list ->
@@ -209,11 +194,24 @@ class YouTubeNoteFragment : Fragment() {
                             }
                         }
                     }
-
                 })
             }
         }
 
+        /**
+         *  Edit or read only mode
+         * */
+        viewModel.canEdit.observe(viewLifecycleOwner) {
+            binding.editDigest.isEnabled = it
+            binding.editDigest.hint = if (it) getString(R.string.input_video_summary) else null
+            binding.icAddTag.isEnabled = it
+            binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
+            binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
+            if (it) {
+                // attach swipe to delete helper
+                itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
+            }
+        }
 
         /**
          *  Buttons on the bottom of the page: Toggle the display of timeItems
@@ -265,19 +263,17 @@ class YouTubeNoteFragment : Fragment() {
          *  Buttons on the bottom of the page: Share this note
          * */
         binding.icShare.setOnClickListener {
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                type="text/plain"
-                putExtra(Intent.EXTRA_TEXT, getString(R.string.youtube_note_uri, viewModel.noteId, videoId))
-            }
-            startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
+            shareNoteLink()
+
         }
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
             when(it) {
                 LoadApiStatus.LOADING -> {
-                    findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    }
                 }
                 LoadApiStatus.DONE -> {
                     requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
@@ -291,6 +287,32 @@ class YouTubeNoteFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun shareNoteLink() {
+        SharingLinkGenerator.generateSharingLink(
+                deepLink = "${SharingLinkGenerator.PREFIX}/youtube_note/${viewModel.noteId}/${viewModel.videoId}".toUri(),
+                previewImageLink = viewModel.noteToBeUpdated?.thumbnail?.toUri()
+            ) { generatedLink ->
+            Timber.d("generatedLink = $generatedLink")
+                shareDeepLink(generatedLink)
+            }
+    }
+
+    private fun shareDeepLink(deepLink: String) {
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "text/plain"
+            putExtra(
+                Intent.EXTRA_SUBJECT,
+                getString(R.string.share_msg_subject,
+                    "YouTube video",
+                    viewModel.noteToBeUpdated?.title)
+            )
+            putExtra(Intent.EXTRA_TEXT, deepLink)
+        }
+
+        startActivity(Intent.createChooser(intent, null))
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -313,7 +335,7 @@ class YouTubeNoteFragment : Fragment() {
         return SwipeHelper.UnderlayButton(
             MyApplication.applicationContext(),
             getString(R.string.delete),
-            14.0f,
+            15.0f,
             android.R.color.holo_red_light,
             object : SwipeHelper.UnderlayButtonClickListener {
                 override fun onClick() {

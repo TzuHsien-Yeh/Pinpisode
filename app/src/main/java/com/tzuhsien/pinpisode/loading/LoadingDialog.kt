@@ -36,7 +36,9 @@ class LoadingDialog : AppCompatDialogFragment() {
                 true -> {
                     dismiss()
                 }
-                false -> {} // show pic to notify error
+                false -> {
+                    Timber.d("ERROR")
+                } // show pic to notify error
             }
         }
 

@@ -99,9 +99,15 @@ class SpotifyNoteViewModel(
     val canEdit: LiveData<Boolean>
         get() = _canEdit
 
+    // For deciding whether to launch foreground service after spotify connection
+    var isViewerCanEdit: Boolean = true
+
     // state of displaying options:
     var displayState: TimeItemDisplay = TimeItemDisplay.ALL
 
+    private var _connectErrorMsg = MutableLiveData<String?>()
+    val connectErrorMsg: LiveData<String?>
+        get() = _connectErrorMsg
 
     val uiState = SpotifyNoteUiState(
         onItemTitleChanged = { item ->
@@ -136,6 +142,7 @@ class SpotifyNoteViewModel(
             getNoteInfoById() // one time query
         } else {
             _canEdit.value = true
+            isViewerCanEdit = true
             checkSpotifyNoteExistence(sourceId)
         }
     }
@@ -145,10 +152,25 @@ class SpotifyNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            SpotifyService.connectToAppRemote(MyApplication.applicationContext()) { isConnected ->
-                if (isConnected) {
-                    _isSpotifyConnected.value = true
-                    _status.value = LoadApiStatus.DONE
+            SpotifyService.connectToAppRemote(MyApplication.applicationContext()) { connection ->
+                when (connection) {
+                    ConnectState.CONNECTED -> {
+                        _isSpotifyConnected.value = true
+                        _status.value = LoadApiStatus.DONE
+                        _connectErrorMsg.value = null
+                    }
+                    ConnectState.NOT_INSTALLED -> {
+                        Timber.d("ConnectState.NOT_installed")
+                        _connectErrorMsg.value = ConnectState.NOT_INSTALLED.msg
+                    }
+                    ConnectState.NOT_LOGGED_IN -> {
+                        Timber.d("ConnectState.NOT_LOGGED_IN")
+                        _connectErrorMsg.value = ConnectState.NOT_LOGGED_IN.msg
+                    }
+                    ConnectState.UNKNOWN_ERROR -> {
+                        Timber.d("ConnectState.UNKNOWN")
+                        _connectErrorMsg.value = ConnectState.UNKNOWN_ERROR.msg
+                    }
                 }
             }
         }
@@ -225,6 +247,7 @@ class SpotifyNoteViewModel(
                         _shouldCreateNewNote.value = true
                     } else {
                         // the note already exist, save one time note info, check if user is in author list, and start listening to live data
+                        noteId = result.data.id
                         noteToBeUpdated = result.data
                         checkIfViewerCanEdit(result.data.authors.contains(UserManager.userId))
                         getLiveNoteById(result.data.id)
@@ -249,6 +272,11 @@ class SpotifyNoteViewModel(
 
     fun createNewSpotifyNote(newSpotifyNote: Note) {
         Timber.d("createNewSpotifyNote(newSpotifyNote)")
+
+        newSpotifyNote.apply {
+            ownerId = UserManager.userId!!
+            authors = listOf(UserManager.userId!!)
+        }
 
         if (!hasUploaded) {
             coroutineScope.launch {
@@ -306,6 +334,7 @@ class SpotifyNoteViewModel(
     private fun checkIfViewerCanEdit(isInAuthors: Boolean) {
         _canEdit.value = isInAuthors
         uiState.canEdit = isInAuthors
+        isViewerCanEdit = isInAuthors
     }
     /** End of initialization of the note **/
 
@@ -486,6 +515,10 @@ class SpotifyNoteViewModel(
     fun unpauseTrackingPosition() {
         positionHandler.removeCallbacks(positionUpdateRunnable)
         positionHandler.postDelayed(positionUpdateRunnable, 200)
+    }
+
+    fun clearConnectionErrorMsg() {
+        _connectErrorMsg.value = null
     }
 
 }

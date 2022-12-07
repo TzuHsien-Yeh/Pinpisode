@@ -5,6 +5,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationManagerCompat
+import timber.log.Timber
 
 
 class SpotifyNoteService : Service() {
@@ -34,9 +35,11 @@ class SpotifyNoteService : Service() {
     private fun start() {
         NotificationBuilder().build(this, isClipping, channelId = "spotify_note", packageName = packageName)
         startForeground(1, buildNotification())
+        Timber.d("start: startForeground")
     }
 
     private fun buildNotification(): Notification {
+        Timber.d("buildNotification")
         return NotificationBuilder().build(this, isClipping, channelId = "spotify_note", packageName = packageName)
     }
 
@@ -55,6 +58,7 @@ class SpotifyNoteService : Service() {
     }
 
     private fun stop() {
+        Timber.d("stop")
         stopForeground(true)
         stopSelf()
     }

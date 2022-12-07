@@ -51,7 +51,7 @@
                 android:inputType="text"
                 style="@style/timestamp_title_style"
                 android:maxLines="1"
-                android:maxLength="20"
+                android:maxLength="22"
                 android:hint="@string/moment"
                 android:background="@color/transparent"
                 android:textAlignment="textStart"

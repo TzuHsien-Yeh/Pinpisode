@@ -64,7 +64,7 @@ interface Repository {
 
     suspend fun deleteInvitation(invitationId: String): Result<Boolean>
 
-    suspend fun deleteUserFromAuthors(noteId: String, authors: List<String>): Result<String>
+    suspend fun deleteUserFromAuthors(noteId: String, authors: MutableList<String>): Result<String>
 
     suspend fun deleteNote(noteId: String): Result<String>
 

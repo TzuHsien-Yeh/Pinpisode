@@ -10,8 +10,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -33,16 +36,20 @@ import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.formatDuration
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.parseSpotifyImageUri
+import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.pause
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.resume
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekBack
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekForward
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekTo
 import com.tzuhsien.pinpisode.tag.TagDialogFragmentDirections
+import com.tzuhsien.pinpisode.util.SharingLinkGenerator
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import timber.log.Timber
 import java.security.MessageDigest
 import java.security.SecureRandom
+
 
 class SpotifyNoteFragment : Fragment() {
     private val viewModel by viewModels<SpotifyNoteViewModel> {
@@ -68,6 +75,7 @@ class SpotifyNoteFragment : Fragment() {
 
         viewModel.isSpotifyConnected.observe(viewLifecycleOwner) { it ->
             Timber.d("viewModel.isSpotifyConnected.observe: $it")
+            viewModel.clearConnectionErrorMsg()
             binding.playPauseButton.isEnabled = it
             binding.seekBackButton.isEnabled = it
             binding.seekForwardButton.isEnabled = it
@@ -121,11 +129,22 @@ class SpotifyNoteFragment : Fragment() {
 
                 }
 
-                Intent(context, SpotifyNoteService::class.java).apply {
-                    action = SpotifyNoteService.ACTION_START
-                    context?.startService(this)
+
+                Timber.d("viewModel.isViewerCanEdit = ${viewModel.isViewerCanEdit}")
+                if (viewModel.isViewerCanEdit) {
+                    Intent(context, SpotifyNoteService::class.java).apply {
+                        action = SpotifyNoteService.ACTION_START
+                        context?.startService(this)
+                    }
+                    registerTimestampReceiver()
+                } else {
+
+                    Timber.d(" viewModel.isSpotifyConnected.observe, ACTION_STOP")
+                    Intent(context, SpotifyNoteService::class.java).apply {
+                        action = SpotifyNoteService.ACTION_STOP
+                        context?.startService(this)
+                    }
                 }
-                registerTimestampReceiver()
             }
         }
 
@@ -239,25 +258,6 @@ class SpotifyNoteFragment : Fragment() {
                 }
             }
         }
-        /**
-         *  Edit or read only mode
-         * */
-        viewModel.canEdit.observe(viewLifecycleOwner) {
-            binding.editDigest.isEnabled = it
-            if (it) {
-                binding.editDigest.visibility = View.VISIBLE
-                binding.editDigest.hint = getString(R.string.input_video_summary)
-            } else if (viewModel.noteToBeUpdated?.digest.isNullOrEmpty()) {
-                binding.editDigest.visibility = View.GONE
-            } else {
-                binding.editDigest.visibility = View.VISIBLE
-                binding.editDigest.hint = getString(R.string.input_video_summary)
-            }
-
-            binding.icAddTag.isEnabled = it
-            binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
-            binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
-        }
 
         /**
          *  RecyclerView views
@@ -265,13 +265,17 @@ class SpotifyNoteFragment : Fragment() {
         // Swipe to delete
         binding.recyclerViewTimeItems.addItemDecoration(DividerItemDecoration(context,
             DividerItemDecoration.VERTICAL))
-        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(binding.recyclerViewTimeItems) {
+        val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(
+            binding.recyclerViewTimeItems,
+            swipeOutListener = OnSwipeOutListener {
+                viewModel.deleteTimeItem(it)
+            }
+        ) {
             override fun instantiateUnderlayButton(position: Int): List<UnderlayButton> {
                 val deleteButton = deleteButton(position)
                 return listOf(deleteButton)
             }
         })
-        itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
 
         val adapter = SpotifyTimeItemAdapter(
             uiState = viewModel.uiState
@@ -299,6 +303,20 @@ class SpotifyNoteFragment : Fragment() {
             }
         }
 
+        /**
+         *  Edit or read only mode
+         * */
+        viewModel.canEdit.observe(viewLifecycleOwner) {
+            binding.editDigest.isEnabled = it
+            binding.editDigest.hint = if (it) getString(R.string.input_video_summary) else null
+            binding.icAddTag.isEnabled = it
+            binding.btnClip.visibility = if (it) View.VISIBLE else View.GONE
+            binding.btnTakeTimestamp.visibility = if (it) View.VISIBLE else View.GONE
+            if (it) {
+                // attach swipe to delete helper
+                itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
+            }
+        }
 
         /**
          *  Buttons on the bottom of the page: Toggle the display of timeItems
@@ -349,38 +367,84 @@ class SpotifyNoteFragment : Fragment() {
          *  Buttons on the bottom of the page: Share this note
          * */
         binding.icShare.setOnClickListener {
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT,
-                    getString(R.string.spotify_note_uri, viewModel.noteId, viewModel.sourceId))
-            }
-            startActivity(Intent.createChooser(shareIntent, getString(R.string.send_to)))
+            shareNoteLink()
         }
 
-//        /** Loading status **/
-//        viewModel.status.observe(viewLifecycleOwner) {
-//            when(it) {
-//                LoadApiStatus.LOADING -> {
-//                    Timber.d("LoadApiStatus.LOADING")
-//                    findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
-//                }
-//                LoadApiStatus.DONE -> {
-//
-//                    Timber.d("LoadApiStatus.DONE")
-//                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-//                        bundleOf("doneLoading" to true))
-//                }
-//                LoadApiStatus.ERROR -> {
-//
-//                    Timber.d("LoadApiStatus.ERROR")
-//                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-//                        bundleOf("doneLoading" to false))
-//                }
+        /**
+         * Toast to warn about Spotify error
+         * */
+        viewModel.connectErrorMsg.observe(viewLifecycleOwner) {
+            if (null != it) {
+                binding.errorMsg.text = it
+                binding.errorMsg.visibility = View.VISIBLE
+            } else {
+                binding.errorMsg.visibility = View.GONE
+            }
+
+//            it?.let {
+//                val customSnack= Snackbar.make(requireView(), "",Snackbar.LENGTH_LONG)
+//                val layout = customSnack.view as Snackbar.SnackbarLayout
+//                val bind = CustomSnackBarBinding.inflate(layoutInflater)
+//                bind.textSnackBar.text = it
+//                layout.addView(bind.root)
+//                customSnack.view.layoutParams = (customSnack.view.layoutParams as FrameLayout.LayoutParams)
+//                    .apply {
+//                        gravity = Gravity.TOP
+//                        gravity = Gravity.CENTER_HORIZONTAL
+//                        width = ViewGroup.LayoutParams.WRAP_CONTENT
+//                        topMargin = 180
+//                    }
+//                layout.setBackgroundColor(Color.TRANSPARENT)
+//                customSnack.show()
 //            }
-//        }
+        }
+
+        /** Loading status **/
+        viewModel.status.observe(viewLifecycleOwner) {
+            when (it) {
+                LoadApiStatus.LOADING -> {
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    }
+                }
+                LoadApiStatus.DONE -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to true))
+                }
+                LoadApiStatus.ERROR -> {
+                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
+                        bundleOf("doneLoading" to false))
+                }
+            }
+        }
 
         return binding.root
+    }
+
+    private fun shareNoteLink() {
+        SharingLinkGenerator.generateSharingLink(
+            deepLink = "${SharingLinkGenerator.PREFIX}/spotify_note/${viewModel.noteId}/${viewModel.sourceId}".toUri(),
+            previewImageLink = viewModel.noteToBeUpdated?.thumbnail?.toUri()
+        ) { generatedLink ->
+            Timber.d("generatedLink = $generatedLink")
+            shareDeepLink(generatedLink)
+        }
+    }
+
+    private fun shareDeepLink(deepLink: String) {
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "text/plain"
+            putExtra(
+                Intent.EXTRA_SUBJECT,
+                getString(R.string.share_msg_subject,
+                    "Spotify podcast",
+                    viewModel.noteToBeUpdated?.title)
+            )
+            putExtra(Intent.EXTRA_TEXT, deepLink)
+        }
+
+        startActivity(Intent.createChooser(intent, null))
     }
 
     private fun updateSeekbar(playerState: PlayerState) {
@@ -413,7 +477,7 @@ class SpotifyNoteFragment : Fragment() {
         return SwipeHelper.UnderlayButton(
             MyApplication.applicationContext(),
             getString(R.string.delete),
-            14.0f,
+            15.0f,
             android.R.color.holo_red_light,
             object : SwipeHelper.UnderlayButtonClickListener {
                 override fun onClick() {
@@ -443,11 +507,18 @@ class SpotifyNoteFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         SpotifyService.disconnect()
+        Timber.d("onDestroy, ACTION_STOP")
         Intent(context, SpotifyNoteService::class.java).apply {
-            action = SpotifyNoteService.ACTION_STOP
-            context?.startService(this)
+                action = SpotifyNoteService.ACTION_STOP
+                context?.startService(this)
         }
-        context?.unregisterReceiver(timestampReceiver)
+
+        try {
+            context?.unregisterReceiver(timestampReceiver)
+        } catch (e: IllegalArgumentException) {
+            // Do nothing if the receiver not registered
+        }
+
         Timber.d("onDestroy() CALLED")
     }
 
@@ -478,15 +549,20 @@ class SpotifyNoteFragment : Fragment() {
 
     private fun endClipping() {
         Timber.d("clipEnd")
-        viewModel.endAt = (viewModel.currentSecond / 1000).toFloat()
-        binding.btnClip.setImageResource(R.drawable.ic_clip)
-        binding.btnClip.animation = null
-        viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
-        viewModel.startOrStopToggle = 0
+        if ((viewModel.currentSecond / 1000).toFloat() < viewModel.startAt) {
+            Toast.makeText(context,
+                getString(R.string.clip_end_before_start_warning),
+                Toast.LENGTH_SHORT).show()
+        } else {
+            viewModel.endAt = (viewModel.currentSecond / 1000).toFloat()
+            binding.btnClip.animation = null
+            viewModel.createTimeItem(viewModel.startAt, viewModel.endAt)
+            viewModel.startOrStopToggle = 0
 
-        Intent(context, SpotifyNoteService::class.java).apply {
-            this.action = SpotifyNoteService.ACTION_DONE_CLIPPING
-            context?.startService(this)
+            Intent(context, SpotifyNoteService::class.java).apply {
+                this.action = SpotifyNoteService.ACTION_DONE_CLIPPING
+                context?.startService(this)
+            }
         }
     }
 

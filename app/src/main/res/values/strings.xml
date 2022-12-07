@@ -8,9 +8,9 @@
     <string name="manage_tags_for_this_note">Manage tags for this note</string>
     <string name="id_edit_add_tag">edit_add_tag</string>
     <string name="add_new_tag">Add new tag</string>
-    <string name="youtube_note_uri">http://pinpisode/youtube_note/%1s/%2s</string>
-    <string name="spotify_note_uri">http://pinpisode/spotify_note/%1s/%2s</string>
-    <string name="send_to">Share link with</string>
+<!--    <string name="youtube_note_uri">https://pinpisode/youtube_note/%1s/%2s</string>-->
+<!--    <string name="spotify_note_uri">https://pinpisode/spotify_note/%1s/%2s</string>-->
+    <string name="share_msg_subject">Check out this Pinpisode note on the %1s: [%2s]!</string>
     <string name="input_video_summary">Input video summary</string>
     <string name="moment">Moment</string>
     <string name="add_some_notes">Add some notes</string>
@@ -46,6 +46,27 @@
     <string name="saved_show">Saved show</string>
 
     <string name="take_timestamp">Take Timestamp</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="clip_end_before_start_warning">A clip should end later than its start</string>
+    <string name="episode_not_found">Episode not found</string>
+    <string name="error_msg_spotify_not_installed">Error:\nPlease install Spotify app on this device to access Spotify related features</string>
+    <string name="error_msg_spotify_not_logged_in">Error:\nPlease log in to Spotify to access Spotify related features</string>
+    <string name="error_connecting_to_spotify">Error connecting to Spotify</string>
+    <string name="pisode_pin">Pisode Pin</string>
+    <string name="_2_minutes_ago">2 minutes ago</string>
+    <string name="input_summary">Input summary</string>
+    <string name="your_summary">Your summary</string>
+    <string name="youtube_video_title">YouTube video title</string>
+    <string name="spotify_podcast_title">Spotify podcast title</string>
+    <string name="_3_hours_ago">3 hours ago</string>
+    <string name="_4_coauthors">4 coauthors</string>
+    <string name="guide_get_started">Here are some tricks for you to make better use of Pinpisode.\n\nLet\'s get started!</string>
+    <string name="add_note_by_yt_sharing">To add a new note, share the media on YouTube or Spotify with Pinpisode.</string>
+    <string name="or_you_can_search_on_youtube_and_spotify_in_pinpisode">Or search on YouTube and Spotify in Pinpisode</string>
+    <string name="how_to_sort_notes">Sort your notes by tag, last edit, media length, or time left from the last timestamp you took.</string>
+    <string name="guide_coauthor_invitations">You can edit notes with others on Pinpisode. Check incoming coauthor invitations here.</string>
+    <string name="how_to_quit_notes">Finally, swipe left to quit your own notes or quit coauthoring others\'</string>
+    <string name="guide_closure_words">If you want to brush up on these tricks, tap on the help icon.</string>
+    <string name="let_s_start_your_episodes">Let\'s start your episodes!</string>
+    <string name="pinpisode_uri">https://pinpisode.page.link/</string>
+
 </resources>
