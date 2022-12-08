@@ -60,15 +60,12 @@ class TimeItemAdapter(
 
 
             // Play the timeTime when onClicked
-            binding.textTimeStart.setOnClickListener {
+            val listener = View.OnClickListener {
                 uiState.onTimeClick(timeItem)
             }
-            binding.textTimeEnd.setOnClickListener {
-                uiState.onTimeClick(timeItem)
-            }
-            binding.extraSpaceForClickToPlay.setOnClickListener {
-                uiState.onTimeClick(timeItem)
-            }
+            binding.textTimeStart.setOnClickListener(listener)
+            binding.textTimeEnd.setOnClickListener(listener)
+            binding.extraSpaceForClickToPlay.setOnClickListener(listener)
 
             /** Disable edit functions only if the viewer is one of the authors **/
             titleView.isEnabled = uiState.canEdit
@@ -78,11 +75,7 @@ class TimeItemAdapter(
                 contentView.visibility = View.VISIBLE
                 contentView.hint = context.getString(R.string.add_some_notes)
             } else {
-                if (timeItem.text.isEmpty()) {
-                    contentView.visibility = View.GONE
-                } else {
-                    contentView.visibility = View.VISIBLE
-                }
+                contentView.visibility = if (timeItem.text.isEmpty()) View.GONE else View.VISIBLE
             }
 
         }

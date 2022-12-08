@@ -107,6 +107,10 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     val navigateToSpotifyNote: LiveData<Note?>
         get() = _navigateToSpotifyNote
 
+    private val _navigateToNoteListGuide = MutableLiveData(false)
+    val navigateToNoteListGuide: LiveData<Boolean>
+        get() = _navigateToNoteListGuide
+
     fun updateInfoFromYouTube(note: Note) {
 
         if (note.source == Source.YOUTUBE.source && note.duration.parseDuration() == 0L) {
@@ -322,6 +326,10 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
         // notify live data change
         _liveNoteList.value = _liveNoteList.value
+    }
+
+    fun doneNavigationToGuide() {
+        _navigateToNoteListGuide.value = false
     }
 }
 

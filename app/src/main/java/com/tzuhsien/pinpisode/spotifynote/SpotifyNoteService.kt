@@ -5,8 +5,10 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationManagerCompat
+import com.tzuhsien.pinpisode.NOTIFICATION_CHANNEL_ID
 import timber.log.Timber
 
+private const val NOTIFICATION_ID = 1
 
 class SpotifyNoteService : Service() {
 
@@ -19,7 +21,7 @@ class SpotifyNoteService : Service() {
         const val ACTION_DONE_CLIPPING = "ACTION_DONE_CLIPPING"
     }
 
-    override fun onBind(p0: Intent?): IBinder? = null
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
@@ -33,27 +35,27 @@ class SpotifyNoteService : Service() {
     }
 
     private fun start() {
-        NotificationBuilder().build(this, isClipping, channelId = "spotify_note", packageName = packageName)
-        startForeground(1, buildNotification())
+        NotificationBuilder().build(this, isClipping, channelId = NOTIFICATION_CHANNEL_ID, packageName = packageName)
+        startForeground(NOTIFICATION_ID, buildNotification())
         Timber.d("start: startForeground")
     }
 
     private fun buildNotification(): Notification {
         Timber.d("buildNotification")
-        return NotificationBuilder().build(this, isClipping, channelId = "spotify_note", packageName = packageName)
+        return NotificationBuilder().build(this, isClipping, channelId = NOTIFICATION_CHANNEL_ID, packageName = packageName)
     }
 
     private fun startClipping() {
         isClipping = true
         with(NotificationManagerCompat.from(this)) {
-            notify(1, buildNotification())
+            notify(NOTIFICATION_ID, buildNotification())
         }
     }
 
     private fun doneClipping() {
         isClipping = false
         with(NotificationManagerCompat.from(this)) {
-            notify(1, buildNotification())
+            notify(NOTIFICATION_ID, buildNotification())
         }
     }
 

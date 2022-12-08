@@ -26,7 +26,12 @@ import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.glide
 import com.tzuhsien.pinpisode.ext.utcToLocalTime
+import com.tzuhsien.pinpisode.loading.BUNDLE_KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.REQUEST_KEY_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
+import com.tzuhsien.pinpisode.search.result.BUNDLE_KEY_QUERY
+import com.tzuhsien.pinpisode.search.result.REQUEST_KEY_KEYWORD_1
+import com.tzuhsien.pinpisode.search.result.REQUEST_KEY_KEYWORD_2
 import com.tzuhsien.pinpisode.search.result.ViewPagerAdapter
 import timber.log.Timber
 import java.security.MessageDigest
@@ -72,8 +77,6 @@ class SearchFragment : Fragment() {
             }
         })
 
-        binding.cardSingleVideoResult.visibility = View.GONE
-        binding.textSearchResult.visibility = View.GONE
 
         /**
          * Search result of url (specified sourceId)
@@ -135,10 +138,10 @@ class SearchFragment : Fragment() {
         setUpTabLayout()
         viewModel.searchQuery.observe(viewLifecycleOwner) {
             Timber.d("query = $it, parentFragmentManager.setFragmentResult")
-            requireActivity().supportFragmentManager.setFragmentResult("requestKey1",
-                bundleOf("query" to it))
-            requireActivity().supportFragmentManager.setFragmentResult("requestKey2",
-                bundleOf("query" to it))
+            requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_KEYWORD_1,
+                bundleOf(BUNDLE_KEY_QUERY to it))
+            requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_KEYWORD_2,
+                bundleOf(BUNDLE_KEY_QUERY to it))
 
             if (null != it) {
                 hideRecommendationViews()
@@ -234,12 +237,12 @@ class SearchFragment : Fragment() {
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
+                        bundleOf(BUNDLE_KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
+                        bundleOf(BUNDLE_KEY_DONE_LOADING to false))
                 }
             }
         }
@@ -313,10 +316,6 @@ class SearchFragment : Fragment() {
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-//                    "user-read-playback-state",
-//                        "user-modify-playback-state",
-//                    "user-read-currently-playing",
-//                        "app-remote-control",
                         "user-read-playback-position",
                         "user-library-read"
                     )
@@ -336,19 +335,15 @@ class SearchFragment : Fragment() {
             AuthorizationResponse.Type.CODE -> {
                 // Here You will get the authorization code which you
                 // can get with authorizationResponse.code
-
                 showLoginActivityToken.launch(getLoginActivityTokenIntent(authorizationResponse.code))
             }
             AuthorizationResponse.Type.ERROR -> {
                 binding.viewGroupSpNotAuthorized.visibility = View.VISIBLE
                 Timber.d("AuthorizationResponse.Type.ERROR")
             }
-            // Handle the Error
-
             else -> {
                 binding.viewGroupSpNotAuthorized.visibility = View.VISIBLE
             }
-            // Probably interruption
         }
     }
 
@@ -358,10 +353,6 @@ class SearchFragment : Fragment() {
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-//                    "user-read-playback-state",
-//                        "user-modify-playback-state",
-//                    "user-read-currently-playing",
-//                    "app-remote-control",
                         "user-read-playback-position",
                         "user-library-read"
                     )
@@ -391,9 +382,7 @@ class SearchFragment : Fragment() {
             AuthorizationResponse.Type.ERROR -> {
                 Timber.d("showLoginActivityToken : AuthorizationResponse.Type.ERROR")
             }
-            // Handle Error
-            else -> {}
-            // Probably interruption
+            else -> {} // Probably interruption
         }
     }
 

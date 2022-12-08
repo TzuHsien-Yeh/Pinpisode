@@ -23,8 +23,11 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
+import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSignInBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.loading.BUNDLE_KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.REQUEST_KEY_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import timber.log.Timber
 
@@ -95,12 +98,12 @@ class SignInFragment : Fragment() {
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
+                        bundleOf(BUNDLE_KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
+                        bundleOf(BUNDLE_KEY_DONE_LOADING to false))
                 }
             }
         }
@@ -165,12 +168,8 @@ class SignInFragment : Fragment() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
-                    viewModel.updateUser(task.result.user!!, account)
-
-                    if (task.result.additionalUserInfo?.isNewUser == true) {
-                        findNavController().navigate(NavGraphDirections.actionGlobalNoteListGuideFragment())
-                    }
-
+                    UserManager.isNewUser = task.result.additionalUserInfo?.isNewUser ?: false
+                    task.result.user?.let { viewModel.updateUser(it, account) }
                 } else {
                     //handle error
                     Timber.d("firebaseAuthWithGoogle: Failed!")

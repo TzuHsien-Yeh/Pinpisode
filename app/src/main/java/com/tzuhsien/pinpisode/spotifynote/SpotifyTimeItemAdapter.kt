@@ -1,5 +1,6 @@
 package com.tzuhsien.pinpisode.spotifynote
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +20,7 @@ class SpotifyTimeItemAdapter(
     class TimeItemViewHolder(private var binding: ItemTimeCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        val context = binding.root.context
+        val context: Context = binding.root.context
 
         fun bind(timeItem: TimeItem, uiState: SpotifyNoteUiState) {
 
@@ -58,15 +59,12 @@ class SpotifyTimeItemAdapter(
             }
 
             // Play the timeTime when onClicked
-            binding.textTimeStart.setOnClickListener {
+            val listener = View.OnClickListener {
                 uiState.onTimeClick(timeItem)
             }
-            binding.textTimeEnd.setOnClickListener {
-                uiState.onTimeClick(timeItem)
-            }
-            binding.extraSpaceForClickToPlay.setOnClickListener {
-                uiState.onTimeClick(timeItem)
-            }
+            binding.textTimeStart.setOnClickListener(listener)
+            binding.textTimeEnd.setOnClickListener(listener)
+            binding.extraSpaceForClickToPlay.setOnClickListener(listener)
 
             /** Disable edit functions only if the viewer is one of the authors **/
             titleView.isEnabled = uiState.canEdit
@@ -76,11 +74,7 @@ class SpotifyTimeItemAdapter(
                 contentView.visibility = View.VISIBLE
                 contentView.hint = context.getString(R.string.add_some_notes)
             } else {
-                if (timeItem.text.isEmpty()) {
-                    contentView.visibility = View.GONE
-                } else {
-                    contentView.visibility = View.VISIBLE
-                }
+                contentView.visibility = if (timeItem.text.isEmpty()) View.GONE else View.VISIBLE
             }
         }
     }

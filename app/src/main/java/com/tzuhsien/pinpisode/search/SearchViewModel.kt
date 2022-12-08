@@ -3,6 +3,7 @@ package com.tzuhsien.pinpisode.search
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.tzuhsien.pinpisode.Constants
 import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
@@ -13,6 +14,7 @@ import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.extractYoutubeVideoId
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util
+import com.tzuhsien.pinpisode.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -39,7 +41,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     val searchQuery: LiveData<String?>
         get() = _searchQuery
 
-
+    // Recommendations
     private val _ytTrendingList = MutableLiveData<List<Item>>()
     val ytTrendingList: LiveData<List<Item>>
         get() = _ytTrendingList
@@ -48,6 +50,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     val spotifyLatestEpisodesList: LiveData<List<SpotifyItem>>
         get() = _spotifyLatestEpisodesList
 
+    // Deal with Spotify auth issue or no show saved
     private val _spotifyMsg = MutableLiveData<String>(null)
     val spotifyMsg: LiveData<String>
         get() = _spotifyMsg
@@ -97,12 +100,6 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
     val navigateToSpotifyNote: LiveData<String?>
         get() = _navigateToSpotifyNote
 
-    private val youtubeWatchUrl = "youtube.com/watch?v="
-    private val youtubeShareLink = "youtu.be/"
-
-    private val spotifyShareLink = "https://open.spotify.com/"
-    private val spotifyUri = "spotify:"
-
     init {
         getYoutubeTrendingVideos()
     }
@@ -113,9 +110,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.getTrendingVideosOnYouTube()
-
-            when (result) {
+            when (val result = repository.getTrendingVideosOnYouTube()) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -154,7 +149,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                         _status.value = LoadApiStatus.DONE
 
                         if (result.data.items.isEmpty()) {
-                            _spotifyMsg.value = "You haven't saved any show yet"
+                            _spotifyMsg.value = getString(R.string.sp_msg_have_not_saved_any_show)
                         } else {
                             getShowEpisodesById(result.data.items)
                         }
@@ -237,7 +232,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
     fun findMediaSource(query: String) {
         // Check if the query is a YouTube url
-        if (query.contains(youtubeWatchUrl) || query.contains(youtubeShareLink)) {
+        if (query.contains(Constants.YOUTUBE_WATCH_URL) || query.contains(Constants.YOUTUBE_SHARE_LINK)) {
 
             val videoId = query.extractYoutubeVideoId()
             if (videoId.isNotEmpty()) {
@@ -245,14 +240,14 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             }
             _searchQuery.value = null
 
-        } else if (query.contains(spotifyShareLink) || query.contains(spotifyUri)) {
+        } else if (query.contains(Constants.SPOTIFY_SHARE_LINK) || query.contains(Constants.SPOTIFY_URI)) {
             // If the query is a  Spotify link, request auth token to proceed to search
             _isAuthRequired.value = UserManager.userSpotifyAuthToken.isEmpty()
 
             val sourceId = query.extractSpotifySourceId()
             if (sourceId.isNotEmpty()) {
-                if (sourceId.contains("episode:")) {
-                    getEpisodeInfoById(sourceId.substringAfter("episode:"))
+                if (sourceId.contains(Constants.SPOTIFY_URI_EPISODE)) {
+                    getEpisodeInfoById(sourceId.substringAfter(Constants.SPOTIFY_URI_EPISODE))
                 } else {
                     _showMsg.value = MyApplication.applicationContext().getString(R.string.episode_not_found)
                 }

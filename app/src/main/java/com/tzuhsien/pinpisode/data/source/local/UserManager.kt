@@ -7,6 +7,8 @@ import com.tzuhsien.pinpisode.data.model.Note
 
 object UserManager {
 
+    var isNewUser: Boolean = false
+
     // Keys put in the USER sharedPref
     // Make it a constant to prevent mis-spelling
     private const val USER_ID = "UserId"

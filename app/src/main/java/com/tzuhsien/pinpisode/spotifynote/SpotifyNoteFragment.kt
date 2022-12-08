@@ -36,6 +36,8 @@ import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.formatDuration
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.parseSpotifyImageUri
+import com.tzuhsien.pinpisode.loading.BUNDLE_KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.REQUEST_KEY_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.pause
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.resume
@@ -382,19 +384,19 @@ class SpotifyNoteFragment : Fragment() {
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            when (it) {
+            when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
                         findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
+                        bundleOf(BUNDLE_KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
+                        bundleOf(BUNDLE_KEY_DONE_LOADING to false))
                 }
             }
         }

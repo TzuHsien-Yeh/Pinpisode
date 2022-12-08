@@ -4,6 +4,7 @@ import android.text.format.DateUtils
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.tzuhsien.pinpisode.Constants
 import com.tzuhsien.pinpisode.R
 import java.text.SimpleDateFormat
 import kotlin.time.Duration
@@ -23,29 +24,22 @@ fun String.parseDuration(): Long? = Duration.parseIsoStringOrNull(this)?.inWhole
 
 
 fun String.extractYoutubeVideoId(): String {
-    val youtubeWatchUrl = "youtube.com/watch?v="
-    val youtubeShareLink = "youtu.be/"
-
-    return if (youtubeWatchUrl in this) {
+    return if (Constants.YOUTUBE_WATCH_URL in this) {
         this
-            .substringAfter(youtubeWatchUrl)
-            .substringBefore("&", this.substringAfter(youtubeWatchUrl))
+            .substringAfter(Constants.YOUTUBE_WATCH_URL)
+            .substringBefore("&", this.substringAfter(Constants.YOUTUBE_WATCH_URL))
     } else {
-        this.substringAfter(youtubeShareLink)
+        this.substringAfter(Constants.YOUTUBE_SHARE_LINK)
     }
 }
 
 fun String.extractSpotifySourceId(): String {
-    val spotifyShareLink = "https://open.spotify.com/"
-    val spotifyUri = "spotify:"
-
-    return if (spotifyShareLink in this) {
-        this.substringAfter(spotifyShareLink)
-            .substringBefore("?si=", this.substringAfter(spotifyShareLink))
+    return if (Constants.SPOTIFY_SHARE_LINK in this) {
+        this.substringAfter(Constants.SPOTIFY_SHARE_LINK)
+            .substringBefore("?si=", this.substringAfter(Constants.SPOTIFY_SHARE_LINK))
             .replace("/", ":")
-
     } else {
-        this.substringAfter(spotifyUri)
+        this.substringAfter(Constants.SPOTIFY_URI)
     }
 }
 

@@ -96,6 +96,7 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             when (destination.id) {
 
+                // TODO: fun setUpUi()
                 R.id.noteListFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
                     binding.toolbar.navigationIcon = null
@@ -113,7 +114,7 @@ class MainActivity : AppCompatActivity() {
                     binding.helperIcon.visibility = View.GONE
                     binding.toolbar.setNavigationIcon(R.drawable.ic_back)
                     binding.toolbar.navigationIcon?.apply {
-                        alpha = 130
+                        alpha = 130 // TODO: CONST
                         setTint(resources.getColor(R.color.back_icon_color_to_theme))
                     }
 
@@ -197,15 +198,15 @@ class MainActivity : AppCompatActivity() {
      * */
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         if (event.action == MotionEvent.ACTION_DOWN) {
-            val v: View? = currentFocus
-            if (v is EditText) {
+            val view: View? = currentFocus
+            if (view is EditText) {
                 val outRect = Rect()
-                v.getGlobalVisibleRect(outRect)
+                view.getGlobalVisibleRect(outRect)
                 if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
-                    v.clearFocus()
+                    view.clearFocus()
                     val imm: InputMethodManager =
                         getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0)
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0)
                 }
             }
         }
@@ -268,48 +269,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-
-//        /**
-//         * Check and handle sign in status
-//         * */
-//        if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
-//            Timber.d("[${this::class.simpleName}]: null == GoogleSignIn.getLastSignedInAccount(applicationContext)")
-//            navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment())
-//        } else {
-//            viewModel.updateLocalUserId()
-//        }
-//
-//        if (UserManager.userId != null) {
-//            intentExtras.getString(Intent.EXTRA_TEXT)?.let { extra ->
-//                if (extra.contains("spotify")) {
-//                    // Handle Spotify intent
-//
-//                    val sourceId =
-//                        intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
-//                    sourceId?.let { it ->
-//
-//                        Timber.d("HANDLE spotify INTENT FUN intent extras : $it")
-//
-//                        navController.navigate(
-//                            SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
-//                                sourceIdKey = it)
-//                        )
-//                    }
-//
-//                } else {
-//                    // Handle YouTube intent
-//                    val videoId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractYoutubeVideoId()
-//                    videoId?.let {
-//                        Timber.d("HANDLE youtube INTENT FUN intent extras : $it")
-//
-//                        navController.navigate(
-//                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(videoIdKey = it)
-//                        )
-//                    }
-//                }
-//
-//            }
-//        }
         }
     }
 }

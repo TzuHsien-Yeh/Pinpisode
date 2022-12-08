@@ -21,10 +21,16 @@ import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSearchResultBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.loading.BUNDLE_KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.REQUEST_KEY_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import timber.log.Timber
 import java.security.MessageDigest
 import java.security.SecureRandom
+
+const val REQUEST_KEY_KEYWORD_1 = "requestKey1"
+const val REQUEST_KEY_KEYWORD_2 = "requestKey2"
+const val BUNDLE_KEY_QUERY = "query"
 
 class SearchResultFragment : Fragment() {
 
@@ -42,29 +48,29 @@ class SearchResultFragment : Fragment() {
         if (viewModel.source == Source.YOUTUBE) {
             // Receive query string from Search Fragment
             requireActivity().supportFragmentManager.setFragmentResultListener(
-                "requestKey1",
+                REQUEST_KEY_KEYWORD_1,
                 this
             ) { _, bundle ->
-                if (null != bundle.getString("query")) {
-                    viewModel.searchOnYouTube(bundle.getString("query"))
+                if (null != bundle.getString(BUNDLE_KEY_QUERY)) {
+                    viewModel.searchOnYouTube(bundle.getString(BUNDLE_KEY_QUERY))
                 } else {
                     viewModel.emptySearchResultLists()
                 }
-                Timber.d("setFragmentResultListener: ${bundle.getString("query")}")
+                Timber.d("setFragmentResultListener: ${bundle.getString(BUNDLE_KEY_QUERY)}")
             }
         } else {
             // Receive query string from Search Fragment
             requireActivity().supportFragmentManager.setFragmentResultListener(
-                "requestKey2",
+                REQUEST_KEY_KEYWORD_2,
                 this
             ) { _, bundle ->
-                if (null != bundle.getString("query")) {
-                    viewModel.searchOnSpotify(bundle.getString("query"))
-                    viewModel.queryKeyword = bundle.getString("query")
+                if (null != bundle.getString(BUNDLE_KEY_QUERY)) {
+                    viewModel.searchOnSpotify(bundle.getString(BUNDLE_KEY_QUERY))
+                    viewModel.queryKeyword = bundle.getString(BUNDLE_KEY_QUERY)
                 } else {
                     viewModel.emptySearchResultLists()
                 }
-                Timber.d("setFragmentResultListener: ${bundle.getString("query")}")
+                Timber.d("setFragmentResultListener: ${bundle.getString(BUNDLE_KEY_QUERY)}")
             }
         }
 
@@ -136,12 +142,12 @@ class SearchResultFragment : Fragment() {
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
+                        bundleOf(BUNDLE_KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
+                        bundleOf(BUNDLE_KEY_DONE_LOADING to false))
                 }
             }
         }
@@ -188,9 +194,6 @@ class SearchResultFragment : Fragment() {
                 REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-//                            "user-read-currently-playing",
-//                            "app-remote-control",
-//                            "user-follow-read",
                         "user-read-playback-position",
                         "user-library-read",
                     )
@@ -217,22 +220,17 @@ class SearchResultFragment : Fragment() {
             AuthorizationResponse.Type.ERROR -> {
                 Timber.d("AuthorizationResponse.Type.ERROR")
             }
-            // Handle the Error
 
-            else -> {}
-            // Probably interruption
+            else -> {} // Probably interruption
         }
     }
 
-    fun getLoginActivityTokenIntent(code: String): Intent =
+    private fun getLoginActivityTokenIntent(code: String): Intent =
         AuthorizationClient.createLoginActivityIntent(
             activity,
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-//                            "user-read-currently-playing",
-//                            "app-remote-control",
-//                            "user-follow-read",
                         "user-read-playback-position",
                         "user-library-read",
                     )
@@ -263,9 +261,7 @@ class SearchResultFragment : Fragment() {
             AuthorizationResponse.Type.ERROR -> {
                 Timber.d("showLoginActivityToken : AuthorizationResponse.Type.ERROR")
             }
-            // Handle Error
-            else -> {}
-            // Probably interruption
+            else -> {} // Probably interruption
         }
     }
 

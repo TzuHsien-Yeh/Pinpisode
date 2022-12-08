@@ -20,6 +20,8 @@ import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentNoteListBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.glide
+import com.tzuhsien.pinpisode.loading.BUNDLE_KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.REQUEST_KEY_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import kotlinx.coroutines.*
@@ -47,6 +49,12 @@ class NoteListFragment : Fragment() {
         } else {
             viewModel.updateLocalUserId()
         }
+
+//        viewModel.navigateToNoteListGuide.observe(viewLifecycleOwner) {
+//            Timber.d("navigateToNoteListGuide: $it")
+//            if (it) findNavController().navigate(NavGraphDirections.actionGlobalNoteListGuideFragment())
+//            viewModel.doneNavigationToGuide()
+//        }
 
         binding = FragmentNoteListBinding.inflate(layoutInflater)
 
@@ -203,7 +211,6 @@ class NoteListFragment : Fragment() {
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            Timber.d("viewModel.status.observe: $it")
             when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
@@ -211,14 +218,12 @@ class NoteListFragment : Fragment() {
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    Timber.d("LoadApiStatus.DONE")
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
+                        bundleOf(BUNDLE_KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    Timber.d("LoadApiStatus.ERROR")
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
+                        bundleOf(BUNDLE_KEY_DONE_LOADING to false))
                 }
             }
         }

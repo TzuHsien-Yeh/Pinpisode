@@ -43,12 +43,10 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
         }
     )
 
-    // status: The internal MutableLiveData that stores the status of the most recent request
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
         get() = _status
 
-    // error: The internal MutableLiveData that stores the error of the most recent request
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?>
         get() = _error
@@ -90,9 +88,7 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = query?.let { repository.searchOnYouTube(it) }
-
-            when (result) {
+            when (val result = query?.let { repository.searchOnYouTube(it) }) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -192,6 +188,11 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
         _needSpotifyAuth.value = false
     }
 
+    fun emptySearchResultLists() {
+        _ytSearchResultList.value = listOf()
+        _spotifySearchResultList.value = listOf()
+    }
+
     fun doneNavigation() {
         _navigateToYoutubeNote.value = null
         _navigateToSpotifyNote.value = null
@@ -200,11 +201,6 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         viewModelJob.cancel()
-    }
-
-    fun emptySearchResultLists() {
-        _ytSearchResultList.value = listOf()
-        _spotifySearchResultList.value = listOf()
     }
 
 }

@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.tzuhsien.pinpisode.data.Result
-import com.tzuhsien.pinpisode.data.model.UserInfo
 import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.network.LoadApiStatus
@@ -15,10 +14,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class MainViewModel(private val repository: Repository): ViewModel() {
-
-    private val _currentUser = MutableLiveData<UserInfo?>()
-    val currentUser: LiveData<UserInfo?>
-        get() = _currentUser
 
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
