@@ -28,6 +28,7 @@ import timber.log.Timber
 import java.security.MessageDigest
 import java.security.SecureRandom
 
+const val SOURCE_KEY = "sourceKey"
 const val REQUEST_KEY_KEYWORD_1 = "requestKey1"
 const val REQUEST_KEY_KEYWORD_2 = "requestKey2"
 const val BUNDLE_KEY_QUERY = "query"
@@ -43,7 +44,7 @@ class SearchResultFragment : Fragment() {
     ): View? {
         binding = FragmentSearchResultBinding.inflate(layoutInflater)
 
-        viewModel.source = requireArguments().getSerializable("sourceKey") as Source
+        viewModel.setViewPagerSource(requireArguments().getSerializable(SOURCE_KEY) as Source)
 
         if (viewModel.source == Source.YOUTUBE) {
             // Receive query string from Search Fragment
@@ -186,7 +187,7 @@ class SearchResultFragment : Fragment() {
         }
     }
 
-    fun getLoginActivityCodeIntent(): Intent =
+    private fun getLoginActivityCodeIntent(): Intent =
         AuthorizationClient.createLoginActivityIntent(
             activity,
             AuthorizationRequest.Builder(CLIENT_ID,

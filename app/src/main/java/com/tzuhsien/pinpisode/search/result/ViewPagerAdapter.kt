@@ -23,7 +23,7 @@ class ViewPagerAdapter(fragmentActivity: SearchFragment, private var totalCount:
     private fun newInstance(source: Source): Fragment {
         val fragment = SearchResultFragment()
         val args = Bundle()
-        args.putSerializable("sourceKey", source)
+        args.putSerializable(SOURCE_KEY, source)
         fragment.arguments = args
         return fragment
     }

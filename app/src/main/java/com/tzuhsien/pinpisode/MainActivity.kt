@@ -20,11 +20,6 @@ import com.tzuhsien.pinpisode.databinding.ActivityMainBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.extractYoutubeVideoId
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.guide.NoteListGuideFragmentDirections
-import com.tzuhsien.pinpisode.notelist.NoteListFragmentDirections
-import com.tzuhsien.pinpisode.signin.SignInFragmentDirections
-import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
-import com.tzuhsien.pinpisode.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
 
 
@@ -88,105 +83,99 @@ class MainActivity : AppCompatActivity() {
         val toolbar: Toolbar = binding.toolbar
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
-        binding.toolbar.visibility = View.VISIBLE
-        binding.toolbar.navigationIcon = null
-        binding.toolbarText.text = getString(R.string.pin_your_episodes)
 
+        navController.addOnDestinationChangedListener { controller, destination, _ ->
 
-        navController.addOnDestinationChangedListener { controller, destination, arguments ->
             when (destination.id) {
-
-                // TODO: fun setUpUi()
                 R.id.noteListFragment -> {
-                    binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.navigationIcon = null
-                    binding.toolbarText.text = getString(R.string.pin_your_episodes)
-                    binding.helperIcon.visibility = View.VISIBLE
-                    binding.helperIcon.setOnClickListener {
-                        if (navController.currentDestination?.id != R.id.noteListGuideFragment) {
-                            controller.navigate(NoteListGuideFragmentDirections.actionGlobalNoteListGuideFragment())
-                        }
-                    }
+                    setUpToolbarUi(
+                        isToolbarVisible = true,
+                        toolbarText = getString(R.string.pin_your_episodes),
+                        isHelpIconVisible = true,
+                        onHelpIconClick = {
+                            if (navController.currentDestination?.id != R.id.noteListGuideFragment) {
+                                controller.navigate(NavGraphDirections.actionGlobalNoteListGuideFragment())
+                            }
+                        },
+                        isNavIconVisible = false,
+                    )
                 }
 
                 R.id.searchFragment -> {
-                    binding.toolbar.visibility = View.VISIBLE
-                    binding.helperIcon.visibility = View.GONE
-                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
-                    binding.toolbar.navigationIcon?.apply {
-                        alpha = 130 // TODO: CONST
-                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
-                    }
-
-                    binding.toolbar.setNavigationOnClickListener {
-                        onBackPressed()
-                    }
-                    binding.toolbarText.text = getString(R.string.find_your_episodes)
+                    setUpToolbarUi(
+                        isToolbarVisible = true,
+                        toolbarText = getString(R.string.find_your_episodes),
+                    )
                 }
 
                 R.id.profileFragment -> {
-                    binding.toolbar.visibility = View.VISIBLE
-                    binding.helperIcon.visibility = View.GONE
-                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
-                    binding.toolbar.navigationIcon?.apply {
-                        alpha = 130
-                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
-                    }
-                    binding.toolbar.setNavigationOnClickListener {
-                        onBackPressed()
-                    }
-                    binding.toolbarText.text = getString(R.string.profile)
+                    setUpToolbarUi(
+                        isToolbarVisible = true,
+                        toolbarText = getString(R.string.profile),
+                    )
                 }
 
                 R.id.youTubeNoteFragment -> {
-                    binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
-                    binding.toolbar.navigationIcon?.apply {
-                        alpha = 130
-                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
-                    }
-                    binding.toolbar.setNavigationOnClickListener {
-                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
-                    }
-                    binding.toolbarText.text = getString(R.string.youtube_note)
+                    setUpToolbarUi(
+                        isToolbarVisible = true,
+                        toolbarText = getString(R.string.youtube_note),
+                        onNavIconClick = {
+                            controller.navigate(NavGraphDirections.actionGlobalNoteListFragment())
+                        },
+//                        isHelpIconVisible = true
+                    )
                 }
 
                 R.id.spotifyNoteFragment -> {
-                    binding.toolbar.visibility = View.VISIBLE
-                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
-                    binding.toolbar.navigationIcon?.apply {
-                        alpha = 130
-                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
-                    }
-                    binding.toolbar.setNavigationOnClickListener {
-                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
-                    }
-                    binding.toolbarText.text = getString(R.string.spotify_note)
+                    setUpToolbarUi(
+                        isToolbarVisible = true,
+                        toolbarText = getString(R.string.spotify_note),
+                        onNavIconClick = {
+                            controller.navigate(NavGraphDirections.actionGlobalNoteListFragment())
+                        },
+//                        isHelpIconVisible = true
+                    )
                 }
 
                 R.id.signInFragment -> {
-                    binding.toolbar.visibility = View.GONE
-                    binding.toolbarText.text = null
-                    binding.toolbar.navigationIcon = null
+                    setUpToolbarUi()
                 }
 
                 R.id.notificationFragment -> {
-                    binding.toolbar.visibility = View.VISIBLE
-                    binding.helperIcon.visibility = View.GONE
-                    binding.toolbar.setNavigationIcon(R.drawable.ic_back)
-                    binding.toolbar.navigationIcon?.apply {
-                        alpha = 130
-                        setTint(resources.getColor(R.color.back_icon_color_to_theme))
-                    }
-                    binding.toolbar.setNavigationOnClickListener {
-                        navController.navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
-                    }
-                    binding.toolbarText.text = getString(R.string.coauthor_invitation)
+                    setUpToolbarUi(
+                        isToolbarVisible = true,
+                        toolbarText = getString(R.string.coauthor_invitation),
+                        isNavIconVisible = true
+                    )
                 }
-
             }
         }
+    }
 
+    private fun setUpToolbarUi(
+        isToolbarVisible: Boolean = false,
+        toolbarText: String? = null,
+        isNavIconVisible: Boolean = true,
+        onNavIconClick: View.OnClickListener = View.OnClickListener { onBackPressed() },
+        isHelpIconVisible: Boolean = false,
+        onHelpIconClick: View.OnClickListener? = null,
+    ) {
+        binding.toolbar.visibility = if (isToolbarVisible) View.VISIBLE else View.GONE
+        binding.toolbarText.text = toolbarText
+
+        if (isNavIconVisible) {
+            binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+            binding.toolbar.navigationIcon?.apply {
+                alpha = 130
+                setTint(getColor(R.color.back_icon_color_to_theme))
+            }
+        } else {
+            binding.toolbar.navigationIcon = null
+        }
+        binding.toolbar.setNavigationOnClickListener(onNavIconClick)
+
+        binding.helperIcon.visibility = if (isHelpIconVisible) View.VISIBLE else View.GONE
+        binding.helperIcon.setOnClickListener(onHelpIconClick)
     }
 
     override fun onBackPressed() {
@@ -235,14 +224,14 @@ class MainActivity : AppCompatActivity() {
                     Timber.d("intentExtras.getString(Intent.EXTRA_TEXT)sourceId = $sourceId")
                     /** Check and handle sign in status **/
                     if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
-                        navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment(
+                        navController.navigate(NavGraphDirections.actionGlobalSignInFragment(
                             source = Source.SPOTIFY.source,
                             sourceId = it
                         ))
                     } else {
                         viewModel.updateLocalUserId()
                         navController.navigate(
-                            SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+                            NavGraphDirections.actionGlobalSpotifyNoteFragment(
                                 sourceIdKey = it)
                         )
                     }
@@ -256,14 +245,14 @@ class MainActivity : AppCompatActivity() {
                     Timber.d("HANDLE youtube INTENT FUN intent extras : $it")
                     /** Check and handle sign in status **/
                     if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
-                        navController.navigate(SignInFragmentDirections.actionGlobalSignInFragment(
+                        navController.navigate(NavGraphDirections.actionGlobalSignInFragment(
                             source = Source.YOUTUBE.source,
                             sourceId = it
                         ))
                     } else {
                         viewModel.updateLocalUserId()
                         navController.navigate(
-                            YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
+                            NavGraphDirections.actionGlobalYouTubeNoteFragment(
                                 videoIdKey = it)
                         )
                     }

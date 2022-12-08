@@ -3,12 +3,12 @@ package com.tzuhsien.pinpisode.profile
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.network.LoadApiStatus
+import com.tzuhsien.pinpisode.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -51,11 +51,16 @@ class ProfileViewModel(private val repository: Repository) : ViewModel() {
                         _status.value = LoadApiStatus.ERROR
                     }
                     else -> {
-                        _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                        _error.value = getString(R.string.unknown_error)
                         _status.value = LoadApiStatus.ERROR
                     }
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
     }
 }

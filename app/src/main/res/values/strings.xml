@@ -17,7 +17,7 @@
     <string name="pin_your_episodes">Pin your episodes!</string>
     <string name="youtube_note">YouTube Note</string>
     <string name="spotify_note">Spotify Note</string>
-    <string name="coauthor_invitation">Coauthor invitation</string>
+    <string name="coauthor_invitation">Coauthor invitations</string>
     <string name="find_your_episodes">Find your episodes</string>
     <string name="profile">Profile</string>
 
@@ -70,5 +70,7 @@
     <string name="spotify_exceeded_app_rate_limits">The app has exceeded its rate limits.</string>
     <string name="spotify_api_bad_oauth_request">Bad OAuth request. Contact Pinpisode developer</string>
     <string name="sp_msg_have_not_saved_any_show">You haven\'t saved any show yet</string>
+    <string name="unknown_user_name">Unknown user name</string>
+    <string name="unknown_email">Unknown email</string>
 
 </resources>

@@ -5,13 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseUser
-import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.model.UserInfo
 import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.network.LoadApiStatus
+import com.tzuhsien.pinpisode.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -49,8 +49,8 @@ class SignInViewModel(private val repository: Repository): ViewModel() {
 
         // create a new user or update google account data to the existing user in users collection
         val userInfo = UserInfo(
-            name = account.displayName!!,
-            email = account.email!!,
+            name = account.displayName ?: getString(R.string.unknown_user_name),
+            email = account.email ?: getString(R.string.unknown_email),
             pic = account.photoUrl.toString()
         )
 
@@ -74,7 +74,7 @@ class SignInViewModel(private val repository: Repository): ViewModel() {
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -103,7 +103,7 @@ class SignInViewModel(private val repository: Repository): ViewModel() {
                     null
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                     null
                 }

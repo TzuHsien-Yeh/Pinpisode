@@ -3,7 +3,6 @@ package com.tzuhsien.pinpisode.coauthor
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.Note
@@ -11,7 +10,7 @@ import com.tzuhsien.pinpisode.data.model.UserInfo
 import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.network.LoadApiStatus
-import com.tzuhsien.pinpisode.util.Util
+import com.tzuhsien.pinpisode.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -81,7 +80,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                     null
                 }
                 else -> {
-                    _error.value = Util.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                     null
                 }
@@ -105,7 +104,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                     _status.value = LoadApiStatus.DONE
 
                     if (null == result.data) {
-                        _resultMsg.value = MyApplication.applicationContext().getString(R.string.user_not_found)
+                        _resultMsg.value = getString(R.string.user_not_found)
                     }
 
                     result.data
@@ -122,7 +121,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                     null
                 }
                 else -> {
-                    _error.value = Util.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                     null
                 }
@@ -141,7 +140,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                     _status.value = LoadApiStatus.DONE
 
                     resetFoundUser()
-                    _resultMsg.value = MyApplication.applicationContext().getString(R.string.coauthor_invitation_sent)
+                    _resultMsg.value = getString(R.string.coauthor_invitation_sent)
                     result.data
                 }
                 is Result.Fail -> {
@@ -153,7 +152,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = Util.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -193,7 +192,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
                     null
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                     null
                 }

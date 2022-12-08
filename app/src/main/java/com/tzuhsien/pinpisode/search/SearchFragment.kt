@@ -105,7 +105,7 @@ class SearchFragment : Fragment() {
             }
         })
         binding.cardSingleVideoResult.setOnClickListener {
-            viewModel.navigateToYoutubeNote(viewModel.ytSingleResultId!!)
+            viewModel.ytSingleResultId?.let { viewModel.navigateToYoutubeNote(it) }
         }
 
         // Spotify episode url search
@@ -127,7 +127,7 @@ class SearchFragment : Fragment() {
         }
 
         binding.cardSingleSpotifyResult.setOnClickListener {
-            viewModel.navigateToSpotifyNote(viewModel.spotifySingleResultId!!)
+            viewModel.spotifySingleResultId?.let { viewModel.navigateToSpotifyNote(it) }
         }
 
         /**

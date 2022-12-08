@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.Note
@@ -14,7 +13,7 @@ import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.ext.parseDuration
 import com.tzuhsien.pinpisode.network.LoadApiStatus
-import com.tzuhsien.pinpisode.util.Util
+import com.tzuhsien.pinpisode.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -123,9 +122,9 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                     is Result.Success -> {
                         _error.value = null
 
-                        if (result.data.items[0].contentDetails?.duration != note.duration) {
+                        if (result.data.items[0].contentDetails.duration != note.duration) {
                             val noteToUpdate = Note()
-                            noteToUpdate.duration = result.data.items[0].contentDetails!!.duration
+                            noteToUpdate.duration = result.data.items[0].contentDetails.duration
                             noteToUpdate.thumbnail =
                                 result.data.items[0].snippet.thumbnails.high.url
                             noteToUpdate.title = result.data.items[0].snippet.title
@@ -144,7 +143,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                         _status.value = LoadApiStatus.ERROR
                     }
                     else -> {
-                        _error.value = Util.getString(R.string.unknown_error)
+                        _error.value = getString(R.string.unknown_error)
                         _status.value = LoadApiStatus.ERROR
                     }
                 }
@@ -174,7 +173,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -220,7 +219,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                         _status.value = LoadApiStatus.ERROR
                     }
                     else -> {
-                        _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                        _error.value = getString(R.string.unknown_error)
                         _status.value = LoadApiStatus.ERROR
                     }
                 }
@@ -228,18 +227,20 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-
     fun deleteOrQuitCoauthoringNote(noteIndex: Int) {
         Timber.d("deleteOrQuitCoauthoringNote: noteIndex = $noteIndex")
 
         val noteToBeRemoved = noteListToDisplay.value?.get(noteIndex)
         Timber.d("deleteOrQuitCoauthoringNote: noteToBeRemoved = $noteToBeRemoved")
 
-        if (noteToBeRemoved?.ownerId == UserManager.userId) {
-            deleteNote(noteToBeRemoved!!)
-        } else {
-            quitCoauthoringNote(noteToBeRemoved!!)
+        noteToBeRemoved?.let {
+            if (noteToBeRemoved.ownerId == UserManager.userId) {
+                deleteNote(noteToBeRemoved)
+            } else {
+                quitCoauthoringNote(noteToBeRemoved)
+            }
         }
+
     }
 
     private fun quitCoauthoringNote(noteToBeRemoved: Note) {
@@ -268,7 +269,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -293,7 +294,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -330,6 +331,11 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
     fun doneNavigationToGuide() {
         _navigateToNoteListGuide.value = false
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
     }
 }
 

@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.tzuhsien.pinpisode.Constants
-import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.*
@@ -13,7 +12,6 @@ import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.extractYoutubeVideoId
 import com.tzuhsien.pinpisode.network.LoadApiStatus
-import com.tzuhsien.pinpisode.util.Util
 import com.tzuhsien.pinpisode.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -75,12 +73,10 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         }
     )
 
-    // status: The internal MutableLiveData that stores the status of the most recent request
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
         get() = _status
 
-    // error: The internal MutableLiveData that stores the error of the most recent request
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?>
         get() = _error
@@ -126,7 +122,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = Util.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -141,9 +137,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
             if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
 
-                val result = repository.getUserSavedShows(UserManager.userSpotifyAuthToken)
-
-                when (result) {
+                when (val result = repository.getUserSavedShows(UserManager.userSpotifyAuthToken)) {
                     is Result.Success -> {
                         _error.value = null
                         _status.value = LoadApiStatus.DONE
@@ -171,7 +165,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                         Timber.d("getSpotifySavedShowLatestEpisodes is Result.Error: ${result.exception}")
                     }
                     else -> {
-                        _error.value = Util.getString(R.string.unknown_error)
+                        _error.value = getString(R.string.unknown_error)
                         _status.value = LoadApiStatus.ERROR
                     }
                 }
@@ -211,7 +205,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                         _status.value = LoadApiStatus.ERROR
                     }
                     else -> {
-                        _error.value = Util.getString(R.string.unknown_error)
+                        _error.value = getString(R.string.unknown_error)
                         _status.value = LoadApiStatus.ERROR
                     }
                 }
@@ -249,7 +243,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                 if (sourceId.contains(Constants.SPOTIFY_URI_EPISODE)) {
                     getEpisodeInfoById(sourceId.substringAfter(Constants.SPOTIFY_URI_EPISODE))
                 } else {
-                    _showMsg.value = MyApplication.applicationContext().getString(R.string.episode_not_found)
+                    _showMsg.value = getString(R.string.episode_not_found)
                 }
             }
 
@@ -295,7 +289,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                         null
                     }
                     else -> {
-                        _error.value = Util.getString(R.string.unknown_error)
+                        _error.value = getString(R.string.unknown_error)
                         _status.value = LoadApiStatus.ERROR
                         null
                     }
@@ -334,7 +328,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                     null
                 }
                 else -> {
-                    _error.value = Util.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                     null
                 }

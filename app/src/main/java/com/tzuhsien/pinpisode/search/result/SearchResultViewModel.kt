@@ -203,6 +203,9 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
         viewModelJob.cancel()
     }
 
+    fun setViewPagerSource(s: Source) {
+        source = s
+    }
 }
 
 data class SearchResultUiState(

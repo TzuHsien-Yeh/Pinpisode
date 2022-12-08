@@ -15,6 +15,7 @@ import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util
+import com.tzuhsien.pinpisode.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -205,7 +206,7 @@ class SpotifyNoteViewModel(
                     null
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                     null
                 }
@@ -317,7 +318,7 @@ class SpotifyNoteViewModel(
                         null
                     }
                     else -> {
-                        _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                        _error.value = getString(R.string.unknown_error)
                         _status.value = LoadApiStatus.ERROR
 
                         hasUploaded = false
@@ -380,7 +381,7 @@ class SpotifyNoteViewModel(
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -403,7 +404,7 @@ class SpotifyNoteViewModel(
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -429,7 +430,7 @@ class SpotifyNoteViewModel(
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -467,7 +468,7 @@ class SpotifyNoteViewModel(
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -480,11 +481,6 @@ class SpotifyNoteViewModel(
 
     fun notifyDisplayChange() {
         _liveTimeItemList.value = _liveTimeItemList.value
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
     }
 
     /**
@@ -521,6 +517,10 @@ class SpotifyNoteViewModel(
         _connectErrorMsg.value = null
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
 }
 
 data class SpotifyNoteUiState(

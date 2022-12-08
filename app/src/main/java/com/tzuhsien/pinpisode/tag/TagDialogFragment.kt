@@ -58,6 +58,7 @@ class TagDialogFragment : AppCompatDialogFragment() {
             viewModel.inputNewTag = it.toString().trim()
         }
         binding.btnAddNewTag.setOnClickListener {
+            Timber.d("viewModel.isInputValid")
             if (!viewModel.inputNewTag.isNullOrEmpty()) {
 
                 viewModel.addNewTag()
@@ -67,7 +68,7 @@ class TagDialogFragment : AppCompatDialogFragment() {
                 newChip.isCheckable = true
                 newChip.isChecked = true
                 newChip.setOnCheckedChangeListener { _, isChecked ->
-                    viewModel.updateTagSet(viewModel.inputNewTag!!, isChecked)
+                    viewModel.inputNewTag?.let { viewModel.updateTagSet(it, isChecked) }
                 }
                 newChip.text = (viewModel.inputNewTag)
                 binding.chipGroupTags.addView(newChip)
@@ -114,7 +115,7 @@ class TagDialogFragment : AppCompatDialogFragment() {
 
     override fun dismiss() {
         binding.layoutTags.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_slide_down))
-        Handler().postDelayed({ super.dismiss() }, 200)
+        Handler().postDelayed({ super.dismiss() }, 100)
     }
 
 }

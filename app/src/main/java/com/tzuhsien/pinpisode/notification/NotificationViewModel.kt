@@ -182,6 +182,11 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
     fun emptyAllInvitationData() {
         _invitationsWithInviterInfo.value = listOf()
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
 }
 
 data class NotificationUiState(
