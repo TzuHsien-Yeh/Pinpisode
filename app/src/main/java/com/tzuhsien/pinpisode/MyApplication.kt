@@ -20,8 +20,6 @@ class MyApplication: Application() {
         fun applicationContext() : Context {
             return instance.applicationContext
         }
-
-
     }
 
     override fun onCreate() {

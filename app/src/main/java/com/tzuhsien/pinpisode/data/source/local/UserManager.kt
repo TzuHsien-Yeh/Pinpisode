@@ -55,8 +55,6 @@ object UserManager {
             editor.putString(USER_PIC, value).commit()
         }
 
-
-
     // Save all the notes of which the user is one of the authors
     var allEditableNoteList: List<Note> = listOf()
 

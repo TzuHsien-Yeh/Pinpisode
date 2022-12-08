@@ -15,15 +15,13 @@ import androidx.navigation.fragment.findNavController
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSearchResultBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
-import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
-import com.tzuhsien.pinpisode.youtubenote.YouTubeNoteFragmentDirections
 import timber.log.Timber
 import java.security.MessageDigest
 import java.security.SecureRandom
@@ -109,7 +107,7 @@ class SearchResultFragment : Fragment() {
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner) {
             it?.let {
                 findNavController().navigate(
-                    YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
+                    NavGraphDirections.actionGlobalYouTubeNoteFragment(
                         videoIdKey = it
                     )
                 )
@@ -121,7 +119,7 @@ class SearchResultFragment : Fragment() {
             it?.let {
                 Timber.d("viewModel.navigateToSpotifyNote.observe: $it")
                 findNavController().navigate(
-                    SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+                    NavGraphDirections.actionGlobalSpotifyNoteFragment(
                         sourceIdKey = it
                     )
                 )
@@ -134,7 +132,7 @@ class SearchResultFragment : Fragment() {
             when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {

@@ -67,5 +67,7 @@
     <string name="let_s_start_your_episodes">Let\'s start your episodes!</string>
     <string name="pinpisode_uri">https://pinpisode.page.link/</string>
     <string name="podcast">Podcast</string>
+    <string name="spotify_exceeded_app_rate_limits">The app has exceeded its rate limits.</string>
+    <string name="spotify_api_bad_oauth_request">Bad OAuth request. Contact Pinpisode developer</string>
 
 </resources>

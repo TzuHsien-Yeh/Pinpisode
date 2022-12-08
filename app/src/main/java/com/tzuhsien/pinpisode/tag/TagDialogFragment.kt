@@ -14,10 +14,10 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.chip.Chip
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.DialogTagBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import timber.log.Timber
 
@@ -93,7 +93,7 @@ class TagDialogFragment : AppCompatDialogFragment() {
             when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {

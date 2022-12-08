@@ -11,14 +11,13 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.tzuhsien.pinpisode.MyApplication.Companion.applicationContext
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentProfileBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.glide
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
-import com.tzuhsien.pinpisode.signin.SignInFragmentDirections
 import timber.log.Timber
 
 class ProfileFragment : Fragment() {
@@ -41,7 +40,7 @@ class ProfileFragment : Fragment() {
         binding.logOut.setOnClickListener {
             GoogleSignIn.getClient(applicationContext(), GoogleSignInOptions.DEFAULT_SIGN_IN).signOut()
             UserManager.userId = null
-            findNavController().navigate(SignInFragmentDirections.actionGlobalSignInFragment())
+            findNavController().navigate(NavGraphDirections.actionGlobalSignInFragment())
             Timber.d("User logged out: ${UserManager.userId}")
         }
 
@@ -50,7 +49,7 @@ class ProfileFragment : Fragment() {
             when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {

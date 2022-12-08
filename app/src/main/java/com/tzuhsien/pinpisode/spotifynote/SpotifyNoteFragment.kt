@@ -25,8 +25,8 @@ import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.tzuhsien.pinpisode.MyApplication
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
-import com.tzuhsien.pinpisode.coauthor.CoauthorDialogFragmentDirections
 import com.tzuhsien.pinpisode.data.model.Note
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.model.TimeItemDisplay
@@ -36,14 +36,12 @@ import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.formatDuration
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.parseSpotifyImageUri
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.pause
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.resume
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekBack
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekForward
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekTo
-import com.tzuhsien.pinpisode.tag.TagDialogFragmentDirections
 import com.tzuhsien.pinpisode.util.SharingLinkGenerator
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import timber.log.Timber
@@ -348,7 +346,7 @@ class SpotifyNoteFragment : Fragment() {
          *  Buttons on the bottom of the page: Navigate to tag fragment
          * */
         binding.icAddTag.setOnClickListener {
-            findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(
+            findNavController().navigate(NavGraphDirections.actionGlobalTagDialogFragment(
                 viewModel.noteToBeUpdated!!))
         }
 
@@ -357,7 +355,7 @@ class SpotifyNoteFragment : Fragment() {
          * */
         binding.icCoauthoring.setOnClickListener {
             findNavController().navigate(
-                CoauthorDialogFragmentDirections.actionGlobalCoauthorDialogFragment(
+                NavGraphDirections.actionGlobalCoauthorDialogFragment(
                     viewModel.noteToBeUpdated!!
                 )
             )
@@ -387,7 +385,7 @@ class SpotifyNoteFragment : Fragment() {
             when (it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {

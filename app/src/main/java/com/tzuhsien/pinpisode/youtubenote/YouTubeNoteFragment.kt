@@ -22,16 +22,14 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.tzuhsien.pinpisode.MyApplication
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
-import com.tzuhsien.pinpisode.coauthor.CoauthorDialogFragmentDirections
 import com.tzuhsien.pinpisode.data.model.TimeItemDisplay
 import com.tzuhsien.pinpisode.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.parseDuration
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteService
-import com.tzuhsien.pinpisode.tag.TagDialogFragmentDirections
 import com.tzuhsien.pinpisode.util.SharingLinkGenerator
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import timber.log.Timber
@@ -244,7 +242,7 @@ class YouTubeNoteFragment : Fragment() {
          * */
         binding.icAddTag.setOnClickListener {
             viewModel.noteToBeUpdated?.let {
-                findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(it))
+                findNavController().navigate(NavGraphDirections.actionGlobalTagDialogFragment(it))
             }
         }
 
@@ -253,7 +251,7 @@ class YouTubeNoteFragment : Fragment() {
          * */
         binding.icCoauthoring.setOnClickListener {
             findNavController().navigate(
-                (CoauthorDialogFragmentDirections.actionGlobalCoauthorDialogFragment(
+                (NavGraphDirections.actionGlobalCoauthorDialogFragment(
                     viewModel.noteToBeUpdated!!
                 ))
             )
@@ -264,7 +262,6 @@ class YouTubeNoteFragment : Fragment() {
          * */
         binding.icShare.setOnClickListener {
             shareNoteLink()
-
         }
 
         /** Loading status **/
@@ -272,7 +269,7 @@ class YouTubeNoteFragment : Fragment() {
             when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {

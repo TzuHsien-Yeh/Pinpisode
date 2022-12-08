@@ -44,8 +44,6 @@ class InvitationAdapter (private val uiState: NotificationUiState) :
 
     }
 
-
-
     companion object DiffCallback : DiffUtil.ItemCallback<Invitation>() {
         override fun areItemsTheSame(oldItem: Invitation, newItem: Invitation): Boolean {
             return oldItem === newItem

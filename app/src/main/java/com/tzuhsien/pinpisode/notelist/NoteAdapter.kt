@@ -17,7 +17,7 @@ class NoteAdapter (
 ) : ListAdapter<Note, NoteAdapter.NoteViewHolder>(DiffCallback) {
 
     class NoteViewHolder(private val binding: ItemNoteBinding) : RecyclerView.ViewHolder(binding.root){
-        fun bind(note: Note, uiState: NoteListUiState) {
+        fun bind(note: Note) {
             val context = binding.root.context
             binding.imgThumbnail.glide(note.thumbnail)
             binding.textSourceTitle.text = note.title
@@ -50,20 +50,19 @@ class NoteAdapter (
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteAdapter.NoteViewHolder {
-        return NoteAdapter.NoteViewHolder(ItemNoteBinding.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
+        return NoteViewHolder(ItemNoteBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         ))
     }
 
-    override fun onBindViewHolder(holder: NoteAdapter.NoteViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
         val note = getItem(position)
         holder.itemView.setOnClickListener {
             uiState.onNoteClicked(note)
         }
-        holder.bind(note, uiState)
-
+        holder.bind(note)
     }
 }

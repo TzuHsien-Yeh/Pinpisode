@@ -25,8 +25,6 @@ import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.FragmentSignInBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.guide.NoteListGuideFragmentDirections
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import timber.log.Timber
 
@@ -93,7 +91,7 @@ class SignInFragment : Fragment() {
             when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
@@ -170,7 +168,7 @@ class SignInFragment : Fragment() {
                     viewModel.updateUser(task.result.user!!, account)
 
                     if (task.result.additionalUserInfo?.isNewUser == true) {
-                        findNavController().navigate(NoteListGuideFragmentDirections.actionGlobalNoteListGuideFragment())
+                        findNavController().navigate(NavGraphDirections.actionGlobalNoteListGuideFragment())
                     }
 
                 } else {

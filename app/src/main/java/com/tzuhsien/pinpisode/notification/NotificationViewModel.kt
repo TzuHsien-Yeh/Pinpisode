@@ -19,13 +19,15 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
 
     private var inviterMap = mutableMapOf<String, UserInfo?>()
 
-    var invitationList = MutableLiveData<List<Invitation>>()
+    private var _invitationList = repository.getLiveIncomingCoauthorInvitations()
+    val invitationList: LiveData<List<Invitation>>
+        get() = _invitationList
 
     private val idListAwaitQuery = mutableListOf<String>()
 
-    private var _fullInvitationData = MutableLiveData<List<Invitation>>()
-    val fullInvitationData: LiveData<List<Invitation>>
-        get() = _fullInvitationData
+    private var _invitationsWithInviterInfo = MutableLiveData<List<Invitation>>()
+    val invitationsWithInviterInfo: LiveData<List<Invitation>>
+        get() = _invitationsWithInviterInfo
 
     val uiState = NotificationUiState(
         onAcceptClicked = { item ->
@@ -35,11 +37,6 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
             deleteInvitation(item)
         }
     )
-
-    private val _addSuccess = MutableLiveData<Boolean>(false)
-    val addSuccess: LiveData<Boolean>
-        get() = _addSuccess
-
 
     private val _status = MutableLiveData<LoadApiStatus>()
     val status: LiveData<LoadApiStatus>
@@ -51,16 +48,6 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
 
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
-
-
-    init {
-        getLiveIncomingCoauthorInvitations()
-    }
-
-    private fun getLiveIncomingCoauthorInvitations(){
-        _status.value = LoadApiStatus.DONE
-        invitationList = repository.getLiveIncomingCoauthorInvitations()
-    }
 
     fun getInvitersInfo(invitations: List<Invitation>){
         // Save a copy of inviter list from snapshot, put only those were not in the map list
@@ -127,7 +114,7 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
                 }
             }
 
-            _fullInvitationData.value = invitations
+             _invitationsWithInviterInfo.value = invitations
             idListAwaitQuery.clear()
         }
 
@@ -142,31 +129,25 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.updateNoteAuthors(item.note.id, authorSet)
-
-            _addSuccess.value = when (result) {
+            when (val result = repository.updateNoteAuthors(item.note.id, authorSet)) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
 
                     // delete invitation item once it's accepted and the invitee is successfully added to authors
                     deleteInvitation(item)
-                    result.data
                 }
                 is Result.Fail -> {
                     _error.value = result.error
                     _status.value = LoadApiStatus.ERROR
-                    false
                 }
                 is Result.Error -> {
                     _error.value = result.exception.toString()
                     _status.value = LoadApiStatus.ERROR
-                    false
                 }
                 else -> {
                     _error.value = Util.getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
-                    false
                 }
             }
         }
@@ -198,8 +179,8 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
         }
     }
 
-    fun emptyFullInvitationData() {
-        _fullInvitationData.value = listOf()
+    fun emptyAllInvitationData() {
+        _invitationsWithInviterInfo.value = listOf()
     }
 }
 

@@ -13,19 +13,15 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tzuhsien.pinpisode.MyApplication
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Sort
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentNoteListBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.glide
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
 import com.tzuhsien.pinpisode.network.LoadApiStatus
-import com.tzuhsien.pinpisode.notification.NotificationFragmentDirections
-import com.tzuhsien.pinpisode.signin.SignInFragmentDirections
-import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.pinpisode.util.SwipeHelper
-import com.tzuhsien.pinpisode.youtubenote.YouTubeNoteFragmentDirections
 import kotlinx.coroutines.*
 import timber.log.Timber
 
@@ -47,7 +43,7 @@ class NoteListFragment : Fragment() {
          * Check and handle sign in status
          * */
         if (null == GoogleSignIn.getLastSignedInAccount(requireContext())) {
-            findNavController().navigate(SignInFragmentDirections.actionGlobalSignInFragment())
+            findNavController().navigate(NavGraphDirections.actionGlobalSignInFragment())
         } else {
             viewModel.updateLocalUserId()
         }
@@ -174,7 +170,7 @@ class NoteListFragment : Fragment() {
 
         // Notification page
         binding.btnNotificationBell.setOnClickListener {
-            findNavController().navigate(NotificationFragmentDirections.actionGlobalNotificationFragment())
+            findNavController().navigate(NavGraphDirections.actionGlobalNotificationFragment())
         }
         /** Show badge if there's any incoming coauthor invitations **/
         viewModel.invitationList.observe(viewLifecycleOwner) {
@@ -184,7 +180,7 @@ class NoteListFragment : Fragment() {
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
             it?.let {
                 findNavController().navigate(
-                    YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
+                    NavGraphDirections.actionGlobalYouTubeNoteFragment(
                         noteIdKey = it.id,
                         videoIdKey = it.sourceId
                     )
@@ -196,7 +192,7 @@ class NoteListFragment : Fragment() {
         viewModel.navigateToSpotifyNote.observe(viewLifecycleOwner) {
             it?.let {
                 findNavController().navigate(
-                    SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+                    NavGraphDirections.actionGlobalSpotifyNoteFragment(
                         noteIdKey = it.id,
                         sourceIdKey = it.sourceId
                     )
@@ -211,7 +207,7 @@ class NoteListFragment : Fragment() {
             when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {

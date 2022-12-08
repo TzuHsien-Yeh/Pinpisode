@@ -69,6 +69,9 @@ interface DataSource {
 
     suspend fun deleteNote(noteId: String): Result<String>
 
+    /**
+     * Search or get Info from Yt & Sp
+     * */
     suspend fun searchOnYouTube(query: String): Result<YouTubeSearchResult>
 
     suspend fun getTrendingVideosOnYouTube(): Result<YouTubeResult>
