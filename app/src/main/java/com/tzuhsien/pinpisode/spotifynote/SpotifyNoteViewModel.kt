@@ -77,6 +77,7 @@ class SpotifyNoteViewModel(
     /** Clipping **/
     // state of clipping btn
     var startOrStopToggle = 0
+
     // Save start and stop position of a clip
     var startAt: Float = 0f
     var endAt: Float = 0f
@@ -182,7 +183,7 @@ class SpotifyNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.getNoteInfoById(noteId = noteId!!)
+            val result = noteId?.let { repository.getNoteInfoById(noteId = it) }
 
             noteToBeUpdated = when (result) {
                 is Result.Success -> {
@@ -275,8 +276,8 @@ class SpotifyNoteViewModel(
         Timber.d("createNewSpotifyNote(newSpotifyNote)")
 
         newSpotifyNote.apply {
-            ownerId = UserManager.userId!!
-            authors = listOf(UserManager.userId!!)
+            ownerId = UserManager.userId ?: getString(R.string.unknown_user_name)
+            authors = listOf(UserManager.userId ?: getString(R.string.unknown_user_name))
         }
 
         if (!hasUploaded) {
@@ -348,10 +349,12 @@ class SpotifyNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.addNewTimeItem(
-                noteId = noteId!!,
-                timeItem = TimeItem(startAt = startAt, endAt = endAt)
-            )) {
+            when (val result = noteId?.let {
+                repository.addNewTimeItem(
+                    noteId = it,
+                    timeItem = TimeItem(startAt = startAt, endAt = endAt)
+                )
+            }) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -390,7 +393,7 @@ class SpotifyNoteViewModel(
 
     private fun updateTimeItem(timeItem: TimeItem) {
         coroutineScope.launch {
-            when (val result = repository.updateTimeItem(noteId!!, timeItem)) {
+            when (val result = noteId?.let { repository.updateTimeItem(it, timeItem) }) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -413,27 +416,33 @@ class SpotifyNoteViewModel(
     }
 
     fun deleteTimeItem(timeItemIndex: Int) {
+
         coroutineScope.launch {
+
             val timeItemToDelete = liveTimeItemList.value?.get(timeItemIndex)
 
-            when (val result = repository.deleteTimeItem(noteId!!, timeItemToDelete!!)) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                }
-                else -> {
-                    _error.value = getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
+            timeItemToDelete?.let {
+                when (val result =
+                    noteId?.let { repository.deleteTimeItem(it, timeItemToDelete) }) {
+                    is Result.Success -> {
+                        _error.value = null
+                        _status.value = LoadApiStatus.DONE
+                    }
+                    is Result.Fail -> {
+                        _error.value = result.error
+                        _status.value = LoadApiStatus.ERROR
+                    }
+                    is Result.Error -> {
+                        _error.value = result.exception.toString()
+                        _status.value = LoadApiStatus.ERROR
+                    }
+                    else -> {
+                        _error.value = getString(R.string.unknown_error)
+                        _status.value = LoadApiStatus.ERROR
+                    }
                 }
             }
+
         }
 
     }
@@ -454,24 +463,28 @@ class SpotifyNoteViewModel(
 
     fun updateNote() {
         coroutineScope.launch {
-            when (val result = repository.updateNote(noteId!!, noteToBeUpdated!!)) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
+
+                noteToBeUpdated?.let { noteToBeUpdated ->
+
+                    when (val result = repository.updateNote(noteToBeUpdated.id, noteToBeUpdated)) {
+                        is Result.Success -> {
+                            _error.value = null
+                            _status.value = LoadApiStatus.DONE
+                        }
+                        is Result.Fail -> {
+                            _error.value = result.error
+                            _status.value = LoadApiStatus.ERROR
+                        }
+                        is Result.Error -> {
+                            _error.value = result.exception.toString()
+                            _status.value = LoadApiStatus.ERROR
+                        }
+                        else -> {
+                            _error.value = getString(R.string.unknown_error)
+                            _status.value = LoadApiStatus.ERROR
+                        }
+                    }
                 }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                }
-                else -> {
-                    _error.value = getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
-                }
-            }
         }
     }
 

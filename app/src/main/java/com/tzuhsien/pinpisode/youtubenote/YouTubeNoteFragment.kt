@@ -32,6 +32,8 @@ import com.tzuhsien.pinpisode.loading.BUNDLE_KEY_DONE_LOADING
 import com.tzuhsien.pinpisode.loading.REQUEST_KEY_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteService
+import com.tzuhsien.pinpisode.util.DEEPLINK_PATH_YOUTUBE_NOTE
+import com.tzuhsien.pinpisode.util.DYNAMIC_LINK_PREFIX
 import com.tzuhsien.pinpisode.util.SharingLinkGenerator
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import timber.log.Timber
@@ -251,11 +253,11 @@ class YouTubeNoteFragment : Fragment() {
          *  Buttons on the bottom of the page: Coauthoring
          * */
         binding.icCoauthoring.setOnClickListener {
-            findNavController().navigate(
-                (NavGraphDirections.actionGlobalCoauthorDialogFragment(
-                    viewModel.noteToBeUpdated!!
-                ))
-            )
+            viewModel.noteToBeUpdated?.let {
+                findNavController().navigate(
+                    (NavGraphDirections.actionGlobalCoauthorDialogFragment(it))
+                )
+            }
         }
 
         /**
@@ -288,16 +290,20 @@ class YouTubeNoteFragment : Fragment() {
     }
 
     private fun shareNoteLink() {
+
+        val deepLink =
+            DYNAMIC_LINK_PREFIX + DEEPLINK_PATH_YOUTUBE_NOTE + viewModel.noteId + "/" + viewModel.videoId
+
         SharingLinkGenerator.generateSharingLink(
-                deepLink = "${SharingLinkGenerator.PREFIX}/youtube_note/${viewModel.noteId}/${viewModel.videoId}".toUri(),
+                deepLink = deepLink.toUri(),
                 previewImageLink = viewModel.noteToBeUpdated?.thumbnail?.toUri()
             ) { generatedLink ->
             Timber.d("generatedLink = $generatedLink")
-                shareDeepLink(generatedLink)
+                shareDynamicLink(generatedLink)
             }
     }
 
-    private fun shareDeepLink(deepLink: String) {
+    private fun shareDynamicLink(dynamicLink: String) {
         val intent = Intent().apply {
             action = Intent.ACTION_SEND
             type = "text/plain"
@@ -307,7 +313,7 @@ class YouTubeNoteFragment : Fragment() {
                     "YouTube video",
                     viewModel.noteToBeUpdated?.title)
             )
-            putExtra(Intent.EXTRA_TEXT, deepLink)
+            putExtra(Intent.EXTRA_TEXT, dynamicLink)
         }
 
         startActivity(Intent.createChooser(intent, null))

@@ -20,8 +20,10 @@ import com.tzuhsien.pinpisode.databinding.ActivityMainBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.extractYoutubeVideoId
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.util.DYNAMIC_LINK_PREFIX
 import timber.log.Timber
 
+private const val ICON_ALPHA = 130
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
         intent?.data?.let {
-            if (it.toString().contains(getString(R.string.pinpisode_uri))) {
+            if (it.toString().contains(DYNAMIC_LINK_PREFIX)) {
                 navController.handleDeepLink(intent)
                 Timber.d("[onNewIntent] handleDeepLink called")
             }
@@ -68,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 
         if (null != intent) {
             intent.data?.let {
-                if (it.toString().contains(getString(R.string.pinpisode_uri))) {
+                if (it.toString().contains(DYNAMIC_LINK_PREFIX)) {
                     navController.handleDeepLink(intent)
                     Timber.d("[onCreate] handleDeepLink called")
                 }
@@ -82,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
         val toolbar: Toolbar = binding.toolbar
         setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayShowTitleEnabled(false)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
         navController.addOnDestinationChangedListener { controller, destination, _ ->
 
@@ -166,7 +168,7 @@ class MainActivity : AppCompatActivity() {
         if (isNavIconVisible) {
             binding.toolbar.setNavigationIcon(R.drawable.ic_back)
             binding.toolbar.navigationIcon?.apply {
-                alpha = 130
+                alpha = ICON_ALPHA
                 setTint(getColor(R.color.back_icon_color_to_theme))
             }
         } else {
@@ -216,7 +218,8 @@ class MainActivity : AppCompatActivity() {
         navController = findNavController(R.id.nav_host_fragment_activity_main)
 
         intentExtras.getString(Intent.EXTRA_TEXT)?.let { extra ->
-            if (extra.contains("spotify")) {
+
+            if (extra.contains(Constants.SPOTIFY)) {
                 // Handle Spotify intent
                 val sourceId = intentExtras.getString(Intent.EXTRA_TEXT)?.extractSpotifySourceId()
 

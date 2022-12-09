@@ -43,11 +43,11 @@ fun String.extractSpotifySourceId(): String {
     }
 }
 
-fun String.parseSpotifyImageUri(): String {
+fun String?.parseSpotifyImageUri(): String {
     val spotifyImageUri = "spotify:image:"
     val imgHttpsUri = "https://i.scdn.co/image/"
 
-    return imgHttpsUri + this.substringAfter(spotifyImageUri)
+    return imgHttpsUri + this?.substringAfter(spotifyImageUri)
 }
 
 fun ImageView.glide(uri: String?) {

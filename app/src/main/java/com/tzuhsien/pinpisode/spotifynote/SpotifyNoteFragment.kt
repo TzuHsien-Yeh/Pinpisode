@@ -2,8 +2,6 @@ package com.tzuhsien.pinpisode.spotifynote
 
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Base64
 import android.view.LayoutInflater
@@ -44,6 +42,8 @@ import com.tzuhsien.pinpisode.spotifynote.SpotifyService.resume
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekBack
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekForward
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekTo
+import com.tzuhsien.pinpisode.util.DEEPLINK_PATH_SPOTIFY_NOTE
+import com.tzuhsien.pinpisode.util.DYNAMIC_LINK_PREFIX
 import com.tzuhsien.pinpisode.util.SharingLinkGenerator
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import timber.log.Timber
@@ -76,6 +76,7 @@ class SpotifyNoteFragment : Fragment() {
         viewModel.isSpotifyConnected.observe(viewLifecycleOwner) { it ->
             Timber.d("viewModel.isSpotifyConnected.observe: $it")
             viewModel.clearConnectionErrorMsg()
+            binding.seekTo.isEnabled = it
             binding.playPauseButton.isEnabled = it
             binding.seekBackButton.isEnabled = it
             binding.seekForwardButton.isEnabled = it
@@ -113,7 +114,7 @@ class SpotifyNoteFragment : Fragment() {
                             sourceId = viewModel.sourceId,
                             tags = listOf(Source.SPOTIFY.source),
                             title = state.track.name,
-                            thumbnail = state.track.imageUri.raw!!.parseSpotifyImageUri(),
+                            thumbnail = state.track.imageUri.raw.parseSpotifyImageUri(),
                             duration = state.track.duration.toString()
                         )
                         viewModel.invokeCreateNewNoteLiveData()
@@ -169,11 +170,11 @@ class SpotifyNoteFragment : Fragment() {
                 }
 
                 PlayingState.PLAYING -> {
-                    SpotifyService.pause()
+                    pause()
                 }
 
                 PlayingState.PAUSED -> {
-                    SpotifyService.resume()
+                    resume()
                 }
             }
         }
@@ -186,12 +187,6 @@ class SpotifyNoteFragment : Fragment() {
         }
 
         /**  Seek bar  **/
-        binding.seekTo.apply {
-            this.isEnabled = false
-            progressDrawable.setColorFilter(Color.parseColor("#ff4664"), PorterDuff.Mode.SRC_ATOP)
-            indeterminateDrawable.setColorFilter(Color.parseColor("#ff4664"),
-                PorterDuff.Mode.SRC_ATOP)
-        }
         trackProgressBar =
             TrackProgressBar(binding.seekTo) { seekToPosition: Long -> seekTo(seekToPosition) }
 
@@ -348,19 +343,19 @@ class SpotifyNoteFragment : Fragment() {
          *  Buttons on the bottom of the page: Navigate to tag fragment
          * */
         binding.icAddTag.setOnClickListener {
-            findNavController().navigate(NavGraphDirections.actionGlobalTagDialogFragment(
-                viewModel.noteToBeUpdated!!))
+            viewModel.noteToBeUpdated?.let {
+                findNavController().navigate(NavGraphDirections.actionGlobalTagDialogFragment(it))
+            }
         }
 
         /**
          *  Buttons on the bottom of the page: Coauthoring
          * */
         binding.icCoauthoring.setOnClickListener {
-            findNavController().navigate(
-                NavGraphDirections.actionGlobalCoauthorDialogFragment(
-                    viewModel.noteToBeUpdated!!
-                )
-            )
+            viewModel.noteToBeUpdated?.let {
+                findNavController().navigate(
+                    NavGraphDirections.actionGlobalCoauthorDialogFragment(it))
+            }
         }
 
         /**
@@ -405,16 +400,19 @@ class SpotifyNoteFragment : Fragment() {
     }
 
     private fun shareNoteLink() {
+        val deepLink =
+            DYNAMIC_LINK_PREFIX + DEEPLINK_PATH_SPOTIFY_NOTE + viewModel.noteId + "/" + viewModel.sourceId
+
         SharingLinkGenerator.generateSharingLink(
-            deepLink = "${SharingLinkGenerator.PREFIX}/spotify_note/${viewModel.noteId}/${viewModel.sourceId}".toUri(),
+            deepLink = deepLink.toUri(),
             previewImageLink = viewModel.noteToBeUpdated?.thumbnail?.toUri()
         ) { generatedLink ->
             Timber.d("generatedLink = $generatedLink")
-            shareDeepLink(generatedLink)
+            shareDynamicLink(generatedLink)
         }
     }
 
-    private fun shareDeepLink(deepLink: String) {
+    private fun shareDynamicLink(dynamicLink: String) {
         val intent = Intent().apply {
             action = Intent.ACTION_SEND
             type = "text/plain"
@@ -424,7 +422,7 @@ class SpotifyNoteFragment : Fragment() {
                     "Spotify podcast",
                     viewModel.noteToBeUpdated?.title)
             )
-            putExtra(Intent.EXTRA_TEXT, deepLink)
+            putExtra(Intent.EXTRA_TEXT, dynamicLink)
         }
 
         startActivity(Intent.createChooser(intent, null))
@@ -499,7 +497,7 @@ class SpotifyNoteFragment : Fragment() {
         try {
             context?.unregisterReceiver(timestampReceiver)
         } catch (e: IllegalArgumentException) {
-            // Do nothing if the receiver not registered
+            // Do nothing if the receiver has not been registered
         }
 
         Timber.d("onDestroy() CALLED")
@@ -586,9 +584,6 @@ class SpotifyNoteFragment : Fragment() {
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-//                        "user-read-currently-playing",
-//                        "app-remote-control",
-//                        "user-follow-read",
                         "user-read-playback-position",
                         "user-library-read",
                     )

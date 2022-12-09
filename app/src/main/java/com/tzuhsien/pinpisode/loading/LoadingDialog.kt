@@ -10,6 +10,7 @@ import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.DialogLoadingBinding
 import timber.log.Timber
 
+
 const val REQUEST_KEY_DISMISS = "dismissRequest"
 const val BUNDLE_KEY_DONE_LOADING = "doneLoading"
 
