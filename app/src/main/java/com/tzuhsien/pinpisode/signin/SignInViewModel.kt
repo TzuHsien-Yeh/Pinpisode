@@ -3,24 +3,48 @@ package com.tzuhsien.pinpisode.signin
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.model.UserInfo
 import com.tzuhsien.pinpisode.data.source.Repository
+import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class SignInViewModel(private val repository: Repository): ViewModel() {
 
+    companion object {
+        const val GOOGLE_SIGN_IN = 1903
+    }
+
     var source: String? = null
     var sourceId: String? = null
+
+    // Build a GoogleSignInClient with the options specified by gso.
+    val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(MyApplication.applicationContext(), getGSO())
+    var auth: FirebaseAuth = Firebase.auth
+
+    private val _msg = MutableLiveData<String>(null)
+    val msg: LiveData<String>
+        get() = _msg
 
     private val _navigateUp = MutableLiveData(false)
     val navigateUp: LiveData<Boolean>
@@ -44,6 +68,49 @@ class SignInViewModel(private val repository: Repository): ViewModel() {
 
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
+
+//    init {
+//        getGoogleSignedInAccount()
+//    }
+//
+//    private fun getGoogleSignedInAccount() {
+//        val account = GoogleSignIn.getLastSignedInAccount(MyApplication.applicationContext())
+//        if (null != account) navigate()
+//    }
+
+    fun handleSignInResult(task: Task<GoogleSignInAccount>) {
+        try {
+            val account = task.getResult(ApiException::class.java)!!
+            firebaseAuthWithGoogle(account)
+        } catch (e: ApiException) {
+            Timber.d("Google Sign in exception: ${e.statusCode}")
+            _msg.value = getString(R.string.sign_in_failed)
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
+        val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    UserManager.isNewUser = task.result.additionalUserInfo?.isNewUser ?: false
+                    task.result.user?.let { updateUser(it, account) }
+                } else {
+                    //handle error
+                    Timber.d("firebaseAuthWithGoogle: Failed!")
+                }
+            }
+    }
+
+    private fun getGSO(): GoogleSignInOptions {
+        // Configure sign-in to request the user's ID, email address, and basic
+        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        return  GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+    }
+
 
     fun updateUser(firebaseUser: FirebaseUser, account: GoogleSignInAccount) {
 

@@ -71,5 +71,6 @@
     <string name="sp_msg_have_not_saved_any_show">You haven\'t saved any show yet</string>
     <string name="unknown_user_name">Unknown user name</string>
     <string name="unknown_email">Unknown email</string>
+    <string name="sign_in_failed">Sign in failed</string>
 
 </resources>
