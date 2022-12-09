@@ -17,8 +17,8 @@ import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentProfileBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.glide
-import com.tzuhsien.pinpisode.loading.BUNDLE_KEY_DONE_LOADING
-import com.tzuhsien.pinpisode.loading.REQUEST_KEY_DISMISS
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import timber.log.Timber
 
@@ -55,12 +55,12 @@ class ProfileFragment : Fragment() {
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
-                        bundleOf(BUNDLE_KEY_DONE_LOADING to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
-                        bundleOf(BUNDLE_KEY_DONE_LOADING to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }

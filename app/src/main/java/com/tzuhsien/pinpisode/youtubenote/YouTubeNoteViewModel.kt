@@ -57,21 +57,21 @@ class YouTubeNoteViewModel(
     // initial value is the note info gotten once from firebase
     var noteToBeUpdated: Note? = null
 
-    private var _liveNoteData = MutableLiveData<Note?>()
-    val liveNoteData: LiveData<Note?>
-        get() = _liveNoteData
+    private var _liveNote = MutableLiveData<Note?>()
+    val liveNote: LiveData<Note?>
+        get() = _liveNote
 
-    private var _liveNoteDataReassigned = MutableLiveData(false)
-    val liveNoteDataReassigned: LiveData<Boolean>
-        get() = _liveNoteDataReassigned
+    private var _isLiveNoteReady = MutableLiveData(false)
+    val isLiveNoteReady: LiveData<Boolean>
+        get() = _isLiveNoteReady
 
     private var _liveTimeItemList = MutableLiveData<List<TimeItem>>()
     val liveTimeItemList: LiveData<List<TimeItem>>
         get() = _liveTimeItemList
 
-    private var _timeItemLiveDataReassigned = MutableLiveData(false)
-    val timeItemLiveDataReassigned: LiveData<Boolean>
-        get() = _timeItemLiveDataReassigned
+    private var _isLiveTimeItemListReady = MutableLiveData(false)
+    val isLiveTimeItemListReady: LiveData<Boolean>
+        get() = _isLiveTimeItemListReady
 
 
     /** Decide whether the viewer can edit the note **/
@@ -142,10 +142,10 @@ class YouTubeNoteViewModel(
     }
 
     private fun getLiveNoteById(noteId: String) {
-        _liveNoteData = repository.getLiveNoteById(noteId)
+        _liveNote = repository.getLiveNoteById(noteId)
         _status.value = LoadApiStatus.DONE
 
-        _liveNoteDataReassigned.value = true
+        _isLiveNoteReady.value = true
     }
 
     private fun getLiveTimeItemsResult(noteId: String) {
@@ -153,7 +153,7 @@ class YouTubeNoteViewModel(
         _status.value = LoadApiStatus.DONE
 
         // Let fragment know it's time to start observing the reassigned _liveTimeItemList LiveData
-        _timeItemLiveDataReassigned.value = true
+        _isLiveTimeItemListReady.value = true
     }
 
     private fun checkVideoExistence(videoId: String) {
@@ -298,8 +298,8 @@ class YouTubeNoteViewModel(
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
                     result.data
-                    Timber.d("liveNoteData.value?.lastTimestamp = ${liveNoteData.value?.lastTimestamp}")
-                    liveNoteData.value?.let { noteFromDb ->
+                    Timber.d("liveNoteData.value?.lastTimestamp = ${liveNote.value?.lastTimestamp}")
+                    liveNote.value?.let { noteFromDb ->
                         if (noteFromDb.lastTimestamp < startAt) {
                             if (null != endAt && noteFromDb.lastTimestamp < endAt) {
                                 noteToBeUpdated?.lastTimestamp = endAt

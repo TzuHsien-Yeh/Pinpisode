@@ -2,7 +2,6 @@ package com.tzuhsien.pinpisode.search.result
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,25 +14,39 @@ import androidx.navigation.fragment.findNavController
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import com.tzuhsien.pinpisode.Constants.AUTH_CODE
+import com.tzuhsien.pinpisode.Constants.CLIENT_ID
+import com.tzuhsien.pinpisode.Constants.PARAM_CODE
+import com.tzuhsien.pinpisode.Constants.PARAM_CODE_CHALLENGE
+import com.tzuhsien.pinpisode.Constants.PARAM_CODE_CHALLENGE_METHOD
+import com.tzuhsien.pinpisode.Constants.PARAM_CODE_VERIFIER
+import com.tzuhsien.pinpisode.Constants.PARAM_GRANT_TYPE
+import com.tzuhsien.pinpisode.Constants.REDIRECT_URI
+import com.tzuhsien.pinpisode.Constants.S256
+import com.tzuhsien.pinpisode.Constants.SCOPE_LIBRARY_READ
+import com.tzuhsien.pinpisode.Constants.SCOPE_READ_PLAYBACK_POSITION
 import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSearchResultBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.loading.BUNDLE_KEY_DONE_LOADING
-import com.tzuhsien.pinpisode.loading.REQUEST_KEY_DISMISS
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
+import com.tzuhsien.pinpisode.util.Util.CODE_VERIFIER
+import com.tzuhsien.pinpisode.util.Util.getCodeChallenge
 import timber.log.Timber
-import java.security.MessageDigest
-import java.security.SecureRandom
 
-const val SOURCE_KEY = "sourceKey"
-const val REQUEST_KEY_KEYWORD_1 = "requestKey1"
-const val REQUEST_KEY_KEYWORD_2 = "requestKey2"
-const val BUNDLE_KEY_QUERY = "query"
 
 class SearchResultFragment : Fragment() {
+
+    companion object {
+        const val SOURCE_KEY = "sourceKey"
+        const val REQUEST_KEYWORD_1 = "requestKey1"
+        const val REQUEST_KEYWORD_2 = "requestKey2"
+        const val KEY_QUERY = "query"
+    }
 
     private val viewModel by viewModels<SearchResultViewModel> { getVmFactory() }
     private lateinit var binding: FragmentSearchResultBinding
@@ -49,29 +62,29 @@ class SearchResultFragment : Fragment() {
         if (viewModel.source == Source.YOUTUBE) {
             // Receive query string from Search Fragment
             requireActivity().supportFragmentManager.setFragmentResultListener(
-                REQUEST_KEY_KEYWORD_1,
+                REQUEST_KEYWORD_1,
                 this
             ) { _, bundle ->
-                if (null != bundle.getString(BUNDLE_KEY_QUERY)) {
-                    viewModel.searchOnYouTube(bundle.getString(BUNDLE_KEY_QUERY))
+                if (null != bundle.getString(KEY_QUERY)) {
+                    viewModel.searchOnYouTube(bundle.getString(KEY_QUERY))
                 } else {
                     viewModel.emptySearchResultLists()
                 }
-                Timber.d("setFragmentResultListener: ${bundle.getString(BUNDLE_KEY_QUERY)}")
+                Timber.d("setFragmentResultListener: ${bundle.getString(KEY_QUERY)}")
             }
         } else {
             // Receive query string from Search Fragment
             requireActivity().supportFragmentManager.setFragmentResultListener(
-                REQUEST_KEY_KEYWORD_2,
+                REQUEST_KEYWORD_2,
                 this
             ) { _, bundle ->
-                if (null != bundle.getString(BUNDLE_KEY_QUERY)) {
-                    viewModel.searchOnSpotify(bundle.getString(BUNDLE_KEY_QUERY))
-                    viewModel.queryKeyword = bundle.getString(BUNDLE_KEY_QUERY)
+                if (null != bundle.getString(KEY_QUERY)) {
+                    viewModel.searchOnSpotify(bundle.getString(KEY_QUERY))
+                    viewModel.queryKeyword = bundle.getString(KEY_QUERY)
                 } else {
                     viewModel.emptySearchResultLists()
                 }
-                Timber.d("setFragmentResultListener: ${bundle.getString(BUNDLE_KEY_QUERY)}")
+                Timber.d("setFragmentResultListener: ${bundle.getString(KEY_QUERY)}")
             }
         }
 
@@ -143,12 +156,12 @@ class SearchResultFragment : Fragment() {
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
-                        bundleOf(BUNDLE_KEY_DONE_LOADING to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
-                        bundleOf(BUNDLE_KEY_DONE_LOADING to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }
@@ -159,34 +172,6 @@ class SearchResultFragment : Fragment() {
     /**
      *  Spotify Auth flow
      * */
-    companion object {
-        const val CLIENT_ID = "f6095c97a1ab4a7fb88b5ac5f2ba606d"
-        const val REDIRECT_URI = "pinpisode://callback"
-
-        val CODE_VERIFIER = getCodeVerifier()
-
-        private fun getCodeVerifier(): String {
-            val secureRandom = SecureRandom()
-            val code = ByteArray(64)
-            secureRandom.nextBytes(code)
-            return Base64.encodeToString(
-                code,
-                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-            )
-        }
-
-        fun getCodeChallenge(verifier: String): String {
-            val bytes = verifier.toByteArray()
-            val messageDigest = MessageDigest.getInstance("SHA-256")
-            messageDigest.update(bytes, 0, bytes.size)
-            val digest = messageDigest.digest()
-            return Base64.encodeToString(
-                digest,
-                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-            )
-        }
-    }
-
     private fun getLoginActivityCodeIntent(): Intent =
         AuthorizationClient.createLoginActivityIntent(
             activity,
@@ -195,12 +180,12 @@ class SearchResultFragment : Fragment() {
                 REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-                        "user-read-playback-position",
-                        "user-library-read",
+                        SCOPE_READ_PLAYBACK_POSITION,
+                        SCOPE_LIBRARY_READ,
                     )
                 )
-                .setCustomParam("code_challenge_method", "S256")
-                .setCustomParam("code_challenge", getCodeChallenge(CODE_VERIFIER))
+                .setCustomParam(PARAM_CODE_CHALLENGE_METHOD, S256)
+                .setCustomParam(PARAM_CODE_CHALLENGE, getCodeChallenge(CODE_VERIFIER))
                 .build()
         )
 
@@ -232,13 +217,13 @@ class SearchResultFragment : Fragment() {
             AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-                        "user-read-playback-position",
-                        "user-library-read",
+                        SCOPE_READ_PLAYBACK_POSITION,
+                        SCOPE_LIBRARY_READ,
                     )
                 )
-                .setCustomParam("grant_type", "authorization_code")
-                .setCustomParam("code", code)
-                .setCustomParam("code_verifier", CODE_VERIFIER)
+                .setCustomParam(PARAM_GRANT_TYPE, AUTH_CODE)
+                .setCustomParam(PARAM_CODE, code)
+                .setCustomParam(PARAM_CODE_VERIFIER, CODE_VERIFIER)
                 .build()
         )
 

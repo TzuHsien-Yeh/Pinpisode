@@ -28,8 +28,8 @@ import com.tzuhsien.pinpisode.data.model.TimeItemDisplay
 import com.tzuhsien.pinpisode.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.parseDuration
-import com.tzuhsien.pinpisode.loading.BUNDLE_KEY_DONE_LOADING
-import com.tzuhsien.pinpisode.loading.REQUEST_KEY_DISMISS
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteService
 import com.tzuhsien.pinpisode.util.DEEPLINK_PATH_YOUTUBE_NOTE
@@ -137,9 +137,9 @@ class YouTubeNoteFragment : Fragment() {
          * */
         binding.editDigest.setBackgroundColor(Color.TRANSPARENT)
 
-        viewModel.liveNoteDataReassigned.observe(viewLifecycleOwner) {
+        viewModel.isLiveNoteReady.observe(viewLifecycleOwner) {
             if (it) {
-                viewModel.liveNoteData.observe(viewLifecycleOwner) { note ->
+                viewModel.liveNote.observe(viewLifecycleOwner) { note ->
                     note?.let {
                         binding.editDigest.setText(note.digest)
                         viewModel.noteToBeUpdated = note
@@ -179,7 +179,7 @@ class YouTubeNoteFragment : Fragment() {
 
         val adapter = TimeItemAdapter(uiState = viewModel.uiState)
         binding.recyclerViewTimeItems.adapter = adapter
-        viewModel.timeItemLiveDataReassigned.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
+        viewModel.isLiveTimeItemListReady.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
             if (timeItemLiveDataAssigned == true) {
                 viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer { list ->
                     list?.let {
@@ -276,12 +276,12 @@ class YouTubeNoteFragment : Fragment() {
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
-                        bundleOf(BUNDLE_KEY_DONE_LOADING to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
-                        bundleOf(BUNDLE_KEY_DONE_LOADING to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }

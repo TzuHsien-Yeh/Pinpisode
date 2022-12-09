@@ -11,10 +11,13 @@ import com.tzuhsien.pinpisode.databinding.DialogLoadingBinding
 import timber.log.Timber
 
 
-const val REQUEST_KEY_DISMISS = "dismissRequest"
-const val BUNDLE_KEY_DONE_LOADING = "doneLoading"
 
 class LoadingDialog : AppCompatDialogFragment() {
+
+    companion object {
+        const val REQUEST_DISMISS = "dismissRequest"
+        const val KEY_DONE_LOADING = "doneLoading"
+    }
 
     private lateinit var binding: DialogLoadingBinding
 
@@ -30,12 +33,12 @@ class LoadingDialog : AppCompatDialogFragment() {
         binding = DialogLoadingBinding.inflate(layoutInflater)
 
         requireActivity().supportFragmentManager.setFragmentResultListener(
-            REQUEST_KEY_DISMISS,
+            REQUEST_DISMISS,
          this,
         ) { _, bundle ->
 
-            Timber.d("setFragmentResultListener bundle: ${bundle.getBoolean(BUNDLE_KEY_DONE_LOADING)}")
-            when (bundle.getBoolean(BUNDLE_KEY_DONE_LOADING)) {
+            Timber.d("setFragmentResultListener bundle: ${bundle.getBoolean(KEY_DONE_LOADING)}")
+            when (bundle.getBoolean(KEY_DONE_LOADING)) {
                 true -> {
                     dismiss()
                 }

@@ -2,7 +2,6 @@ package com.tzuhsien.pinpisode.search
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +16,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import com.tzuhsien.pinpisode.Constants
 import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Source
@@ -26,16 +26,15 @@ import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.glide
 import com.tzuhsien.pinpisode.ext.utcToLocalTime
-import com.tzuhsien.pinpisode.loading.BUNDLE_KEY_DONE_LOADING
-import com.tzuhsien.pinpisode.loading.REQUEST_KEY_DISMISS
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
-import com.tzuhsien.pinpisode.search.result.BUNDLE_KEY_QUERY
-import com.tzuhsien.pinpisode.search.result.REQUEST_KEY_KEYWORD_1
-import com.tzuhsien.pinpisode.search.result.REQUEST_KEY_KEYWORD_2
+import com.tzuhsien.pinpisode.search.result.SearchResultFragment.Companion.KEY_QUERY
+import com.tzuhsien.pinpisode.search.result.SearchResultFragment.Companion.REQUEST_KEYWORD_1
+import com.tzuhsien.pinpisode.search.result.SearchResultFragment.Companion.REQUEST_KEYWORD_2
 import com.tzuhsien.pinpisode.search.result.ViewPagerAdapter
+import com.tzuhsien.pinpisode.util.Util
 import timber.log.Timber
-import java.security.MessageDigest
-import java.security.SecureRandom
 
 class SearchFragment : Fragment() {
 
@@ -138,10 +137,10 @@ class SearchFragment : Fragment() {
         setUpTabLayout()
         viewModel.searchQuery.observe(viewLifecycleOwner) {
             Timber.d("query = $it, parentFragmentManager.setFragmentResult")
-            requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_KEYWORD_1,
-                bundleOf(BUNDLE_KEY_QUERY to it))
-            requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_KEYWORD_2,
-                bundleOf(BUNDLE_KEY_QUERY to it))
+            requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEYWORD_1,
+                bundleOf(KEY_QUERY to it))
+            requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEYWORD_2,
+                bundleOf(KEY_QUERY to it))
 
             if (null != it) {
                 hideRecommendationViews()
@@ -237,12 +236,12 @@ class SearchFragment : Fragment() {
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
-                        bundleOf(BUNDLE_KEY_DONE_LOADING to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEY_DISMISS,
-                        bundleOf(BUNDLE_KEY_DONE_LOADING to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }
@@ -282,46 +281,21 @@ class SearchFragment : Fragment() {
     /**
      *  Spotify Auth flow
      * */
-    companion object {
-        const val CLIENT_ID = "f6095c97a1ab4a7fb88b5ac5f2ba606d"
-        const val REDIRECT_URI = "pinpisode://callback"
-
-        val CODE_VERIFIER = getCodeVerifier()
-
-        private fun getCodeVerifier(): String {
-            val secureRandom = SecureRandom()
-            val code = ByteArray(64)
-            secureRandom.nextBytes(code)
-            return Base64.encodeToString(
-                code,
-                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-            )
-        }
-
-        fun getCodeChallenge(verifier: String): String {
-            val bytes = verifier.toByteArray()
-            val messageDigest = MessageDigest.getInstance("SHA-256")
-            messageDigest.update(bytes, 0, bytes.size)
-            val digest = messageDigest.digest()
-            return Base64.encodeToString(
-                digest,
-                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-            )
-        }
-    }
-
     private fun getLoginActivityCodeIntent(): Intent =
         AuthorizationClient.createLoginActivityIntent(
             activity,
-            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
+            AuthorizationRequest.Builder(Constants.CLIENT_ID,
+                AuthorizationResponse.Type.CODE,
+                Constants.REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-                        "user-read-playback-position",
-                        "user-library-read"
+                        Constants.SCOPE_READ_PLAYBACK_POSITION,
+                        Constants.SCOPE_LIBRARY_READ,
                     )
                 )
-                .setCustomParam("code_challenge_method", "S256")
-                .setCustomParam("code_challenge", getCodeChallenge(CODE_VERIFIER))
+                .setCustomParam(Constants.PARAM_CODE_CHALLENGE_METHOD, Constants.S256)
+                .setCustomParam(Constants.PARAM_CODE_CHALLENGE,
+                    Util.getCodeChallenge(Util.CODE_VERIFIER))
                 .build()
         )
 
@@ -329,37 +303,38 @@ class SearchFragment : Fragment() {
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
 
-        val authorizationResponse = AuthorizationClient.getResponse(result.resultCode, result.data)
+        val authorizationResponse =
+            AuthorizationClient.getResponse(result.resultCode, result.data)
 
         when (authorizationResponse.type) {
             AuthorizationResponse.Type.CODE -> {
                 // Here You will get the authorization code which you
                 // can get with authorizationResponse.code
+
                 showLoginActivityToken.launch(getLoginActivityTokenIntent(authorizationResponse.code))
             }
             AuthorizationResponse.Type.ERROR -> {
-                binding.viewGroupSpNotAuthorized.visibility = View.VISIBLE
                 Timber.d("AuthorizationResponse.Type.ERROR")
             }
-            else -> {
-                binding.viewGroupSpNotAuthorized.visibility = View.VISIBLE
-            }
+
+            else -> {} // Probably interruption
         }
     }
 
     private fun getLoginActivityTokenIntent(code: String): Intent =
         AuthorizationClient.createLoginActivityIntent(
             activity,
-            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
+            AuthorizationRequest.Builder(Constants.CLIENT_ID, AuthorizationResponse.Type.TOKEN,
+                Constants.REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-                        "user-read-playback-position",
-                        "user-library-read"
+                        Constants.SCOPE_READ_PLAYBACK_POSITION,
+                        Constants.SCOPE_LIBRARY_READ,
                     )
                 )
-                .setCustomParam("grant_type", "authorization_code")
-                .setCustomParam("code", code)
-                .setCustomParam("code_verifier", CODE_VERIFIER)
+                .setCustomParam(Constants.PARAM_GRANT_TYPE, Constants.AUTH_CODE)
+                .setCustomParam(Constants.PARAM_CODE, code)
+                .setCustomParam(Constants.PARAM_CODE_VERIFIER, Util.CODE_VERIFIER)
                 .build()
         )
 
@@ -367,7 +342,8 @@ class SearchFragment : Fragment() {
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
 
-        val authorizationResponse = AuthorizationClient.getResponse(result.resultCode, result.data)
+        val authorizationResponse =
+            AuthorizationClient.getResponse(result.resultCode, result.data)
 
         when (authorizationResponse.type) {
             AuthorizationResponse.Type.TOKEN -> {
@@ -377,7 +353,7 @@ class SearchFragment : Fragment() {
                 Timber.d("showLoginActivityToken authorizationResponse.expiresIn: ${authorizationResponse.expiresIn}")
                 Timber.d("authorizationResponse.accessToken = ${authorizationResponse.accessToken}")
                 UserManager.userSpotifyAuthToken = authorizationResponse.accessToken
-                viewModel.getSpotifySavedShowLatestEpisodes()
+                viewModel.doneRequestSpotifyAuthToken()
             }
             AuthorizationResponse.Type.ERROR -> {
                 Timber.d("showLoginActivityToken : AuthorizationResponse.Type.ERROR")
@@ -385,5 +361,4 @@ class SearchFragment : Fragment() {
             else -> {} // Probably interruption
         }
     }
-
 }

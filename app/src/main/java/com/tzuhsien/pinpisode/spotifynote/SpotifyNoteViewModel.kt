@@ -35,10 +35,6 @@ class SpotifyNoteViewModel(
 
     var playingState = PlayingState.STOPPED
 
-    private val _isSpotifyNeedLogin = MutableLiveData<Boolean>(false)
-    val isSpotifyNeedLogin: LiveData<Boolean>
-        get() = _isSpotifyNeedLogin
-
     private val _isSpotifyConnected = MutableLiveData<Boolean>(false)
     val isSpotifyConnected: LiveData<Boolean>
         get() = _isSpotifyConnected
@@ -50,21 +46,21 @@ class SpotifyNoteViewModel(
     val shouldCreateNewNote: LiveData<Boolean>
         get() = _shouldCreateNewNote
 
-    private var _liveNoteData = MutableLiveData<Note?>()
-    val liveNoteData: LiveData<Note?>
-        get() = _liveNoteData
+    private var _liveNote = MutableLiveData<Note?>()
+    val liveNote: LiveData<Note?>
+        get() = _liveNote
 
-    private var _liveNoteDataReassigned = MutableLiveData(false)
-    val liveNoteDataReassigned: LiveData<Boolean>
-        get() = _liveNoteDataReassigned
+    private var _isLiveNoteReady = MutableLiveData(false)
+    val isLiveNoteReady: LiveData<Boolean>
+        get() = _isLiveNoteReady
 
     private var _liveTimeItemList = MutableLiveData<List<TimeItem>>()
     val liveTimeItemList: LiveData<List<TimeItem>>
         get() = _liveTimeItemList
 
-    private var _timeItemLiveDataReassigned = MutableLiveData<Boolean>(false)
-    val timeItemLiveDataReassigned: LiveData<Boolean>
-        get() = _timeItemLiveDataReassigned
+    private var _isLiveTimeItemListReady = MutableLiveData<Boolean>(false)
+    val isLiveTimeItemListReady: LiveData<Boolean>
+        get() = _isLiveTimeItemListReady
 
 
     /** current position info from playerState **/
@@ -88,16 +84,8 @@ class SpotifyNoteViewModel(
         get() = _playStart
     var playEnd: Long? = null
 
-//    private val _seekToPosition = MutableLiveData<Long>()
-//    val seekToPosition: LiveData<Long>
-//        get() = _seekToPosition
-//
-//    private val _pause = MutableLiveData<Boolean>()
-//    val pause: LiveData<Boolean>
-//        get() = _pause
-
     /** Decide whether the viewer can edit the note **/
-    private var _canEdit = MutableLiveData<Boolean>(false)
+    private var _canEdit = MutableLiveData(false)
     val canEdit: LiveData<Boolean>
         get() = _canEdit
 
@@ -217,10 +205,10 @@ class SpotifyNoteViewModel(
     }
 
     private fun getLiveNoteById(noteId: String) {
-        _liveNoteData = repository.getLiveNoteById(noteId)
+        _liveNote = repository.getLiveNoteById(noteId)
         _status.value = LoadApiStatus.DONE
 
-        _liveNoteDataReassigned.value = true
+        _isLiveNoteReady.value = true
     }
 
     private fun getLiveTimeItemsResult(noteId: String) {
@@ -228,7 +216,7 @@ class SpotifyNoteViewModel(
         _status.value = LoadApiStatus.DONE
 
         // Let fragment know it's time to start observing the reassigned _liveTimeItemList LiveData
-        _timeItemLiveDataReassigned.value = true
+        _isLiveTimeItemListReady.value = true
     }
 
     private fun checkSpotifyNoteExistence(sourceId: String) {
@@ -359,8 +347,8 @@ class SpotifyNoteViewModel(
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
                     result.data
-                    Timber.d("liveNoteData.value?.lastTimestamp = ${liveNoteData.value?.lastTimestamp}")
-                    liveNoteData.value?.let { noteFromDb ->
+                    Timber.d("liveNoteData.value?.lastTimestamp = ${liveNote.value?.lastTimestamp}")
+                    liveNote.value?.let { noteFromDb ->
                         if (noteFromDb.lastTimestamp < startAt) {
                             if (null != endAt && noteFromDb.lastTimestamp < endAt) {
                                 noteToBeUpdated?.lastTimestamp = endAt
