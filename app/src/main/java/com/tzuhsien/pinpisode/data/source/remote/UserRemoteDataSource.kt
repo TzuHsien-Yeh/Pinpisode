@@ -2,7 +2,7 @@ package com.tzuhsien.pinpisode.data.source.remote
 
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
@@ -13,6 +13,7 @@ import com.google.firebase.ktx.Firebase
 import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
+import com.tzuhsien.pinpisode.data.model.Guide
 import com.tzuhsien.pinpisode.data.model.Invitation
 import com.tzuhsien.pinpisode.data.model.Note
 import com.tzuhsien.pinpisode.data.model.UserInfo
@@ -33,7 +34,7 @@ object UserRemoteDataSource : UserDataSource {
     private const val KEY_TIME = "time"
     private const val KEY_INVITEE_ID = "inviteeId"
 
-    override suspend fun signInWithGoogle(credential: AuthCredential): Result<FirebaseUser> =
+    override suspend fun signInWithGoogle(credential: AuthCredential): Result<AuthResult> =
         suspendCoroutine { continuation ->
 
             Firebase.auth
@@ -46,7 +47,7 @@ object UserRemoteDataSource : UserDataSource {
                         Timber.d("Firebase.auth.currentUser.displayName: ${Firebase.auth.currentUser?.displayName}")
                         Timber.d("Firebase.auth.currentUser.profilePic: ${Firebase.auth.currentUser?.photoUrl}")
 
-                        continuation.resume(Result.Success(task.result.user!!))
+                        continuation.resume(Result.Success(task.result))
                     } else {
                         continuation.resume(Result.Fail(getString(R.string.no_signed_in_firebase_user)))
                     }
@@ -98,6 +99,18 @@ object UserRemoteDataSource : UserDataSource {
     }
 
     override fun getLocalCurrentUser(): UserInfo? {
+        TODO("Not yet implemented")
+    }
+
+    override fun markNewUser(isNewUser: Boolean): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun checkWhetherToShowNoteListGuide(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun markGuideAsHasShown(guide: Guide): Boolean {
         TODO("Not yet implemented")
     }
 

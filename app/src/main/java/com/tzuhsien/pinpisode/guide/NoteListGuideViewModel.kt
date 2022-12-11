@@ -3,8 +3,10 @@ package com.tzuhsien.pinpisode.guide
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.tzuhsien.pinpisode.data.model.Guide
+import com.tzuhsien.pinpisode.data.source.Repository
 
-class NoteListGuideViewModel : ViewModel() {
+class NoteListGuideViewModel(private val repository : Repository) : ViewModel() {
 
     var trickNumber = 1
 
@@ -67,6 +69,7 @@ class NoteListGuideViewModel : ViewModel() {
                 showSixthTrick()
             }
             7 -> {
+                doneNoteListGuideForNewUser()
                 dismissGuide()
             }
         }
@@ -100,6 +103,10 @@ class NoteListGuideViewModel : ViewModel() {
     private fun showSixthTrick() {
         _isToShowQuit.value = false
         _isToShowClosure.value = true
+    }
+
+    private fun doneNoteListGuideForNewUser() {
+        repository.markGuideAsHasShown(Guide.NOTE_LIST)
     }
 
     private fun dismissGuide() {

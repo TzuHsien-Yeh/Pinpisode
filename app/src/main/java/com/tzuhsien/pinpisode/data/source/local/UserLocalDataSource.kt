@@ -2,8 +2,9 @@ package com.tzuhsien.pinpisode.data.source.local
 
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.AuthResult
 import com.tzuhsien.pinpisode.data.Result
+import com.tzuhsien.pinpisode.data.model.Guide
 import com.tzuhsien.pinpisode.data.model.Invitation
 import com.tzuhsien.pinpisode.data.model.Note
 import com.tzuhsien.pinpisode.data.model.UserInfo
@@ -11,7 +12,7 @@ import com.tzuhsien.pinpisode.data.source.UserDataSource
 import timber.log.Timber
 
 object UserLocalDataSource : UserDataSource {
-    override suspend fun signInWithGoogle(credential: AuthCredential): Result<FirebaseUser> {
+    override suspend fun signInWithGoogle(credential: AuthCredential): Result<AuthResult> {
         TODO("Not yet implemented")
     }
 
@@ -30,6 +31,29 @@ object UserLocalDataSource : UserDataSource {
         } else {
             UserInfo(id = UserManager.userId!!, email = UserManager.userEmail!!, name = UserManager.userName!!, pic = UserManager.userPic)
         }
+    }
+
+    override fun markNewUser(isNewUser: Boolean): Boolean {
+        UserManager.isNewUser = isNewUser
+        UserManager.shouldShowNoteListGuide = isNewUser
+
+        Timber.d("isNewUser = ${UserManager.isNewUser},shouldShowNoteListGuide: ${UserManager.shouldShowNoteListGuide}")
+        return true
+    }
+
+    override fun checkWhetherToShowNoteListGuide(): Boolean {
+        Timber.d("UserManager.shouldShowNoteListGuide = ${UserManager.shouldShowNoteListGuide}")
+
+        return UserManager.shouldShowNoteListGuide
+    }
+
+    override fun markGuideAsHasShown(guide: Guide): Boolean {
+        when(guide) {
+            Guide.NOTE_LIST -> UserManager.shouldShowNoteListGuide = false
+            Guide.YOUTUBE_NOTE -> TODO()
+            Guide.SPOTIFY_NOTE -> TODO()
+        }
+        return true
     }
 
     override fun setSpotifyAuthToken(authToken: String): Boolean {

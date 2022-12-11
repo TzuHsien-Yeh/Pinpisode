@@ -118,7 +118,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     val navigateToSpotifyNote: LiveData<Note?>
         get() = _navigateToSpotifyNote
 
-    private val _navigateToNoteListGuide = MutableLiveData(false)
+    private val _navigateToNoteListGuide = MutableLiveData(repository.checkWhetherToShowNoteListGuide())
     val navigateToNoteListGuide: LiveData<Boolean>
         get() = _navigateToNoteListGuide
 

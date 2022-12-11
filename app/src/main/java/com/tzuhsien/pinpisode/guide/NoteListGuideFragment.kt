@@ -9,19 +9,20 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Sort
 import com.tzuhsien.pinpisode.databinding.DialogNoteListGuideBinding
+import com.tzuhsien.pinpisode.ext.getVmFactory
 import kotlinx.coroutines.*
 import timber.log.Timber
 
 
 class NoteListGuideFragment : AppCompatDialogFragment() {
 
-    private lateinit var viewModel: NoteListGuideViewModel
+    private val viewModel by viewModels<NoteListGuideViewModel> { getVmFactory() }
     private lateinit var binding: DialogNoteListGuideBinding
 
     private val animJob = Job()
@@ -38,8 +39,6 @@ class NoteListGuideFragment : AppCompatDialogFragment() {
     ): View? {
 
         binding = DialogNoteListGuideBinding.inflate(layoutInflater)
-
-        viewModel = ViewModelProvider(this).get(NoteListGuideViewModel::class.java)
 
         binding.root.setOnClickListener { viewModel.showNext() }
 

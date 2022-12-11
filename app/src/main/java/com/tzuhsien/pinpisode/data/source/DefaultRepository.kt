@@ -2,7 +2,7 @@ package com.tzuhsien.pinpisode.data.source
 
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.AuthResult
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.*
@@ -70,7 +70,7 @@ class DefaultRepository(
     /**
      *  Users
      * */
-    override suspend fun signInWithGoogle(credential: AuthCredential): Result<FirebaseUser> {
+    override suspend fun signInWithGoogle(credential: AuthCredential): Result<AuthResult> {
         return userRemoteDataSource.signInWithGoogle(credential)
     }
 
@@ -102,6 +102,18 @@ class DefaultRepository(
 
     override fun getCurrentUser(): UserInfo? {
         return userLocalDataSource.getLocalCurrentUser()
+    }
+
+    override fun markNewUser(isNewUser: Boolean): Boolean {
+        return userLocalDataSource.markNewUser(isNewUser)
+    }
+
+    override fun checkWhetherToShowNoteListGuide(): Boolean {
+        return userLocalDataSource.checkWhetherToShowNoteListGuide()
+    }
+
+    override fun markGuideAsHasShown(guide: Guide): Boolean {
+        return userLocalDataSource.markGuideAsHasShown(guide)
     }
 
     override fun setSpotifyAuthToken(authToken: String): Boolean {

@@ -83,6 +83,7 @@ class SignInViewModel(private val repository: Repository) : ViewModel() {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
 
+                    markIfIsNewUser(result.data.additionalUserInfo?.isNewUser)
                     updateUser()
                 }
                 is Result.Error -> {
@@ -103,6 +104,10 @@ class SignInViewModel(private val repository: Repository) : ViewModel() {
                 }
             }
         }
+    }
+
+    private fun markIfIsNewUser(newUser: Boolean?) {
+        repository.markNewUser(newUser ?: false)
     }
 
     private fun getGSO(): GoogleSignInOptions {

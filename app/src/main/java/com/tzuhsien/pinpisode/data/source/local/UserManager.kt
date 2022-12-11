@@ -13,6 +13,8 @@ object UserManager {
     private const val USER_EMAIL = "UserEmail"
     private const val USER_PIC = "UserPic"
     private const val USER_SPOTIFY_TOKEN = "UserSpotifyToken"
+    private const val NEW_USER = "isNewUser"
+    private const val SHOW_NOTE_LIST_GUIDE = "shown_note_list_guide"
 
     private val preferences: SharedPreferences =
         MyApplication.instance.getSharedPreferences(USER, Context.MODE_PRIVATE)
@@ -65,5 +67,21 @@ object UserManager {
         }
 
     var isNewUser: Boolean = false
+        get() {
+            return preferences.getBoolean(NEW_USER, false)
+        }
+        set(value) {
+            field = value
+            editor.putBoolean(NEW_USER, value).commit()
+        }
+
+    var shouldShowNoteListGuide: Boolean = true
+        get() {
+            return preferences.getBoolean(SHOW_NOTE_LIST_GUIDE, isNewUser)
+        }
+        set(value) {
+            field = value
+            editor.putBoolean(SHOW_NOTE_LIST_GUIDE, value).commit()
+        }
 
 }

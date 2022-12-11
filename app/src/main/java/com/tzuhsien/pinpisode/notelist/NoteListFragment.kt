@@ -23,6 +23,7 @@ import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import kotlinx.coroutines.*
+import timber.log.Timber
 
 class NoteListFragment : Fragment() {
 
@@ -43,11 +44,13 @@ class NoteListFragment : Fragment() {
             if (it) findNavController().navigate(NavGraphDirections.actionGlobalSignInFragment())
         }
 
-//        viewModel.navigateToNoteListGuide.observe(viewLifecycleOwner) {
-//            Timber.d("navigateToNoteListGuide: $it")
-//            if (it) findNavController().navigate(NavGraphDirections.actionGlobalNoteListGuideFragment())
-//            viewModel.doneNavigationToGuide()
-//        }
+        viewModel.navigateToNoteListGuide.observe(viewLifecycleOwner) {
+            Timber.d("navigateToNoteListGuide: $it")
+            if (it) {
+                findNavController().navigate(NavGraphDirections.actionGlobalNoteListGuideFragment())
+                viewModel.doneNavigationToGuide()
+            }
+        }
 
         binding = FragmentNoteListBinding.inflate(layoutInflater)
 
