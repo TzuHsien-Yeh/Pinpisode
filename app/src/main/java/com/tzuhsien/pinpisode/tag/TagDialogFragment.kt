@@ -26,7 +26,9 @@ import timber.log.Timber
 
 class TagDialogFragment : AppCompatDialogFragment() {
 
-    private val viewModel by viewModels<TagViewModel> { getVmFactory(TagDialogFragmentArgs.fromBundle(requireArguments()).noteKey) }
+    private val viewModel by viewModels<TagViewModel> {
+        getVmFactory(TagDialogFragmentArgs.fromBundle(requireArguments()).noteKey)
+    }
     private lateinit var binding: DialogTagBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,18 +42,28 @@ class TagDialogFragment : AppCompatDialogFragment() {
     ): ConstraintLayout {
 
         binding = DialogTagBinding.inflate(inflater, container, false)
-        binding.layoutTags.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_slide_up))
+        binding.layoutTags.startAnimation(AnimationUtils.loadAnimation(context,
+            R.anim.anim_slide_up))
 
-        for (t in viewModel.allTags) {
-            val chip = inflater.inflate(R.layout.chip_tag, binding.chipGroupTags, false) as Chip
-            chip.isClickable = true
-            chip.isCheckable = true
-            chip.isChecked = viewModel.tagsOfCurrentNote.contains(t)
-            chip.setOnCheckedChangeListener { _, isChecked ->
-                viewModel.updateTagSet(t, isChecked)
+        viewModel.allTags.observe(viewLifecycleOwner) {
+            it?.let {
+                if (!viewModel.hasDrawnTags) {
+                    for (t in it) {
+                        val chip = inflater.inflate(R.layout.chip_tag,
+                            binding.chipGroupTags,
+                            false) as Chip
+                        chip.isClickable = true
+                        chip.isCheckable = true
+                        chip.isChecked = viewModel.tagsOfCurrentNote.contains(t)
+                        chip.setOnCheckedChangeListener { _, isChecked ->
+                            viewModel.updateTagSet(t, isChecked)
+                        }
+                        chip.text = (t)
+                        binding.chipGroupTags.addView(chip)
+                    }
+                    viewModel.doneDrawingTags()
+                }
             }
-            chip.text = (t)
-            binding.chipGroupTags.addView(chip)
         }
 
         binding.editAddNewTag.doAfterTextChanged {
@@ -63,7 +75,8 @@ class TagDialogFragment : AppCompatDialogFragment() {
 
                 viewModel.addNewTag()
 
-                val newChip = inflater.inflate(R.layout.chip_tag, binding.chipGroupTags, false) as Chip
+                val newChip =
+                    inflater.inflate(R.layout.chip_tag, binding.chipGroupTags, false) as Chip
                 newChip.isClickable = true
                 newChip.isCheckable = true
                 newChip.isChecked = true
@@ -85,7 +98,7 @@ class TagDialogFragment : AppCompatDialogFragment() {
         }
 
         viewModel.leave.observe(viewLifecycleOwner, Observer {
-            if (it){
+            if (it) {
                 dismiss()
                 viewModel.onLeaveCompleted()
             }
@@ -93,7 +106,7 @@ class TagDialogFragment : AppCompatDialogFragment() {
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            when(it) {
+            when (it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
                         findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
@@ -114,7 +127,8 @@ class TagDialogFragment : AppCompatDialogFragment() {
     }
 
     override fun dismiss() {
-        binding.layoutTags.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_slide_down))
+        binding.layoutTags.startAnimation(AnimationUtils.loadAnimation(context,
+            R.anim.anim_slide_down))
         Handler().postDelayed({ super.dismiss() }, 100)
     }
 

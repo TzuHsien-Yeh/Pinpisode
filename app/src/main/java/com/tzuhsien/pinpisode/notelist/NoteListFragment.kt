@@ -11,12 +11,10 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Sort
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentNoteListBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.glide
@@ -28,9 +26,7 @@ import kotlinx.coroutines.*
 
 class NoteListFragment : Fragment() {
 
-    private val viewModel by viewModels<NoteListViewModel> {
-        getVmFactory()
-    }
+    private val viewModel by viewModels<NoteListViewModel> { getVmFactory() }
     private lateinit var binding: FragmentNoteListBinding
     private val scrollJob = Job()
     val coroutineScope = CoroutineScope(scrollJob + Dispatchers.Main)
@@ -43,10 +39,8 @@ class NoteListFragment : Fragment() {
         /**
          * Check and handle sign in status
          * */
-        if (null == GoogleSignIn.getLastSignedInAccount(requireContext())) {
-            findNavController().navigate(NavGraphDirections.actionGlobalSignInFragment())
-        } else {
-            viewModel.updateLocalUserId()
+        viewModel.navigateToSignIn.observe(viewLifecycleOwner) {
+            if (it) findNavController().navigate(NavGraphDirections.actionGlobalSignInFragment())
         }
 
 //        viewModel.navigateToNoteListGuide.observe(viewLifecycleOwner) {
@@ -161,8 +155,12 @@ class NoteListFragment : Fragment() {
          *  Navigation
          * */
         // Profile page
-        binding.imgPicToProfile.glide(UserManager.userPic)
-        binding.textUserName.text = UserManager.userName
+        viewModel.userPic.observe(viewLifecycleOwner) {
+            it?.let { binding.imgPicToProfile.glide(it) }
+        }
+        viewModel.userName.observe(viewLifecycleOwner) {
+            it?.let { binding.textUserName.text = it }
+        }
         binding.imgPicToProfile.setOnClickListener {
             findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToProfileFragment())
         }

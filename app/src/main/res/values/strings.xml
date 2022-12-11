@@ -72,5 +72,7 @@
     <string name="unknown_user_name">Unknown user name</string>
     <string name="unknown_email">Unknown email</string>
     <string name="sign_in_failed">Sign in failed</string>
+    <string name="no_signed_in_firebase_user">No user signed in</string>
+    <string name="no_signed_in_user">No signed in user</string>
 
 </resources>

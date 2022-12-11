@@ -7,10 +7,8 @@ import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.*
 import com.tzuhsien.pinpisode.data.source.Repository
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util
-import com.tzuhsien.pinpisode.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -116,7 +114,7 @@ class YouTubeNoteViewModel(
                     _status.value = LoadApiStatus.DONE
 
                     // save one time note info, check if user is in author list, and start listening to live data
-                    checkIfViewerCanEdit(result.data.authors.contains(UserManager.userId))
+                    checkIfViewerCanEdit(result.data.authors.contains(repository.getCurrentUser()?.id))
                     getLiveNoteById(result.data.id)
                     getLiveTimeItemsResult(result.data.id)
                     result.data
@@ -171,11 +169,9 @@ class YouTubeNoteViewModel(
                         getYoutubeVideoInfoById(videoId)
                     } else {
                         // the note already exist, save one time note info, check if user is in author list, and start listening to live data
+                        noteId = result.data.id
                         noteToBeUpdated = result.data
-                        Timber.d("result.data.authors.contains(UserManager.userId): ${
-                            result.data.authors.contains(UserManager.userId)
-                        } UserManager.userId = ${UserManager.userId}")
-                        checkIfViewerCanEdit(result.data.authors.contains(UserManager.userId))
+                        checkIfViewerCanEdit(result.data.authors.contains(repository.getCurrentUser()?.id))
                         getLiveNoteById(result.data.id)
                         getLiveTimeItemsResult(result.data.id)
                     }
@@ -222,52 +218,54 @@ class YouTubeNoteViewModel(
     }
 
     private fun createNewYouTubeNote(video: Item) {
-        val newYtNote = Note(
-            sourceId = video.id,
-            source = Source.YOUTUBE.source,
-            ownerId = UserManager.userId ?: getString(R.string.unknown_user_name),
-            authors = listOf(UserManager.userId ?: getString(R.string.unknown_user_name)),
-            tags = listOf(Source.YOUTUBE.source),
-            thumbnail = video.snippet.thumbnails.high.url,
-            title = video.snippet.title,
-            duration = video.contentDetails.duration
-        )
-
-        coroutineScope.launch {
-
-            val result = repository.createNote(
-                source = Source.YOUTUBE.source,
+        repository.getCurrentUser()?.let { currentUser ->
+            val newYtNote = Note(
                 sourceId = video.id,
-                note = newYtNote
+                source = Source.YOUTUBE.source,
+                ownerId = currentUser.id,
+                authors = listOf(currentUser.id),
+                tags = listOf(Source.YOUTUBE.source),
+                thumbnail = video.snippet.thumbnails.high.url,
+                title = video.snippet.title,
+                duration = video.contentDetails.duration
             )
 
-            noteToBeUpdated = when (result) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
+            coroutineScope.launch {
 
-                    // new note created,
-                    // save one time note info & noteId, check if user is in author list, and start listening to live data
-                    noteId = result.data.id
-                    checkIfViewerCanEdit(result.data.authors.contains(UserManager.userId))
-                    getLiveNoteById(result.data.id)
-                    getLiveTimeItemsResult(result.data.id)
-                    result.data
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                    null
-                }
-                else -> {
-                    _error.value = Util.getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
-                    null
+                val result = repository.createNote(
+                    source = Source.YOUTUBE.source,
+                    sourceId = video.id,
+                    note = newYtNote
+                )
+
+                noteToBeUpdated = when (result) {
+                    is Result.Success -> {
+                        _error.value = null
+                        _status.value = LoadApiStatus.DONE
+
+                        // new note created,
+                        // save one time note info & noteId, check if user is in author list, and start listening to live data
+                        noteId = result.data.id
+                        checkIfViewerCanEdit(result.data.authors.contains(currentUser.id))
+                        getLiveNoteById(result.data.id)
+                        getLiveTimeItemsResult(result.data.id)
+                        result.data
+                    }
+                    is Result.Fail -> {
+                        _error.value = result.error
+                        _status.value = LoadApiStatus.ERROR
+                        null
+                    }
+                    is Result.Error -> {
+                        _error.value = result.exception.toString()
+                        _status.value = LoadApiStatus.ERROR
+                        null
+                    }
+                    else -> {
+                        _error.value = Util.getString(R.string.unknown_error)
+                        _status.value = LoadApiStatus.ERROR
+                        null
+                    }
                 }
             }
         }

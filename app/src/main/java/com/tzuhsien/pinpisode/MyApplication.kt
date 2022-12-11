@@ -15,7 +15,7 @@ const val NOTIFICATION_CHANNEL_NAME = "Spotify Note"
 class MyApplication: Application() {
 
     val repository: Repository
-        get() = ServiceLocator.provideTasksRepository(this)
+        get() = ServiceLocator.provideTasksRepository()
 
     companion object {
         var instance: MyApplication by Delegates.notNull()

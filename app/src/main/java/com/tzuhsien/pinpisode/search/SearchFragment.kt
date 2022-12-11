@@ -10,7 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.tabs.TabLayoutMediator
 import com.spotify.sdk.android.auth.AuthorizationClient
@@ -20,7 +19,6 @@ import com.tzuhsien.pinpisode.Constants
 import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Source
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSearchBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.getVmFactory
@@ -65,7 +63,7 @@ class SearchFragment : Fragment() {
             }
         )
 
-        viewModel.showMsg.observe(viewLifecycleOwner, Observer {
+        viewModel.showMsg.observe(viewLifecycleOwner) {
             if (null != it) {
                 binding.textResourceNotFound.text = it
                 binding.textResourceNotFound.visibility = View.VISIBLE
@@ -74,13 +72,13 @@ class SearchFragment : Fragment() {
             } else {
                 binding.textResourceNotFound.visibility = View.GONE
             }
-        })
+        }
 
 
         /**
          * Search result of url (specified sourceId)
          * */
-        viewModel.ytVideoData.observe(viewLifecycleOwner, Observer {
+        viewModel.ytVideoData.observe(viewLifecycleOwner) {
             it?.let {
                 if (it.items.isNotEmpty()) {
 
@@ -102,7 +100,7 @@ class SearchFragment : Fragment() {
                     binding.cardSingleVideoResult.visibility = View.GONE
                 }
             }
-        })
+        }
         binding.cardSingleVideoResult.setOnClickListener {
             viewModel.ytSingleResultId?.let { viewModel.navigateToYoutubeNote(it) }
         }
@@ -162,14 +160,14 @@ class SearchFragment : Fragment() {
 
         viewModel.showSpotifyAuthView.observe(viewLifecycleOwner) {
             binding.viewGroupSpNotAuthorized.visibility =
-                if (it) View.VISIBLE else if (UserManager.userSpotifyAuthToken.isEmpty()) View.VISIBLE else View.GONE
+                if (it) View.VISIBLE else if (viewModel.getSpotifyAuthToken().isNullOrEmpty()) View.VISIBLE else View.GONE
         }
 
         // Check if Spotify auth token available and if the user want to auth
         viewModel.isAuthRequired.observe(viewLifecycleOwner) {
             when (it) {
                 null -> {
-                    if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
+                    if (!viewModel.getSpotifyAuthToken().isNullOrEmpty()) {
                         viewModel.getSpotifySavedShowLatestEpisodes()
                         binding.viewGroupSpNotAuthorized.visibility = View.GONE
                     }
@@ -205,7 +203,7 @@ class SearchFragment : Fragment() {
         /**
          *  Navigation
          * */
-        viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
+        viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner) {
             it?.let {
                 findNavController().navigate(
                     NavGraphDirections.actionGlobalYouTubeNoteFragment(
@@ -214,7 +212,7 @@ class SearchFragment : Fragment() {
                 )
                 viewModel.doneNavigation()
             }
-        })
+        }
 
         viewModel.navigateToSpotifyNote.observe(viewLifecycleOwner) {
             it?.let {
@@ -352,8 +350,7 @@ class SearchFragment : Fragment() {
 
                 Timber.d("showLoginActivityToken authorizationResponse.expiresIn: ${authorizationResponse.expiresIn}")
                 Timber.d("authorizationResponse.accessToken = ${authorizationResponse.accessToken}")
-                UserManager.userSpotifyAuthToken = authorizationResponse.accessToken
-                viewModel.doneRequestSpotifyAuthToken()
+                viewModel.saveSpotifyAuthToken(authorizationResponse.accessToken)
             }
             AuthorizationResponse.Type.ERROR -> {
                 Timber.d("showLoginActivityToken : AuthorizationResponse.Type.ERROR")

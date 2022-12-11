@@ -23,7 +23,9 @@ import com.tzuhsien.pinpisode.tag.TagDialogFragmentArgs
 
 class CoauthorDialogFragment : DialogFragment() {
 
-    private val viewModel by viewModels<CoauthorViewModel> { getVmFactory(TagDialogFragmentArgs.fromBundle(requireArguments()).noteKey) }
+    private val viewModel by viewModels<CoauthorViewModel> {
+        getVmFactory(TagDialogFragmentArgs.fromBundle(requireArguments()).noteKey)
+    }
     private lateinit var binding: FragmentCoauthorDialogBinding
 
     override fun onCreateView(
@@ -52,9 +54,12 @@ class CoauthorDialogFragment : DialogFragment() {
             else -> getString(R.string.coauthors)
         }
 
-        binding.searchUserByEmail.visibility = if (viewModel.isUserTheOwner) View.VISIBLE else View.GONE
-        binding.textInviteCoauthors.visibility = if (viewModel.isUserTheOwner) View.VISIBLE else View.GONE
-        binding.textQuitCoauthoring.visibility = if (viewModel.isUserTheOwner) View.GONE else View.VISIBLE
+        binding.searchUserByEmail.visibility =
+            if (viewModel.isUserTheOwner) View.VISIBLE else View.GONE
+        binding.textInviteCoauthors.visibility =
+            if (viewModel.isUserTheOwner) View.VISIBLE else View.GONE
+        binding.textQuitCoauthoring.visibility =
+            if (viewModel.isUserTheOwner) View.GONE else View.VISIBLE
 
         binding.textQuitCoauthoring.setOnClickListener {
             viewModel.quitCoauthoringTheNote()
@@ -84,7 +89,7 @@ class CoauthorDialogFragment : DialogFragment() {
         )
 
         viewModel.foundUser.observe(viewLifecycleOwner) {
-             it?.let {
+            it?.let {
                 binding.viewGroupUserSearchResult.visibility = View.VISIBLE
                 binding.textSearchResultName.text = it.name
                 binding.textSearchResultEmail.text = it.email
@@ -105,7 +110,7 @@ class CoauthorDialogFragment : DialogFragment() {
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            when(it) {
+            when (it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
                         findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())

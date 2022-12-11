@@ -61,7 +61,8 @@ class SignInFragment : Fragment() {
         viewModel.navigateToYtNote.observe(viewLifecycleOwner) {
             Timber.d("navigateToYtNote: $it")
             it?.let {
-                findNavController().navigate(NavGraphDirections.actionGlobalYouTubeNoteFragment(videoIdKey = it))
+                findNavController().navigate(NavGraphDirections.actionGlobalYouTubeNoteFragment(
+                    videoIdKey = it))
                 viewModel.doneNavigation()
             }
         }
@@ -69,14 +70,15 @@ class SignInFragment : Fragment() {
         viewModel.navigateToSpNote.observe(viewLifecycleOwner) {
             Timber.d("navigateToSpNote: $it")
             it?.let {
-                findNavController().navigate(NavGraphDirections.actionGlobalSpotifyNoteFragment(sourceIdKey = it))
+                findNavController().navigate(NavGraphDirections.actionGlobalSpotifyNoteFragment(
+                    sourceIdKey = it))
                 viewModel.doneNavigation()
             }
         }
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            when(it) {
+            when (it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
                         findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())

@@ -8,7 +8,6 @@ import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.*
 import com.tzuhsien.pinpisode.data.source.Repository
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.extractYoutubeVideoId
 import com.tzuhsien.pinpisode.network.LoadApiStatus
@@ -100,6 +99,10 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         getYoutubeTrendingVideos()
     }
 
+    fun getSpotifyAuthToken(): String? {
+        return repository.getSpotifyAuthToken()
+    }
+
     private fun getYoutubeTrendingVideos() {
 
         coroutineScope.launch {
@@ -135,9 +138,9 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
+            getSpotifyAuthToken()?.let { token ->
 
-                when (val result = repository.getUserSavedShows(UserManager.userSpotifyAuthToken)) {
+                when (val result = repository.getUserSavedShows(token)) {
                     is Result.Success -> {
                         _error.value = null
                         _status.value = LoadApiStatus.DONE
@@ -180,10 +183,12 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
             val list = mutableListOf<SpotifyItem>()
 
             for (item in showItems) {
-                val episodeResult = repository.getShowEpisodes(
-                    showId = item.show.id,
-                    authToken = UserManager.userSpotifyAuthToken
-                )
+                val episodeResult = getSpotifyAuthToken()?.let {
+                    repository.getShowEpisodes(
+                        showId = item.show.id,
+                        authToken = it
+                    )
+                }
 
                 when (episodeResult) {
                     is Result.Success -> {
@@ -236,7 +241,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
         } else if (query.contains(Constants.SPOTIFY_SHARE_LINK) || query.contains(Constants.SPOTIFY_URI)) {
             // If the query is a  Spotify link, request auth token to proceed to search
-            _isAuthRequired.value = UserManager.userSpotifyAuthToken.isEmpty()
+            _isAuthRequired.value = null == getSpotifyAuthToken()
 
             val sourceId = query.extractSpotifySourceId()
             if (sourceId.isNotEmpty()) {
@@ -256,13 +261,14 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
     private fun getEpisodeInfoById(id: String) {
 
-        if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
+        getSpotifyAuthToken()?.let { token ->
+
             coroutineScope.launch {
 
                 _status.value = LoadApiStatus.LOADING
 
                 val result =
-                    repository.getSpotifyEpisodeInfo(id, UserManager.userSpotifyAuthToken)
+                    repository.getSpotifyEpisodeInfo(id, token)
 
                 _spotifyEpisodeData.value = when (result) {
                     is Result.Success -> {
@@ -358,7 +364,8 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         viewModelJob.cancel()
     }
 
-    fun doneRequestSpotifyAuthToken() {
+    fun saveSpotifyAuthToken(authToken: String) {
+        repository.setSpotifyAuthToken(authToken)
         _isAuthRequired.value = false
     }
 
@@ -366,6 +373,9 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
         _isAuthRequired.value = true
     }
 
+    fun doneRequestSpotifyAuthToken() {
+        _isAuthRequired.value = false
+    }
 }
 
 data class SearchUiState(

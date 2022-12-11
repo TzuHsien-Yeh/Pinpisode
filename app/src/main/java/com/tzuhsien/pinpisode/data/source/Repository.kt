@@ -1,6 +1,7 @@
 package com.tzuhsien.pinpisode.data.source
 
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseUser
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.*
@@ -41,9 +42,15 @@ interface Repository {
     /**
      *  Users
      * */
-    suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo) : Result<UserInfo>
+    suspend fun signInWithGoogle(credential: AuthCredential): Result<FirebaseUser>
 
-    suspend fun getCurrentUser(): Result<UserInfo?>
+    suspend fun updateCurrentUser(): Result<UserInfo?>
+
+    fun getCurrentUser(): UserInfo?
+
+    fun setSpotifyAuthToken(authToken: String): Boolean
+
+    fun getSpotifyAuthToken(): String?
 
     suspend fun findUserByEmail(query: String): Result<UserInfo?>
 

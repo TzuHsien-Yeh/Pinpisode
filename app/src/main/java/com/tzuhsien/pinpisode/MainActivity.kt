@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.databinding.ActivityMainBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
@@ -226,13 +225,12 @@ class MainActivity : AppCompatActivity() {
                 sourceId?.let { it ->
                     Timber.d("intentExtras.getString(Intent.EXTRA_TEXT)sourceId = $sourceId")
                     /** Check and handle sign in status **/
-                    if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
+                    if (null == viewModel.getSignedInUser()) {
                         navController.navigate(NavGraphDirections.actionGlobalSignInFragment(
                             source = Source.SPOTIFY.source,
                             sourceId = it
                         ))
                     } else {
-                        viewModel.updateLocalUserId()
                         navController.navigate(
                             NavGraphDirections.actionGlobalSpotifyNoteFragment(
                                 sourceIdKey = it)
@@ -247,13 +245,12 @@ class MainActivity : AppCompatActivity() {
                 videoId?.let {
                     Timber.d("HANDLE youtube INTENT FUN intent extras : $it")
                     /** Check and handle sign in status **/
-                    if (null == GoogleSignIn.getLastSignedInAccount(applicationContext)) {
+                    if (null == viewModel.getSignedInUser()) {
                         navController.navigate(NavGraphDirections.actionGlobalSignInFragment(
                             source = Source.YOUTUBE.source,
                             sourceId = it
                         ))
                     } else {
-                        viewModel.updateLocalUserId()
                         navController.navigate(
                             NavGraphDirections.actionGlobalYouTubeNoteFragment(
                                 videoIdKey = it)

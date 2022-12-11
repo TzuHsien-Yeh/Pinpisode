@@ -1,11 +1,19 @@
 package com.tzuhsien.pinpisode.data.source
 
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseUser
+import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.*
+import com.tzuhsien.pinpisode.util.Util.getString
+import timber.log.Timber
 
-class DefaultRepository(private val noteRemoteDataSource: DataSource): Repository {
+class DefaultRepository(
+    private val noteRemoteDataSource: NoteDataSource,
+    private val userRemoteDataSource: UserDataSource,
+    private val userLocalDataSource: UserDataSource,
+) : Repository {
 
     override fun getAllLiveNotes(): MutableLiveData<List<Note>> {
         return noteRemoteDataSource.getAllLiveNotes()
@@ -15,7 +23,7 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.getNoteInfoById(noteId)
     }
 
-    override fun getLiveNoteById(noteId: String):  MutableLiveData<Note?>  {
+    override fun getLiveNoteById(noteId: String): MutableLiveData<Note?> {
         return noteRemoteDataSource.getLiveNoteById(noteId)
     }
 
@@ -24,7 +32,7 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
     }
 
     override suspend fun checkIfNoteAlreadyExists(source: String, sourceId: String): Result<Note?> {
-        return noteRemoteDataSource.checkIfNoteAlreadyExists(source, sourceId)
+        return noteRemoteDataSource.checkIfNoteAlreadyExists(source, sourceId, getCurrentUser())
     }
 
     override suspend fun createNote(source: String, sourceId: String, note: Note): Result<Note> {
@@ -59,16 +67,53 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.updateTags(noteId, note)
     }
 
-    override suspend fun updateUser(firebaseUser: FirebaseUser, user: UserInfo): Result<UserInfo> {
-        return noteRemoteDataSource.updateUser(firebaseUser, user)
+    /**
+     *  Users
+     * */
+    override suspend fun signInWithGoogle(credential: AuthCredential): Result<FirebaseUser> {
+        return userRemoteDataSource.signInWithGoogle(credential)
     }
 
-    override suspend fun getCurrentUser(): Result<UserInfo?> {
-        return noteRemoteDataSource.getCurrentUser()
+    override suspend fun updateCurrentUser(): Result<UserInfo?> {
+        // Create or update the current signed-in user to users collection
+        return when (val userResult = userRemoteDataSource.updateCurrentUser()) {
+            is Result.Success -> {
+                if (userLocalDataSource.updateLocalUser(userResult.data)) {
+                    Result.Success(getCurrentUser())
+                } else {
+                    Timber.d("Error updating local user")
+                    Result.Fail("Error updating local user")
+                }
+            }
+            is Result.Fail -> {
+                Timber.d(userResult.error)
+                Result.Fail(userResult.error)
+            }
+            is Result.Error -> {
+                Timber.d("[Error]userRemoteDataSource.getCurrentUser: ${userResult.exception}")
+                Result.Error(userResult.exception)
+            }
+            else -> {
+                Timber.d(getString(R.string.unknown_error))
+                Result.Fail(getString(R.string.unknown_error))
+            }
+        }
+    }
+
+    override fun getCurrentUser(): UserInfo? {
+        return userLocalDataSource.getLocalCurrentUser()
+    }
+
+    override fun setSpotifyAuthToken(authToken: String): Boolean {
+        return userLocalDataSource.setSpotifyAuthToken(authToken)
+    }
+
+    override fun getSpotifyAuthToken(): String? {
+        return userLocalDataSource.getSpotifyAuthToken()
     }
 
     override suspend fun findUserByEmail(query: String): Result<UserInfo?> {
-        return noteRemoteDataSource.findUserByEmail(query)
+        return userRemoteDataSource.findUserByEmail(query)
     }
 
     override suspend fun updateNoteAuthors(noteId: String, authors: Set<String>): Result<Boolean> {
@@ -76,31 +121,34 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
     }
 
     override fun getLiveCoauthorsInfoOfTheNote(note: Note): MutableLiveData<List<UserInfo>> {
-        return noteRemoteDataSource.getLiveCoauthorsInfoOfTheNote(note)
+        return userRemoteDataSource.getLiveCoauthorsInfoOfTheNote(note)
     }
 
     override suspend fun getUserInfoById(id: String): Result<UserInfo> {
-        return noteRemoteDataSource.getUserInfoById(id)
+        return userRemoteDataSource.getUserInfoById(id)
     }
 
     /**  Coauthor invitation  **/
     override suspend fun sendCoauthorInvitation(note: Note, inviteeId: String): Result<Boolean> {
-        return noteRemoteDataSource.sendCoauthorInvitation(note, inviteeId)
+        return userRemoteDataSource.sendCoauthorInvitation(note, inviteeId)
     }
 
     override fun getLiveIncomingCoauthorInvitations(): MutableLiveData<List<Invitation>> {
-        return noteRemoteDataSource.getLiveIncomingCoauthorInvitations()
+        return userRemoteDataSource.getLiveIncomingCoauthorInvitations(getCurrentUser())
     }
 
     override suspend fun getUserInfoByIds(userIds: List<String>): Result<List<UserInfo>> {
-        return noteRemoteDataSource.getUserInfoByIds(userIds)
+        return userRemoteDataSource.getUserInfoByIds(userIds)
     }
 
     override suspend fun deleteInvitation(invitationId: String): Result<Boolean> {
-        return noteRemoteDataSource.deleteInvitation(invitationId)
+        return userRemoteDataSource.deleteInvitation(invitationId)
     }
 
-    override suspend fun deleteUserFromAuthors(noteId: String, authors: MutableList<String>): Result<String> {
+    override suspend fun deleteUserFromAuthors(
+        noteId: String,
+        authors: MutableList<String>,
+    ): Result<String> {
         return noteRemoteDataSource.deleteUserFromAuthors(noteId, authors)
     }
 
@@ -120,7 +168,10 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
         return noteRemoteDataSource.getSpotifyEpisodeInfo(id, authToken)
     }
 
-    override suspend fun searchOnSpotify(query: String, authToken: String): Result<SpotifySearchResult> {
+    override suspend fun searchOnSpotify(
+        query: String,
+        authToken: String,
+    ): Result<SpotifySearchResult> {
         return noteRemoteDataSource.searchOnSpotify(query, authToken)
     }
 
@@ -131,6 +182,4 @@ class DefaultRepository(private val noteRemoteDataSource: DataSource): Repositor
     override suspend fun getShowEpisodes(showId: String, authToken: String): Result<Episodes> {
         return noteRemoteDataSource.getShowEpisodes(showId, authToken)
     }
-
-
 }

@@ -28,7 +28,6 @@ import com.tzuhsien.pinpisode.Constants.SCOPE_READ_PLAYBACK_POSITION
 import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Source
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSearchResultBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
@@ -105,13 +104,13 @@ class SearchResultFragment : Fragment() {
             spResultAdapter.submitList(it)
         }
 
-        if (viewModel.source == Source.SPOTIFY && UserManager.userSpotifyAuthToken.isEmpty()) {
+        if (viewModel.source == Source.SPOTIFY && null == viewModel.getSpotifyAuthToken()) {
             binding.btnSpotifyAuth.visibility = View.VISIBLE
         }
 
         binding.btnSpotifyAuth.setOnClickListener {
             showLoginActivityCode.launch(getLoginActivityCodeIntent())
-            if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
+            if (null != viewModel.getSpotifyAuthToken()) {
                 viewModel.doneRequestSpotifyAuthToken()
             }
         }
@@ -241,7 +240,7 @@ class SearchResultFragment : Fragment() {
 
                 Timber.d("showLoginActivityToken authorizationResponse.expiresIn: ${authorizationResponse.expiresIn}")
                 Timber.d("authorizationResponse.accessToken = ${authorizationResponse.accessToken}")
-                UserManager.userSpotifyAuthToken = authorizationResponse.accessToken
+                viewModel.saveSpotifyAuthToken(authorizationResponse.accessToken)
                 viewModel.doneRequestSpotifyAuthToken()
             }
             AuthorizationResponse.Type.ERROR -> {

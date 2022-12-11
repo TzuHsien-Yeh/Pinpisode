@@ -8,7 +8,6 @@ import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.Note
 import com.tzuhsien.pinpisode.data.model.UserInfo
 import com.tzuhsien.pinpisode.data.source.Repository
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
@@ -18,7 +17,11 @@ import kotlinx.coroutines.launch
 
 class CoauthorViewModel(private val repository: Repository, val note: Note) : ViewModel() {
 
-    val isUserTheOwner = UserManager.userId == note.ownerId
+    private val _noteOwner = MutableLiveData<UserInfo>()
+    val noteOwner: LiveData<UserInfo>
+        get() = _noteOwner
+
+    val isUserTheOwner = note.ownerId == repository.getCurrentUser()?.id
 
     private val _foundUser = MutableLiveData<UserInfo?>()
     val foundUser: LiveData<UserInfo?>
@@ -27,10 +30,6 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
     private val _resultMsg = MutableLiveData<String?>(null)
     val resultMsg: LiveData<String?>
         get() = _resultMsg
-
-    private val _noteOwner = MutableLiveData<UserInfo>()
-    val noteOwner: LiveData<UserInfo>
-        get() = _noteOwner
 
     private val _quitCoauthoringResult = MutableLiveData<String>(null)
     val quitCoauthoringResult: LiveData<String>
@@ -59,6 +58,7 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
     private fun getNoteOwner() {
 
         coroutineScope.launch {
+
             _status.value = LoadApiStatus.LOADING
 
             val result = repository.getUserInfoById(note.ownerId)
@@ -129,12 +129,13 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
         }
     }
 
-    fun sendCoauthorInvitation(){
+    fun sendCoauthorInvitation() {
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = foundUser.value?.let { repository.sendCoauthorInvitation(note, it.id) }) {
+            when (val result =
+                foundUser.value?.let { repository.sendCoauthorInvitation(note, it.id) }) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -166,12 +167,12 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
     fun quitCoauthoringTheNote() {
         val newAuthorList = mutableListOf<String>()
         newAuthorList.addAll(note.authors)
-        newAuthorList.remove(UserManager.userId)
+        newAuthorList.remove(repository.getCurrentUser()?.id)
 
         coroutineScope.launch {
             _status.value = LoadApiStatus.LOADING
 
-            _quitCoauthoringResult.value = when(val result = repository.deleteUserFromAuthors(
+            _quitCoauthoringResult.value = when (val result = repository.deleteUserFromAuthors(
                 noteId = note.id,
                 authors = newAuthorList
             )) {

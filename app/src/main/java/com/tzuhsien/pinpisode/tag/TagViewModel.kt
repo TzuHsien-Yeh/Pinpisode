@@ -2,12 +2,12 @@ package com.tzuhsien.pinpisode.tag
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
 import com.tzuhsien.pinpisode.data.model.Note
 import com.tzuhsien.pinpisode.data.source.Repository
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util
 import kotlinx.coroutines.CoroutineScope
@@ -15,11 +15,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class TagViewModel(private val repository: Repository, val note: Note): ViewModel() {
+class TagViewModel(private val repository: Repository, val note: Note) : ViewModel() {
 
+    var hasDrawnTags: Boolean = false
     var inputNewTag: String? = null
 
-    val allTags = UserManager.tagSet
+    val set = mutableSetOf<String>()
+    val allTags = Transformations.map(repository.getAllLiveNotes()) {
+        for (note in it) {
+            for (tag in note.tags) {
+                set.add(tag)
+            }
+        }
+        set
+    }
+
     val tagsOfCurrentNote = mutableSetOf<String>().also { it.addAll(note.tags) }
 
     private val _leave = MutableLiveData<Boolean>()
@@ -37,7 +47,11 @@ class TagViewModel(private val repository: Repository, val note: Note): ViewMode
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
-    fun updateTagSet(tag: String, isChecked: Boolean){
+    fun doneDrawingTags() {
+        hasDrawnTags = true
+    }
+
+    fun updateTagSet(tag: String, isChecked: Boolean) {
         if (isChecked) {
             tagsOfCurrentNote.add(tag)
         } else {
@@ -89,4 +103,5 @@ class TagViewModel(private val repository: Repository, val note: Note): ViewMode
         super.onCleared()
         viewModelJob.cancel()
     }
+
 }

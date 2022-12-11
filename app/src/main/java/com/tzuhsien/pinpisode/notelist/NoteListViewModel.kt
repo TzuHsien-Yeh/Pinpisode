@@ -10,7 +10,6 @@ import com.tzuhsien.pinpisode.data.model.Note
 import com.tzuhsien.pinpisode.data.model.Sort
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.source.Repository
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.ext.parseDuration
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util.getString
@@ -78,6 +77,15 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
     var invitationList = repository.getLiveIncomingCoauthorInvitations()
 
+    var userId: String? = null
+    private val _userName = MutableLiveData<String>()
+    val userName: LiveData<String>
+        get() = _userName
+
+    private val _userPic = MutableLiveData<String>()
+    val userPic: LiveData<String>
+        get() = _userPic
+
     val uiState = NoteListUiState(
         onNoteClicked = { note ->
             navigateToNotePage(note)
@@ -98,6 +106,10 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
+    private val _navigateToSignIn = MutableLiveData(false)
+    val navigateToSignIn: LiveData<Boolean>
+        get() = _navigateToSignIn
+
     private val _navigateToYoutubeNote = MutableLiveData<Note?>(null)
     val navigateToYoutubeNote: LiveData<Note?>
         get() = _navigateToYoutubeNote
@@ -109,6 +121,51 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
     private val _navigateToNoteListGuide = MutableLiveData(false)
     val navigateToNoteListGuide: LiveData<Boolean>
         get() = _navigateToNoteListGuide
+
+    init {
+        getCurrentSignedInUser()
+    }
+
+    private fun getCurrentSignedInUser(){
+
+        Timber.d("getCurrentSignedInUser")
+
+        _status.value = LoadApiStatus.LOADING
+
+        coroutineScope.launch {
+            when(val result = repository.updateCurrentUser()) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+
+                    // Navigate to sign in page if there's no signed-in user
+                    _navigateToSignIn.value = (null == result.data)
+
+                    userId = result.data?.id.toString()
+                    _userName.value = result.data?.name.toString()
+                    _userPic.value = result.data?.pic.toString()
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+
+                    _navigateToSignIn.value = true
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+
+                    _navigateToSignIn.value = true
+                }
+                else -> {
+                    _error.value = getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
+
+                    _navigateToSignIn.value = true
+                }
+            }
+        }
+    }
 
     fun updateInfoFromYouTube(note: Note) {
 
@@ -197,36 +254,6 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         _navigateToSpotifyNote.value = null
     }
 
-    fun updateLocalUserId() {
-
-        if (null == UserManager.userId) {
-
-            coroutineScope.launch {
-                _status.value = LoadApiStatus.LOADING
-
-                when (val currentUserResult = repository.getCurrentUser()) {
-                    is Result.Success -> {
-                        _error.value = null
-                        _status.value = LoadApiStatus.DONE
-                        UserManager.userId = currentUserResult.data?.id
-                    }
-                    is Result.Fail -> {
-                        _error.value = currentUserResult.error
-                        _status.value = LoadApiStatus.ERROR
-                    }
-                    is Result.Error -> {
-                        _error.value = currentUserResult.exception.toString()
-                        _status.value = LoadApiStatus.ERROR
-                    }
-                    else -> {
-                        _error.value = getString(R.string.unknown_error)
-                        _status.value = LoadApiStatus.ERROR
-                    }
-                }
-            }
-        }
-    }
-
     fun deleteOrQuitCoauthoringNote(noteIndex: Int) {
         Timber.d("deleteOrQuitCoauthoringNote: noteIndex = $noteIndex")
 
@@ -234,7 +261,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         Timber.d("deleteOrQuitCoauthoringNote: noteToBeRemoved = $noteToBeRemoved")
 
         noteToBeRemoved?.let {
-            if (noteToBeRemoved.ownerId == UserManager.userId) {
+            if (noteToBeRemoved.ownerId == userId) {
                 deleteNote(noteToBeRemoved)
             } else {
                 quitCoauthoringNote(noteToBeRemoved)
@@ -247,7 +274,7 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
         val newAuthorList = mutableListOf<String>()
         newAuthorList.addAll(noteToBeRemoved.authors)
-        newAuthorList.remove(UserManager.userId)
+        newAuthorList.remove(userId)
 
         coroutineScope.launch {
             _status.value = LoadApiStatus.LOADING
