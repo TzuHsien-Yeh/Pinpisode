@@ -149,7 +149,7 @@ class NoteListFragment : Fragment() {
         viewModel.noteListToDisplay.observe(viewLifecycleOwner) { list ->
             noteAdapter.submitList(list)
             coroutineScope.launch {
-                delay(200L)
+                delay(250L)
                 binding.recyclerviewNoteList.scrollToPosition(0)
             }
         }
