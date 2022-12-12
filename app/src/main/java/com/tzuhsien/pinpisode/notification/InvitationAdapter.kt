@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Invitation
 import com.tzuhsien.pinpisode.databinding.ItemInvitationBinding
+import com.tzuhsien.pinpisode.ext.glide
 
 class InvitationAdapter (private val uiState: NotificationUiState) :
     ListAdapter<Invitation, InvitationAdapter.InvitationViewHolder>(DiffCallback) {
@@ -18,9 +18,7 @@ class InvitationAdapter (private val uiState: NotificationUiState) :
         RecyclerView.ViewHolder(binding.root) {
 
             fun bind(invitation: Invitation, uiState: NotificationUiState){
-                Glide.with(binding.imgInviterProfile)
-                    .load(invitation.inviter!!.pic)
-                    .into(binding.imgInviterProfile)
+                binding.imgInviterProfile.glide(invitation.inviter!!.pic)
 
                 binding.textInvitationContent.text =
                     binding.textInvitationContent.context.getString(
@@ -30,10 +28,7 @@ class InvitationAdapter (private val uiState: NotificationUiState) :
                     )
 
                 binding.textNoteSourceTitle.text = invitation.note.title
-                Glide.with(binding.imgNoteThumbnail)
-                    .load(invitation.note.thumbnail)
-                    .into(binding.imgNoteThumbnail)
-
+                binding.imgNoteThumbnail.glide(invitation.note.thumbnail)
 
                 val timeAgo = DateUtils.getRelativeTimeSpanString(invitation.time)
                 binding.textNotifReceivedTime.text = timeAgo
@@ -48,8 +43,6 @@ class InvitationAdapter (private val uiState: NotificationUiState) :
             }
 
     }
-
-
 
     companion object DiffCallback : DiffUtil.ItemCallback<Invitation>() {
         override fun areItemsTheSame(oldItem: Invitation, newItem: Invitation): Boolean {

@@ -3,19 +3,21 @@ package com.tzuhsien.pinpisode.data.source.local
 import android.content.Context
 import android.content.SharedPreferences
 import com.tzuhsien.pinpisode.MyApplication
-import com.tzuhsien.pinpisode.data.model.Note
 
 object UserManager {
-
     // Keys put in the USER sharedPref
     // Make it a constant to prevent mis-spelling
+    private const val USER = "USER"
     private const val USER_ID = "UserId"
     private const val USER_NAME = "UserName"
     private const val USER_EMAIL = "UserEmail"
     private const val USER_PIC = "UserPic"
+    private const val USER_SPOTIFY_TOKEN = "UserSpotifyToken"
+    private const val NEW_USER = "isNewUser"
+    private const val SHOW_NOTE_LIST_GUIDE = "shown_note_list_guide"
 
     private val preferences: SharedPreferences =
-        MyApplication.instance.getSharedPreferences("USER", Context.MODE_PRIVATE)
+        MyApplication.instance.getSharedPreferences(USER, Context.MODE_PRIVATE)
 
     private val editor = preferences.edit()
 
@@ -55,17 +57,31 @@ object UserManager {
             editor.putString(USER_PIC, value).commit()
         }
 
+    var userSpotifyAuthToken: String? = null
+        get() {
+            return preferences.getString(USER_SPOTIFY_TOKEN, null)
+        }
+        set(value) {
+            field = value
+            editor.putString(USER_SPOTIFY_TOKEN, value).commit()
+        }
 
+    var isNewUser: Boolean = false
+        get() {
+            return preferences.getBoolean(NEW_USER, false)
+        }
+        set(value) {
+            field = value
+            editor.putBoolean(NEW_USER, value).commit()
+        }
 
-    // Save all the notes of which the user is one of the authors
-    var allEditableNoteList: List<Note> = listOf()
+    var shouldShowNoteListGuide: Boolean = true
+        get() {
+            return preferences.getBoolean(SHOW_NOTE_LIST_GUIDE, isNewUser)
+        }
+        set(value) {
+            field = value
+            editor.putBoolean(SHOW_NOTE_LIST_GUIDE, value).commit()
+        }
 
-    // Save all the notes owned by the user
-    var usersNoteList: List<Note> = listOf()
-
-    // Get all tags
-    var tagSet = mutableSetOf<String>()
-
-    // Spotify authorization token
-    var userSpotifyAuthToken = ""
 }

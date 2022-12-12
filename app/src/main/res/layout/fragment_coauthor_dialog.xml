@@ -67,6 +67,7 @@
         android:text="@string/add_coauthors"
         android:layout_marginTop="16dp"
         style="@style/yt_bold_17sp"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/img_owner_pic"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -80,6 +81,7 @@
         app:queryBackground="@null"
         android:background="@drawable/bg_searchview"
         app:iconifiedByDefault="false"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_invite_coauthors" />
@@ -136,6 +138,7 @@
         android:paddingHorizontal="@dimen/standard"
         android:paddingVertical="8dp"
         style="@style/yt_bold_17sp"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/img_owner_pic"

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.tzuhsien.pinpisode.MainViewModel
 import com.tzuhsien.pinpisode.data.source.Repository
+import com.tzuhsien.pinpisode.guide.NoteListGuideViewModel
 import com.tzuhsien.pinpisode.notelist.NoteListViewModel
 import com.tzuhsien.pinpisode.notification.NotificationViewModel
 import com.tzuhsien.pinpisode.profile.ProfileViewModel
@@ -39,6 +40,9 @@ class ViewModelFactory(
 
                 isAssignableFrom(NotificationViewModel::class.java) ->
                     NotificationViewModel(repository)
+
+                isAssignableFrom(NoteListGuideViewModel::class.java) ->
+                    NoteListGuideViewModel(repository)
 
                 else ->
                     throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

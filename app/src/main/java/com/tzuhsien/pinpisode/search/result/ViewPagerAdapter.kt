@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.search.SearchFragment
+import com.tzuhsien.pinpisode.search.result.SearchResultFragment.Companion.SOURCE_KEY
 
 class ViewPagerAdapter(fragmentActivity: SearchFragment, private var totalCount: Int) :
     FragmentStateAdapter(fragmentActivity) {
@@ -23,7 +24,7 @@ class ViewPagerAdapter(fragmentActivity: SearchFragment, private var totalCount:
     private fun newInstance(source: Source): Fragment {
         val fragment = SearchResultFragment()
         val args = Bundle()
-        args.putSerializable("sourceKey", source)
+        args.putSerializable(SOURCE_KEY, source)
         fragment.arguments = args
         return fragment
     }

@@ -4,12 +4,13 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import com.tzuhsien.pinpisode.MainActivity
 import com.tzuhsien.pinpisode.R
+
+private const val REQUEST_CODE = 0
 
 class NotificationBuilder {
 
@@ -28,8 +29,6 @@ class NotificationBuilder {
             notificationView.setViewVisibility(R.id.btn_clipping, View.GONE)
         }
 
-        val bmp = BitmapFactory.decodeResource(context.resources, R.mipmap.launcher)
-
         return NotificationCompat.Builder(context, channelId)
             .setAutoCancel(false)
             .setOngoing(true)
@@ -40,7 +39,6 @@ class NotificationBuilder {
             .setContentTitle(context.getString(R.string.app_name))
             .setColor(context.getColor(R.color.beige))
             .setSmallIcon(R.drawable.pinpisode_clipart)
-//            .setLargeIcon(bmp)
             .build()
     }
 
@@ -48,28 +46,28 @@ class NotificationBuilder {
         val timestampIntent = Intent().apply {
             action = TimestampReceiver.ACTION_TAKE_TIMESTAMP
         }
-        return PendingIntent.getBroadcast(context, 0, timestampIntent, PendingIntent.FLAG_IMMUTABLE)
+        return PendingIntent.getBroadcast(context, REQUEST_CODE, timestampIntent, PendingIntent.FLAG_IMMUTABLE)
     }
 
     private fun startClippingPendingIntent(context: Context): PendingIntent {
         val clipIntent = Intent().apply {
             action = TimestampReceiver.ACTION_CLIP_START
         }
-        return PendingIntent.getBroadcast(context, 0, clipIntent, PendingIntent.FLAG_IMMUTABLE)
+        return PendingIntent.getBroadcast(context, REQUEST_CODE, clipIntent, PendingIntent.FLAG_IMMUTABLE)
     }
 
     private fun endClippingPendingIntent(context: Context): PendingIntent {
         val clipEndIntent = Intent().apply {
             action = TimestampReceiver.ACTION_CLIP_END
         }
-        return PendingIntent.getBroadcast(context, 0, clipEndIntent, PendingIntent.FLAG_IMMUTABLE)
+        return PendingIntent.getBroadcast(context, REQUEST_CODE, clipEndIntent, PendingIntent.FLAG_IMMUTABLE)
     }
 
     private fun noteFragmentPendingIntent(context: Context): PendingIntent {
         val fragmentIntent = Intent(context, MainActivity::class.java)
         return PendingIntent.getActivity(
             context,
-            0,
+            REQUEST_CODE,
             fragmentIntent,
             PendingIntent.FLAG_IMMUTABLE
         )

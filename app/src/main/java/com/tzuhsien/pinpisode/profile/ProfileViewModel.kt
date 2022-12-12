@@ -3,17 +3,21 @@ package com.tzuhsien.pinpisode.profile
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.Result
+import com.tzuhsien.pinpisode.data.model.UserInfo
 import com.tzuhsien.pinpisode.data.source.Repository
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.network.LoadApiStatus
+import com.tzuhsien.pinpisode.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 
 class ProfileViewModel(private val repository: Repository) : ViewModel() {
@@ -29,33 +33,44 @@ class ProfileViewModel(private val repository: Repository) : ViewModel() {
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
-    fun updateLocalUserId() {
+    fun getCurrentUser(): UserInfo? {
+        return repository.getCurrentUser()
+    }
 
-        if (null == UserManager.userId) {
-            coroutineScope.launch {
-                _status.value = LoadApiStatus.LOADING
+    fun updateUser() {
+        coroutineScope.launch {
+            _status.value = LoadApiStatus.LOADING
 
-                when(val currentUserResult = repository.getCurrentUser()) {
-                    is Result.Success -> {
-                        _error.value = null
-                        _status.value = LoadApiStatus.DONE
-
-                        Timber.d("[${this::class.simpleName}]: repository.getCurrentUser(): ${UserManager.userId} = ${currentUserResult.data?.id}")
-                    }
-                    is Result.Fail -> {
-                        _error.value = currentUserResult.error
-                        _status.value = LoadApiStatus.ERROR
-                    }
-                    is Result.Error -> {
-                        _error.value = currentUserResult.exception.toString()
-                        _status.value = LoadApiStatus.ERROR
-                    }
-                    else -> {
-                        _error.value = MyApplication.instance.getString(R.string.unknown_error)
-                        _status.value = LoadApiStatus.ERROR
-                    }
+            when (val result = repository.updateCurrentUser()) {
+                is Result.Success -> {
+                    _error.value = null
+                    _status.value = LoadApiStatus.DONE
+                }
+                is Result.Fail -> {
+                    _error.value = result.error
+                    _status.value = LoadApiStatus.ERROR
+                }
+                is Result.Error -> {
+                    _error.value = result.exception.toString()
+                    _status.value = LoadApiStatus.ERROR
+                }
+                else -> {
+                    _error.value = Util.getString(R.string.unknown_error)
+                    _status.value = LoadApiStatus.ERROR
                 }
             }
         }
     }
+
+    fun signOut() {
+        GoogleSignIn.getClient(MyApplication.applicationContext(),
+            GoogleSignInOptions.DEFAULT_SIGN_IN).signOut()
+        Firebase.auth.signOut()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
+
 }

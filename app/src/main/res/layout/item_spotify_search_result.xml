@@ -64,6 +64,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                android:text="@string/podcast"
                 tools:text="Podcast/song"
                 style="@style/small_text_style"
                 app:layout_constraintStart_toEndOf="@id/img_thumbnail"

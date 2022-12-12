@@ -11,29 +11,23 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
-import com.bumptech.glide.Glide
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tzuhsien.pinpisode.MyApplication
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Sort
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentNoteListBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.ext.glide
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
-import com.tzuhsien.pinpisode.notification.NotificationFragmentDirections
-import com.tzuhsien.pinpisode.signin.SignInFragmentDirections
-import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
 import com.tzuhsien.pinpisode.util.SwipeHelper
-import com.tzuhsien.pinpisode.youtubenote.YouTubeNoteFragmentDirections
 import kotlinx.coroutines.*
 import timber.log.Timber
 
 class NoteListFragment : Fragment() {
 
-    private val viewModel by viewModels<NoteListViewModel> {
-        getVmFactory()
-    }
+    private val viewModel by viewModels<NoteListViewModel> { getVmFactory() }
     private lateinit var binding: FragmentNoteListBinding
     private val scrollJob = Job()
     val coroutineScope = CoroutineScope(scrollJob + Dispatchers.Main)
@@ -46,10 +40,16 @@ class NoteListFragment : Fragment() {
         /**
          * Check and handle sign in status
          * */
-        if (null == GoogleSignIn.getLastSignedInAccount(requireContext())) {
-            findNavController().navigate(SignInFragmentDirections.actionGlobalSignInFragment())
-        } else {
-            viewModel.updateLocalUserId()
+        viewModel.navigateToSignIn.observe(viewLifecycleOwner) {
+            if (it) findNavController().navigate(NavGraphDirections.actionGlobalSignInFragment())
+        }
+
+        viewModel.navigateToNoteListGuide.observe(viewLifecycleOwner) {
+            Timber.d("navigateToNoteListGuide: $it")
+            if (it) {
+                findNavController().navigate(NavGraphDirections.actionGlobalNoteListGuideFragment())
+                viewModel.doneNavigationToGuide()
+            }
         }
 
         binding = FragmentNoteListBinding.inflate(layoutInflater)
@@ -149,7 +149,7 @@ class NoteListFragment : Fragment() {
         viewModel.noteListToDisplay.observe(viewLifecycleOwner) { list ->
             noteAdapter.submitList(list)
             coroutineScope.launch {
-                delay(200L)
+                delay(250L)
                 binding.recyclerviewNoteList.scrollToPosition(0)
             }
         }
@@ -158,10 +158,12 @@ class NoteListFragment : Fragment() {
          *  Navigation
          * */
         // Profile page
-        Glide.with(binding.imgPicToProfile)
-            .load(UserManager.userPic)
-            .into(binding.imgPicToProfile)
-        binding.textUserName.text = UserManager.userName
+        viewModel.userPic.observe(viewLifecycleOwner) {
+            it?.let { binding.imgPicToProfile.glide(it) }
+        }
+        viewModel.userName.observe(viewLifecycleOwner) {
+            it?.let { binding.textUserName.text = it }
+        }
         binding.imgPicToProfile.setOnClickListener {
             findNavController().navigate(NoteListFragmentDirections.actionNoteListFragmentToProfileFragment())
         }
@@ -176,7 +178,7 @@ class NoteListFragment : Fragment() {
 
         // Notification page
         binding.btnNotificationBell.setOnClickListener {
-            findNavController().navigate(NotificationFragmentDirections.actionGlobalNotificationFragment())
+            findNavController().navigate(NavGraphDirections.actionGlobalNotificationFragment())
         }
         /** Show badge if there's any incoming coauthor invitations **/
         viewModel.invitationList.observe(viewLifecycleOwner) {
@@ -186,7 +188,7 @@ class NoteListFragment : Fragment() {
         viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
             it?.let {
                 findNavController().navigate(
-                    YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
+                    NavGraphDirections.actionGlobalYouTubeNoteFragment(
                         noteIdKey = it.id,
                         videoIdKey = it.sourceId
                     )
@@ -198,7 +200,7 @@ class NoteListFragment : Fragment() {
         viewModel.navigateToSpotifyNote.observe(viewLifecycleOwner) {
             it?.let {
                 findNavController().navigate(
-                    SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+                    NavGraphDirections.actionGlobalSpotifyNoteFragment(
                         noteIdKey = it.id,
                         sourceIdKey = it.sourceId
                     )
@@ -209,22 +211,19 @@ class NoteListFragment : Fragment() {
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            Timber.d("viewModel.status.observe: $it")
             when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    Timber.d("LoadApiStatus.DONE")
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    Timber.d("LoadApiStatus.ERROR")
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }

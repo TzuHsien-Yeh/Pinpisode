@@ -11,19 +11,21 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentCoauthorDialogBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.ext.glide
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
-import com.tzuhsien.pinpisode.notelist.NoteListFragmentDirections
 import com.tzuhsien.pinpisode.tag.TagDialogFragmentArgs
 
 class CoauthorDialogFragment : DialogFragment() {
 
-    private val viewModel by viewModels<CoauthorViewModel> { getVmFactory(TagDialogFragmentArgs.fromBundle(requireArguments()).noteKey) }
+    private val viewModel by viewModels<CoauthorViewModel> {
+        getVmFactory(TagDialogFragmentArgs.fromBundle(requireArguments()).noteKey)
+    }
     private lateinit var binding: FragmentCoauthorDialogBinding
 
     override fun onCreateView(
@@ -43,9 +45,7 @@ class CoauthorDialogFragment : DialogFragment() {
         }
 
         viewModel.noteOwner.observe(viewLifecycleOwner) {
-            Glide.with(binding.imgOwnerPic)
-                .load(it?.pic)
-                .into(binding.imgOwnerPic)
+            binding.imgOwnerPic.glide(it.pic)
         }
 
         binding.textCoauthors.text = when (viewModel.note.authors.size) {
@@ -54,15 +54,12 @@ class CoauthorDialogFragment : DialogFragment() {
             else -> getString(R.string.coauthors)
         }
 
-        if (UserManager.userId == viewModel.note.ownerId) {
-            binding.searchUserByEmail.visibility = View.VISIBLE
-            binding.textInviteCoauthors.visibility = View.VISIBLE
-            binding.textQuitCoauthoring.visibility = View.GONE
-        } else {
-            binding.searchUserByEmail.visibility = View.GONE
-            binding.textInviteCoauthors.visibility = View.GONE
-            binding.textQuitCoauthoring.visibility = View.VISIBLE
-        }
+        binding.searchUserByEmail.visibility =
+            if (viewModel.isUserTheOwner) View.VISIBLE else View.GONE
+        binding.textInviteCoauthors.visibility =
+            if (viewModel.isUserTheOwner) View.VISIBLE else View.GONE
+        binding.textQuitCoauthoring.visibility =
+            if (viewModel.isUserTheOwner) View.GONE else View.VISIBLE
 
         binding.textQuitCoauthoring.setOnClickListener {
             viewModel.quitCoauthoringTheNote()
@@ -71,7 +68,7 @@ class CoauthorDialogFragment : DialogFragment() {
         viewModel.quitCoauthoringResult.observe(viewLifecycleOwner) {
             it?.let {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                findNavController().navigate(NoteListFragmentDirections.actionGlobalNoteListFragment())
+                findNavController().navigate(NavGraphDirections.actionGlobalNoteListFragment())
             }
         }
 
@@ -92,15 +89,12 @@ class CoauthorDialogFragment : DialogFragment() {
         )
 
         viewModel.foundUser.observe(viewLifecycleOwner) {
-             it?.let {
+            it?.let {
                 binding.viewGroupUserSearchResult.visibility = View.VISIBLE
                 binding.textSearchResultName.text = it.name
                 binding.textSearchResultEmail.text = it.email
-                Glide.with(binding.imgSearchResultPic)
-                    .load(it.pic)
-                    .into(binding.imgSearchResultPic)
-
-                 binding.textResultMsg.visibility = View.GONE
+                binding.imgSearchResultPic.glide(it.pic)
+                binding.textResultMsg.visibility = View.GONE
             }
         }
 
@@ -111,30 +105,29 @@ class CoauthorDialogFragment : DialogFragment() {
 
         viewModel.resultMsg.observe(viewLifecycleOwner) {
             binding.textResultMsg.visibility = if (null != it) View.VISIBLE else View.GONE
-            it.let { binding.textResultMsg.text = it }
+            it?.let { binding.textResultMsg.text = it }
         }
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            when(it) {
+            when (it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }
 
         return binding.root
     }
-
 
 }

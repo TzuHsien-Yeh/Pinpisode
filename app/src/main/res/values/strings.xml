@@ -8,8 +8,6 @@
     <string name="manage_tags_for_this_note">Manage tags for this note</string>
     <string name="id_edit_add_tag">edit_add_tag</string>
     <string name="add_new_tag">Add new tag</string>
-<!--    <string name="youtube_note_uri">https://pinpisode/youtube_note/%1s/%2s</string>-->
-<!--    <string name="spotify_note_uri">https://pinpisode/spotify_note/%1s/%2s</string>-->
     <string name="share_msg_subject">Check out this Pinpisode note on the %1s: [%2s]!</string>
     <string name="input_video_summary">Input video summary</string>
     <string name="moment">Moment</string>
@@ -19,7 +17,7 @@
     <string name="pin_your_episodes">Pin your episodes!</string>
     <string name="youtube_note">YouTube Note</string>
     <string name="spotify_note">Spotify Note</string>
-    <string name="coauthor_invitation">Coauthor invitation</string>
+    <string name="coauthor_invitation">Coauthor invitations</string>
     <string name="find_your_episodes">Find your episodes</string>
     <string name="profile">Profile</string>
 
@@ -59,14 +57,22 @@
     <string name="spotify_podcast_title">Spotify podcast title</string>
     <string name="_3_hours_ago">3 hours ago</string>
     <string name="_4_coauthors">4 coauthors</string>
-    <string name="guide_get_started">Here are some tricks for you to make better use of Pinpisode.\n\nLet\'s get started!</string>
+    <string name="guide_get_started">Here are some tips for you to make better use of Pinpisode.\n\nLet\'s get started!</string>
     <string name="add_note_by_yt_sharing">To add a new note, share the media on YouTube or Spotify with Pinpisode.</string>
     <string name="or_you_can_search_on_youtube_and_spotify_in_pinpisode">Or search on YouTube and Spotify in Pinpisode</string>
     <string name="how_to_sort_notes">Sort your notes by tag, last edit, media length, or time left from the last timestamp you took.</string>
     <string name="guide_coauthor_invitations">You can edit notes with others on Pinpisode. Check incoming coauthor invitations here.</string>
-    <string name="how_to_quit_notes">Finally, swipe left to quit your own notes or quit coauthoring others\'</string>
+    <string name="how_to_quit_notes">Finally, swipe left to quit your own note or quit coauthoring other\'s.</string>
     <string name="guide_closure_words">If you want to brush up on these tricks, tap on the help icon.</string>
     <string name="let_s_start_your_episodes">Let\'s start your episodes!</string>
-    <string name="pinpisode_uri">https://pinpisode.page.link/</string>
+    <string name="podcast">Podcast</string>
+    <string name="spotify_exceeded_app_rate_limits">The app has exceeded its rate limits.</string>
+    <string name="spotify_api_bad_oauth_request">Bad OAuth request. Contact Pinpisode developer</string>
+    <string name="sp_msg_have_not_saved_any_show">You haven\'t saved any show yet</string>
+    <string name="unknown_user_name">Unknown user name</string>
+    <string name="unknown_email">Unknown email</string>
+    <string name="sign_in_failed">Sign in failed</string>
+    <string name="no_signed_in_firebase_user">No user signed in</string>
+    <string name="no_signed_in_user">No signed in user</string>
 
 </resources>

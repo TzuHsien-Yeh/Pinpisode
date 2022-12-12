@@ -4,14 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.DialogFragment
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.DialogLoadingBinding
 import timber.log.Timber
 
+
+
 class LoadingDialog : AppCompatDialogFragment() {
+
+    companion object {
+        const val REQUEST_DISMISS = "dismissRequest"
+        const val KEY_DONE_LOADING = "doneLoading"
+    }
 
     private lateinit var binding: DialogLoadingBinding
 
@@ -27,36 +33,25 @@ class LoadingDialog : AppCompatDialogFragment() {
         binding = DialogLoadingBinding.inflate(layoutInflater)
 
         requireActivity().supportFragmentManager.setFragmentResultListener(
-            "dismissRequest",
+            REQUEST_DISMISS,
          this,
         ) { _, bundle ->
 
-            Timber.d("setFragmentResultListener bundle: ${bundle.getBoolean("doneLoading")}")
-            when (bundle.getBoolean("doneLoading")) {
+            Timber.d("setFragmentResultListener bundle: ${bundle.getBoolean(KEY_DONE_LOADING)}")
+            when (bundle.getBoolean(KEY_DONE_LOADING)) {
                 true -> {
                     dismiss()
                 }
                 false -> {
                     Timber.d("ERROR")
-                } // show pic to notify error
+                }
             }
         }
-
-        val animation = AnimationUtils.loadAnimation(context, R.anim.ic_clipping)
-
-//        Glide.with(binding.imgLoading)
-//            .load(R.raw.pinpisode_logo_with_text)
-//            .into(binding.imgLoading)
-
-//        binding.imgLoading.apply {
-//            startAnimation(animation)
-//        }
 
         return binding.root
     }
 
     override fun dismiss() {
-//        Handler().postDelayed({ super.dismiss() }, 500)
         super.dismiss()
         Timber.d("loading dialog dismissed")
     }

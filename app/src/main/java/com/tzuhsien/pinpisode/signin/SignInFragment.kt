@@ -12,56 +12,43 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.FragmentSignInBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.guide.NoteListGuideFragmentDirections
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
+import com.tzuhsien.pinpisode.signin.SignInViewModel.Companion.GOOGLE_SIGN_IN
 import timber.log.Timber
 
 
 class SignInFragment : Fragment() {
-    companion object {
-        const val GOOGLE_SIGN_IN = 1903
-    }
 
     private val viewModel by viewModels<SignInViewModel> { getVmFactory() }
     private lateinit var binding: FragmentSignInBinding
-    private lateinit var auth: FirebaseAuth
-    private lateinit var googleSignInClient: GoogleSignInClient
+//    private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        // Build a GoogleSignInClient with the options specified by gso.
-        googleSignInClient = GoogleSignIn.getClient(requireContext(), getGSO())
+        viewModel.source = SignInFragmentArgs.fromBundle(requireArguments()).source
+        viewModel.sourceId = SignInFragmentArgs.fromBundle(requireArguments()).sourceId
+        Timber.d("source: ${viewModel.source}, sourceId: ${viewModel.sourceId}")
 
         binding = FragmentSignInBinding.inflate(layoutInflater)
+
         Glide.with(binding.appIcon)
             .load(R.raw.pinpisode_logo_with_text)
             .into(binding.appIcon)
 
-        binding.appIcon
         binding.btnSignIn.setOnClickListener { signIn() }
-        auth = Firebase.auth
 
-        viewModel.source = SignInFragmentArgs.fromBundle(requireArguments()).source
-        viewModel.sourceId = SignInFragmentArgs.fromBundle(requireArguments()).sourceId
-
-        Timber.d("source: ${viewModel.source}, sourceId: ${viewModel.sourceId}")
+        viewModel.msg.observe(viewLifecycleOwner) {
+            it?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+        }
 
         viewModel.navigateUp.observe(viewLifecycleOwner) {
             Timber.d("viewModel.navigateUp: $it")
@@ -74,35 +61,36 @@ class SignInFragment : Fragment() {
         viewModel.navigateToYtNote.observe(viewLifecycleOwner) {
             Timber.d("navigateToYtNote: $it")
             it?.let {
-                findNavController().navigate(NavGraphDirections.actionGlobalYouTubeNoteFragment(videoIdKey = it))
+                findNavController().navigate(NavGraphDirections.actionGlobalYouTubeNoteFragment(
+                    videoIdKey = it))
                 viewModel.doneNavigation()
             }
         }
 
         viewModel.navigateToSpNote.observe(viewLifecycleOwner) {
-
             Timber.d("navigateToSpNote: $it")
             it?.let {
-                findNavController().navigate(NavGraphDirections.actionGlobalSpotifyNoteFragment(sourceIdKey = it))
+                findNavController().navigate(NavGraphDirections.actionGlobalSpotifyNoteFragment(
+                    sourceIdKey = it))
                 viewModel.doneNavigation()
             }
         }
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            when(it) {
+            when (it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }
@@ -110,22 +98,8 @@ class SignInFragment : Fragment() {
         return binding.root
     }
 
-    override fun onStart() {
-        super.onStart()
-        // Check for existing Google Sign In account, if the user is already signed in
-        // the GoogleSignInAccount will be non-null.
-        val account = GoogleSignIn.getLastSignedInAccount(requireContext())
-        updateUI(account)
-    }
-
-    private fun updateUI(account: GoogleSignInAccount?) {
-        if (null != account) {
-            findNavController().navigateUp()
-        }
-    }
-
     private fun signIn() {
-        val signInIntent = googleSignInClient.signInIntent
+        val signInIntent = viewModel.googleSignInClient.signInIntent
         startActivityForResult(signInIntent, GOOGLE_SIGN_IN)
     }
 
@@ -135,59 +109,8 @@ class SignInFragment : Fragment() {
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...)
         if (requestCode == GOOGLE_SIGN_IN) {
             val completedTask = GoogleSignIn.getSignedInAccountFromIntent(data)
-            handleSignInResult(completedTask)
+            viewModel.handleSignInResult(completedTask)
         }
-    }
-
-    private fun handleSignInResult(task: Task<GoogleSignInAccount>) {
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            firebaseAuthWithGoogle(account)
-
-//            youtubeAuth(account)
-
-        } catch (e: ApiException) {
-            Timber.d("Google Sign in exception: ${e.statusCode}")
-            Toast.makeText(context, "Sign in failed", Toast.LENGTH_LONG).show()
-        }
-    }
-
-//    private fun youtubeAuth(account: GoogleSignInAccount) {
-//        val authToken = GoogleAuthUtil.getToken(
-//            MyApplication.applicationContext(),
-//            account.account!!,
-//            "oauth2:https://www.googleapis.com/auth/youtube",
-//            Bundle()
-//        )
-//        Timber.d("authToken: $authToken")
-//    }
-
-    private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
-        val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    viewModel.updateUser(task.result.user!!, account)
-
-                    if (task.result.additionalUserInfo?.isNewUser == true) {
-                        findNavController().navigate(NoteListGuideFragmentDirections.actionGlobalNoteListGuideFragment())
-                    }
-
-                } else {
-                    //handle error
-                    Timber.d("firebaseAuthWithGoogle: Failed!")
-                }
-            }
-    }
-
-    private fun getGSO(): GoogleSignInOptions {
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        return  GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-//            .requestScopes(Scope("https://www.googleapis.com/auth/youtube"))
-            .requestEmail()
-            .build()
     }
 
 }

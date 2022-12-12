@@ -109,7 +109,7 @@
             android:layout_height="24dp"
             android:layout_marginTop="@dimen/standard"
             android:layout_marginHorizontal="@dimen/standard"
-            android:progressTint="@color/color_primary"
+            android:progressTint="@color/color_primary_variant"
             android:thumbTint="@color/color_primary_variant"
             app:tint="@color/color_primary_variant"
             app:layout_constraintEnd_toEndOf="parent"

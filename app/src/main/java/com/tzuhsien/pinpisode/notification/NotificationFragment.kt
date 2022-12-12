@@ -8,9 +8,12 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.tzuhsien.pinpisode.NavGraphDirections
+import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.FragmentNotificationBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 
 class NotificationFragment : Fragment() {
@@ -29,13 +32,13 @@ class NotificationFragment : Fragment() {
             if (it.isNotEmpty()) {
                 viewModel.getInvitersInfo(it)
             } else {
-                viewModel.emptyFullInvitationData()
+                viewModel.emptyAllInvitationData()
             }
         }
 
         val adapter = InvitationAdapter(viewModel.uiState)
         binding.recyclerviewInvitation.adapter = adapter
-        viewModel.fullInvitationData.observe(viewLifecycleOwner) {
+        viewModel.invitationsWithInviterInfo.observe(viewLifecycleOwner) {
             adapter.submitList(it)
             adapter.notifyDataSetChanged()
         }
@@ -44,21 +47,21 @@ class NotificationFragment : Fragment() {
         viewModel.status.observe(viewLifecycleOwner) {
             when(it) {
                 LoadApiStatus.LOADING -> {
-                    findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                    if (findNavController().currentDestination?.id != R.id.loadingDialog) {
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
+                    }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }
 
         return binding.root
     }
-
-
 }

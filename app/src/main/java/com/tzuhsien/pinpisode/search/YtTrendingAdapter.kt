@@ -5,21 +5,17 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.tzuhsien.pinpisode.data.model.Item
 import com.tzuhsien.pinpisode.databinding.ItemYtTrendingBinding
+import com.tzuhsien.pinpisode.ext.glide
 import com.tzuhsien.pinpisode.ext.utcToLocalTime
 
 class YtTrendingAdapter(
     private val uiState: SearchUiState
 ): ListAdapter<Item, YtTrendingAdapter.YtResultViewHolder>(DiffCallback) {
     class YtResultViewHolder(private val binding: ItemYtTrendingBinding): RecyclerView.ViewHolder(binding.root) {
-        fun bind(resultItem: Item, uiState: SearchUiState){
-
-            Glide.with(binding.imgThumbnail)
-                .load(resultItem.snippet.thumbnails.high.url)
-                .into(binding.imgThumbnail)
-
+        fun bind(resultItem: Item){
+            binding.imgThumbnail.glide(resultItem.snippet.thumbnails.high.url)
             binding.textTitle.text = resultItem.snippet.title
             binding.textChannelName.text = resultItem.snippet.channelTitle
             binding.textPublishedTime.text = resultItem.snippet.publishedAt.utcToLocalTime()
@@ -31,7 +27,6 @@ class YtTrendingAdapter(
             }
         }
     }
-
 
     companion object DiffCallback : DiffUtil.ItemCallback<Item>() {
         override fun areItemsTheSame(oldItem: Item, newItem: Item): Boolean {
@@ -56,6 +51,6 @@ class YtTrendingAdapter(
         holder.itemView.setOnClickListener {
             uiState.onTrendingVideoClick(item)
         }
-        holder.bind(item, uiState)
+        holder.bind(item)
     }
 }

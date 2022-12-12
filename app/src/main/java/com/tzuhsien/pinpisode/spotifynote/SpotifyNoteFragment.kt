@@ -2,17 +2,12 @@ package com.tzuhsien.pinpisode.spotifynote
 
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
-import android.graphics.PorterDuff
 import android.os.Bundle
-import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -21,34 +16,30 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.spotify.protocol.types.PlayerState
-import com.spotify.sdk.android.auth.AuthorizationClient
-import com.spotify.sdk.android.auth.AuthorizationRequest
-import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.tzuhsien.pinpisode.MyApplication
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
-import com.tzuhsien.pinpisode.coauthor.CoauthorDialogFragmentDirections
 import com.tzuhsien.pinpisode.data.model.Note
 import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.model.TimeItemDisplay
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSpotifyNoteBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.formatDuration
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.parseSpotifyImageUri
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.pause
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.resume
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekBack
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekForward
 import com.tzuhsien.pinpisode.spotifynote.SpotifyService.seekTo
-import com.tzuhsien.pinpisode.tag.TagDialogFragmentDirections
+import com.tzuhsien.pinpisode.util.DEEPLINK_PATH_SPOTIFY_NOTE
+import com.tzuhsien.pinpisode.util.DYNAMIC_LINK_PREFIX
 import com.tzuhsien.pinpisode.util.SharingLinkGenerator
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import timber.log.Timber
-import java.security.MessageDigest
-import java.security.SecureRandom
 
 
 class SpotifyNoteFragment : Fragment() {
@@ -67,15 +58,10 @@ class SpotifyNoteFragment : Fragment() {
     ): View? {
         binding = FragmentSpotifyNoteBinding.inflate(layoutInflater)
 
-        viewModel.isSpotifyNeedLogin.observe(viewLifecycleOwner) {
-            if (it) {
-                showLoginActivityCode.launch(getLoginActivityCodeIntent())
-            }
-        }
-
         viewModel.isSpotifyConnected.observe(viewLifecycleOwner) { it ->
             Timber.d("viewModel.isSpotifyConnected.observe: $it")
             viewModel.clearConnectionErrorMsg()
+            binding.seekTo.isEnabled = it
             binding.playPauseButton.isEnabled = it
             binding.seekBackButton.isEnabled = it
             binding.seekForwardButton.isEnabled = it
@@ -113,7 +99,7 @@ class SpotifyNoteFragment : Fragment() {
                             sourceId = viewModel.sourceId,
                             tags = listOf(Source.SPOTIFY.source),
                             title = state.track.name,
-                            thumbnail = state.track.imageUri.raw!!.parseSpotifyImageUri(),
+                            thumbnail = state.track.imageUri.raw.parseSpotifyImageUri(),
                             duration = state.track.duration.toString()
                         )
                         viewModel.invokeCreateNewNoteLiveData()
@@ -126,7 +112,6 @@ class SpotifyNoteFragment : Fragment() {
                         // track current playing position in real time
                         viewModel.unpauseTrackingPosition()
                     }
-
                 }
 
 
@@ -164,40 +149,24 @@ class SpotifyNoteFragment : Fragment() {
         binding.playPauseButton.setOnClickListener {
             Timber.d("binding.playPauseButton.setOnClickListener, ${viewModel.playingState}")
             when (viewModel.playingState) {
-                PlayingState.STOPPED -> {
-                    viewModel.playingState = PlayingState.PLAYING
-                }
 
-                PlayingState.PLAYING -> {
-                    SpotifyService.pause()
-                }
+                PlayingState.STOPPED -> { viewModel.playingState = PlayingState.PLAYING }
 
-                PlayingState.PAUSED -> {
-                    SpotifyService.resume()
-                }
+                PlayingState.PLAYING -> pause()
+
+                PlayingState.PAUSED -> resume()
             }
         }
 
-        binding.seekBackButton.setOnClickListener {
-            seekBack()
-        }
-        binding.seekForwardButton.setOnClickListener {
-            seekForward()
-        }
+        binding.seekBackButton.setOnClickListener { seekBack() }
+
+        binding.seekForwardButton.setOnClickListener { seekForward() }
 
         /**  Seek bar  **/
-        binding.seekTo.apply {
-            this.isEnabled = false
-            progressDrawable.setColorFilter(Color.parseColor("#ff4664"), PorterDuff.Mode.SRC_ATOP)
-            indeterminateDrawable.setColorFilter(Color.parseColor("#ff4664"),
-                PorterDuff.Mode.SRC_ATOP)
-        }
         trackProgressBar =
             TrackProgressBar(binding.seekTo) { seekToPosition: Long -> seekTo(seekToPosition) }
 
-        /**
-         *  Take timestamps / clips buttons
-         * */
+        /** Take timestamps / clips buttons **/
         binding.btnTakeTimestamp.setOnClickListener {
             Timber.d("binding.btnTakeTimestamp.setOnClickListener clicked")
             takeTimestamp()
@@ -242,9 +211,9 @@ class SpotifyNoteFragment : Fragment() {
         /**
          * Digest of the video (editText)
          * */
-        viewModel.liveNoteDataReassigned.observe(viewLifecycleOwner) {
+        viewModel.isLiveNoteReady.observe(viewLifecycleOwner) {
             if (it) {
-                viewModel.liveNoteData.observe(viewLifecycleOwner) { note ->
+                viewModel.liveNote.observe(viewLifecycleOwner) { note ->
                     note?.let {
                         binding.editDigest.setText(note.digest)
                         viewModel.noteToBeUpdated = note
@@ -277,12 +246,11 @@ class SpotifyNoteFragment : Fragment() {
             }
         })
 
-        val adapter = SpotifyTimeItemAdapter(
-            uiState = viewModel.uiState
-        )
+        val adapter = SpotifyTimeItemAdapter(uiState = viewModel.uiState)
+
         binding.recyclerViewTimeItems.adapter = adapter
 
-        viewModel.timeItemLiveDataReassigned.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
+        viewModel.isLiveTimeItemListReady.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
             if (timeItemLiveDataAssigned == true) {
                 viewModel.liveTimeItemList.observe(viewLifecycleOwner) { list ->
                     list?.let {
@@ -298,7 +266,6 @@ class SpotifyNoteFragment : Fragment() {
                             }
                         }
                     }
-
                 }
             }
         }
@@ -348,27 +315,25 @@ class SpotifyNoteFragment : Fragment() {
          *  Buttons on the bottom of the page: Navigate to tag fragment
          * */
         binding.icAddTag.setOnClickListener {
-            findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(
-                viewModel.noteToBeUpdated!!))
+            viewModel.noteToBeUpdated?.let {
+                findNavController().navigate(NavGraphDirections.actionGlobalTagDialogFragment(it))
+            }
         }
 
         /**
          *  Buttons on the bottom of the page: Coauthoring
          * */
         binding.icCoauthoring.setOnClickListener {
-            findNavController().navigate(
-                CoauthorDialogFragmentDirections.actionGlobalCoauthorDialogFragment(
-                    viewModel.noteToBeUpdated!!
-                )
-            )
+            viewModel.noteToBeUpdated?.let {
+                findNavController().navigate(
+                    NavGraphDirections.actionGlobalCoauthorDialogFragment(it))
+            }
         }
 
         /**
          *  Buttons on the bottom of the page: Share this note
          * */
-        binding.icShare.setOnClickListener {
-            shareNoteLink()
-        }
+        binding.icShare.setOnClickListener { shareNoteLink() }
 
         /**
          * Toast to warn about Spotify error
@@ -380,40 +345,23 @@ class SpotifyNoteFragment : Fragment() {
             } else {
                 binding.errorMsg.visibility = View.GONE
             }
-
-//            it?.let {
-//                val customSnack= Snackbar.make(requireView(), "",Snackbar.LENGTH_LONG)
-//                val layout = customSnack.view as Snackbar.SnackbarLayout
-//                val bind = CustomSnackBarBinding.inflate(layoutInflater)
-//                bind.textSnackBar.text = it
-//                layout.addView(bind.root)
-//                customSnack.view.layoutParams = (customSnack.view.layoutParams as FrameLayout.LayoutParams)
-//                    .apply {
-//                        gravity = Gravity.TOP
-//                        gravity = Gravity.CENTER_HORIZONTAL
-//                        width = ViewGroup.LayoutParams.WRAP_CONTENT
-//                        topMargin = 180
-//                    }
-//                layout.setBackgroundColor(Color.TRANSPARENT)
-//                customSnack.show()
-//            }
         }
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            when (it) {
+            when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }
@@ -422,16 +370,19 @@ class SpotifyNoteFragment : Fragment() {
     }
 
     private fun shareNoteLink() {
+        val deepLink =
+            DYNAMIC_LINK_PREFIX + DEEPLINK_PATH_SPOTIFY_NOTE + viewModel.noteId + "/" + viewModel.sourceId
+
         SharingLinkGenerator.generateSharingLink(
-            deepLink = "${SharingLinkGenerator.PREFIX}/spotify_note/${viewModel.noteId}/${viewModel.sourceId}".toUri(),
+            deepLink = deepLink.toUri(),
             previewImageLink = viewModel.noteToBeUpdated?.thumbnail?.toUri()
         ) { generatedLink ->
             Timber.d("generatedLink = $generatedLink")
-            shareDeepLink(generatedLink)
+            shareDynamicLink(generatedLink)
         }
     }
 
-    private fun shareDeepLink(deepLink: String) {
+    private fun shareDynamicLink(dynamicLink: String) {
         val intent = Intent().apply {
             action = Intent.ACTION_SEND
             type = "text/plain"
@@ -441,7 +392,7 @@ class SpotifyNoteFragment : Fragment() {
                     "Spotify podcast",
                     viewModel.noteToBeUpdated?.title)
             )
-            putExtra(Intent.EXTRA_TEXT, deepLink)
+            putExtra(Intent.EXTRA_TEXT, dynamicLink)
         }
 
         startActivity(Intent.createChooser(intent, null))
@@ -516,7 +467,7 @@ class SpotifyNoteFragment : Fragment() {
         try {
             context?.unregisterReceiver(timestampReceiver)
         } catch (e: IllegalArgumentException) {
-            // Do nothing if the receiver not registered
+            // Do nothing if the receiver has not been registered
         }
 
         Timber.d("onDestroy() CALLED")
@@ -565,111 +516,4 @@ class SpotifyNoteFragment : Fragment() {
             }
         }
     }
-
-    /**
-     *  Spotify Auth flow
-     * */
-    companion object {
-        const val CLIENT_ID = "f6095c97a1ab4a7fb88b5ac5f2ba606d"
-        const val REDIRECT_URI = "pinpisode://callback"
-
-        val CODE_VERIFIER = getCodeVerifier()
-
-        private fun getCodeVerifier(): String {
-            val secureRandom = SecureRandom()
-            val code = ByteArray(64)
-            secureRandom.nextBytes(code)
-            return Base64.encodeToString(
-                code,
-                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-            )
-        }
-
-        fun getCodeChallenge(verifier: String): String {
-            val bytes = verifier.toByteArray()
-            val messageDigest = MessageDigest.getInstance("SHA-256")
-            messageDigest.update(bytes, 0, bytes.size)
-            val digest = messageDigest.digest()
-            return Base64.encodeToString(
-                digest,
-                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-            )
-        }
-    }
-
-    private fun getLoginActivityCodeIntent(): Intent =
-        AuthorizationClient.createLoginActivityIntent(
-            activity,
-            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
-                .setScopes(
-                    arrayOf(
-//                        "user-read-currently-playing",
-//                        "app-remote-control",
-//                        "user-follow-read",
-                        "user-read-playback-position",
-                        "user-library-read",
-                    )
-                )
-                .setCustomParam("code_challenge_method", "S256")
-                .setCustomParam("code_challenge", getCodeChallenge(CODE_VERIFIER))
-                .build()
-        )
-
-    private val showLoginActivityCode = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result: ActivityResult ->
-
-        val authorizationResponse = AuthorizationClient.getResponse(result.resultCode, result.data)
-
-        when (authorizationResponse.type) {
-            AuthorizationResponse.Type.CODE -> {
-                // Here You will get the authorization code which you
-                // can get with authorizationResponse.code
-
-                showLoginActivityToken.launch(getLoginActivityTokenIntent(authorizationResponse.code))
-            }
-            AuthorizationResponse.Type.ERROR -> {
-                Timber.d("AuthorizationResponse.Type.ERROR")
-            }
-            // Handle the Error
-
-            else -> {}
-            // Probably interruption
-        }
-    }
-
-    private fun getLoginActivityTokenIntent(code: String): Intent =
-        AuthorizationClient.createLoginActivityIntent(
-            activity,
-            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
-                .setCustomParam("grant_type", "authorization_code")
-                .setCustomParam("code", code)
-                .setCustomParam("code_verifier", CODE_VERIFIER)
-                .build()
-        )
-
-    private val showLoginActivityToken = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result: ActivityResult ->
-
-        val authorizationResponse = AuthorizationClient.getResponse(result.resultCode, result.data)
-
-        when (authorizationResponse.type) {
-            AuthorizationResponse.Type.TOKEN -> {
-                // Here You can get access to the authorization token
-                // with authorizationResponse.token
-
-                Timber.d("showLoginActivityToken authorizationResponse.expiresIn: ${authorizationResponse.expiresIn}")
-                Timber.d("authorizationResponse.accessToken = ${authorizationResponse.accessToken}")
-                UserManager.userSpotifyAuthToken = authorizationResponse.accessToken
-            }
-            AuthorizationResponse.Type.ERROR -> {
-                Timber.d("showLoginActivityToken : AuthorizationResponse.Type.ERROR")
-            }
-            // Handle Error
-            else -> {}
-            // Probably interruption
-        }
-    }
-
 }

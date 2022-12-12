@@ -5,9 +5,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.tzuhsien.pinpisode.data.model.ItemX
 import com.tzuhsien.pinpisode.databinding.ItemYtSearchResultBinding
+import com.tzuhsien.pinpisode.ext.glide
 import com.tzuhsien.pinpisode.ext.utcToLocalTime
 
 class YtSearchResultAdapter(
@@ -15,11 +15,7 @@ class YtSearchResultAdapter(
 ): ListAdapter<ItemX, YtSearchResultAdapter.YtResultViewHolder>(DiffCallback) {
     class YtResultViewHolder(private val binding: ItemYtSearchResultBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(resultItem: ItemX){
-
-            Glide.with(binding.imgThumbnail)
-                .load(resultItem.snippet.thumbnails.high.url)
-                .into(binding.imgThumbnail)
-
+            binding.imgThumbnail.glide(resultItem.snippet.thumbnails.high.url)
             binding.textTitle.text = resultItem.snippet.title
             binding.textChannelName.text = resultItem.snippet.channelTitle
             binding.textPublishedTime.text = resultItem.snippet.publishedAt.utcToLocalTime()

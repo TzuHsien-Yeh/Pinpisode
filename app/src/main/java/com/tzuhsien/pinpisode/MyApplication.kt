@@ -9,10 +9,13 @@ import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.util.ServiceLocator
 import kotlin.properties.Delegates
 
+const val NOTIFICATION_CHANNEL_ID = "spotify_note"
+const val NOTIFICATION_CHANNEL_NAME = "Spotify Note"
+
 class MyApplication: Application() {
 
     val repository: Repository
-        get() = ServiceLocator.provideTasksRepository(this)
+        get() = ServiceLocator.provideTasksRepository()
 
     companion object {
         var instance: MyApplication by Delegates.notNull()
@@ -20,8 +23,6 @@ class MyApplication: Application() {
         fun applicationContext() : Context {
             return instance.applicationContext
         }
-
-
     }
 
     override fun onCreate() {
@@ -30,8 +31,8 @@ class MyApplication: Application() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "spotify_note",
-                "Spotify Note",
+                NOTIFICATION_CHANNEL_ID,
+                NOTIFICATION_CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_LOW
             )
 

@@ -12,9 +12,9 @@ import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.data.model.TimeItem
 import com.tzuhsien.pinpisode.data.model.TimeItemDisplay
 import com.tzuhsien.pinpisode.data.source.Repository
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util
+import com.tzuhsien.pinpisode.util.Util.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,10 +34,6 @@ class SpotifyNoteViewModel(
 
     var playingState = PlayingState.STOPPED
 
-    private val _isSpotifyNeedLogin = MutableLiveData<Boolean>(false)
-    val isSpotifyNeedLogin: LiveData<Boolean>
-        get() = _isSpotifyNeedLogin
-
     private val _isSpotifyConnected = MutableLiveData<Boolean>(false)
     val isSpotifyConnected: LiveData<Boolean>
         get() = _isSpotifyConnected
@@ -49,21 +45,21 @@ class SpotifyNoteViewModel(
     val shouldCreateNewNote: LiveData<Boolean>
         get() = _shouldCreateNewNote
 
-    private var _liveNoteData = MutableLiveData<Note?>()
-    val liveNoteData: LiveData<Note?>
-        get() = _liveNoteData
+    private var _liveNote = MutableLiveData<Note?>()
+    val liveNote: LiveData<Note?>
+        get() = _liveNote
 
-    private var _liveNoteDataReassigned = MutableLiveData(false)
-    val liveNoteDataReassigned: LiveData<Boolean>
-        get() = _liveNoteDataReassigned
+    private var _isLiveNoteReady = MutableLiveData(false)
+    val isLiveNoteReady: LiveData<Boolean>
+        get() = _isLiveNoteReady
 
     private var _liveTimeItemList = MutableLiveData<List<TimeItem>>()
     val liveTimeItemList: LiveData<List<TimeItem>>
         get() = _liveTimeItemList
 
-    private var _timeItemLiveDataReassigned = MutableLiveData<Boolean>(false)
-    val timeItemLiveDataReassigned: LiveData<Boolean>
-        get() = _timeItemLiveDataReassigned
+    private var _isLiveTimeItemListReady = MutableLiveData<Boolean>(false)
+    val isLiveTimeItemListReady: LiveData<Boolean>
+        get() = _isLiveTimeItemListReady
 
 
     /** current position info from playerState **/
@@ -76,6 +72,7 @@ class SpotifyNoteViewModel(
     /** Clipping **/
     // state of clipping btn
     var startOrStopToggle = 0
+
     // Save start and stop position of a clip
     var startAt: Float = 0f
     var endAt: Float = 0f
@@ -86,16 +83,8 @@ class SpotifyNoteViewModel(
         get() = _playStart
     var playEnd: Long? = null
 
-//    private val _seekToPosition = MutableLiveData<Long>()
-//    val seekToPosition: LiveData<Long>
-//        get() = _seekToPosition
-//
-//    private val _pause = MutableLiveData<Boolean>()
-//    val pause: LiveData<Boolean>
-//        get() = _pause
-
     /** Decide whether the viewer can edit the note **/
-    private var _canEdit = MutableLiveData<Boolean>(false)
+    private var _canEdit = MutableLiveData(false)
     val canEdit: LiveData<Boolean>
         get() = _canEdit
 
@@ -181,7 +170,7 @@ class SpotifyNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.getNoteInfoById(noteId = noteId!!)
+            val result = noteId?.let { repository.getNoteInfoById(noteId = it) }
 
             noteToBeUpdated = when (result) {
                 is Result.Success -> {
@@ -189,7 +178,7 @@ class SpotifyNoteViewModel(
                     _status.value = LoadApiStatus.DONE
 
                     // save one time note info, check if user is in author list, and start listening to live data
-                    checkIfViewerCanEdit(result.data.authors.contains(UserManager.userId))
+                    checkIfViewerCanEdit(result.data.authors.contains(repository.getCurrentUser()?.id))
                     getLiveNoteById(result.data.id)
                     getLiveTimeItemsResult(result.data.id)
                     result.data
@@ -205,7 +194,7 @@ class SpotifyNoteViewModel(
                     null
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                     null
                 }
@@ -215,10 +204,10 @@ class SpotifyNoteViewModel(
     }
 
     private fun getLiveNoteById(noteId: String) {
-        _liveNoteData = repository.getLiveNoteById(noteId)
+        _liveNote = repository.getLiveNoteById(noteId)
         _status.value = LoadApiStatus.DONE
 
-        _liveNoteDataReassigned.value = true
+        _isLiveNoteReady.value = true
     }
 
     private fun getLiveTimeItemsResult(noteId: String) {
@@ -226,7 +215,7 @@ class SpotifyNoteViewModel(
         _status.value = LoadApiStatus.DONE
 
         // Let fragment know it's time to start observing the reassigned _liveTimeItemList LiveData
-        _timeItemLiveDataReassigned.value = true
+        _isLiveTimeItemListReady.value = true
     }
 
     private fun checkSpotifyNoteExistence(sourceId: String) {
@@ -249,7 +238,7 @@ class SpotifyNoteViewModel(
                         // the note already exist, save one time note info, check if user is in author list, and start listening to live data
                         noteId = result.data.id
                         noteToBeUpdated = result.data
-                        checkIfViewerCanEdit(result.data.authors.contains(UserManager.userId))
+                        checkIfViewerCanEdit(result.data.authors.contains(repository.getCurrentUser()?.id))
                         getLiveNoteById(result.data.id)
                         getLiveTimeItemsResult(result.data.id)
                     }
@@ -273,60 +262,63 @@ class SpotifyNoteViewModel(
     fun createNewSpotifyNote(newSpotifyNote: Note) {
         Timber.d("createNewSpotifyNote(newSpotifyNote)")
 
-        newSpotifyNote.apply {
-            ownerId = UserManager.userId!!
-            authors = listOf(UserManager.userId!!)
-        }
+        repository.getCurrentUser()?.let { currentUser ->
 
-        if (!hasUploaded) {
-            coroutineScope.launch {
+            newSpotifyNote.apply {
+                ownerId = currentUser.id
+                authors = listOf(currentUser.id)
+            }
 
-                val result = repository.createNote(
-                    source = Source.SPOTIFY.source,
-                    sourceId = sourceId,
-                    note = newSpotifyNote
-                )
+            if (!hasUploaded) {
+                coroutineScope.launch {
 
-                noteToBeUpdated = when (result) {
-                    is Result.Success -> {
-                        _error.value = null
-                        _status.value = LoadApiStatus.DONE
+                    val result = repository.createNote(
+                        source = Source.SPOTIFY.source,
+                        sourceId = sourceId,
+                        note = newSpotifyNote
+                    )
 
-                        Timber.d("createNewSpotifyNote SUCCESS")
-                        // new note created
-                        hasUploaded = true
-                        // save one time note info & noteId, check if user is in author list, and start listening to live data
-                        noteId = result.data.id
-                        checkIfViewerCanEdit(result.data.authors.contains(UserManager.userId))
-                        getLiveNoteById(result.data.id)
-                        getLiveTimeItemsResult(result.data.id)
+                    noteToBeUpdated = when (result) {
+                        is Result.Success -> {
+                            _error.value = null
+                            _status.value = LoadApiStatus.DONE
 
-                        result.data
-                    }
-                    is Result.Fail -> {
-                        _error.value = result.error
-                        _status.value = LoadApiStatus.ERROR
-                        hasUploaded = false
-                        null
-                    }
-                    is Result.Error -> {
-                        _error.value = result.exception.toString()
-                        _status.value = LoadApiStatus.ERROR
+                            Timber.d("createNewSpotifyNote SUCCESS")
+                            // new note created
+                            hasUploaded = true
+                            // save one time note info & noteId, check if user is in author list, and start listening to live data
+                            noteId = result.data.id
+                            checkIfViewerCanEdit(result.data.authors.contains(currentUser.id))
+                            getLiveNoteById(result.data.id)
+                            getLiveTimeItemsResult(result.data.id)
 
-                        hasUploaded = false
-                        null
-                    }
-                    else -> {
-                        _error.value = MyApplication.instance.getString(R.string.unknown_error)
-                        _status.value = LoadApiStatus.ERROR
+                            result.data
+                        }
+                        is Result.Fail -> {
+                            _error.value = result.error
+                            _status.value = LoadApiStatus.ERROR
+                            hasUploaded = false
+                            null
+                        }
+                        is Result.Error -> {
+                            _error.value = result.exception.toString()
+                            _status.value = LoadApiStatus.ERROR
 
-                        hasUploaded = false
-                        null
+                            hasUploaded = false
+                            null
+                        }
+                        else -> {
+                            _error.value = getString(R.string.unknown_error)
+                            _status.value = LoadApiStatus.ERROR
+
+                            hasUploaded = false
+                            null
+                        }
                     }
                 }
+            } else {
+                _status.value = LoadApiStatus.DONE
             }
-        } else {
-            _status.value = LoadApiStatus.DONE
         }
 
     }
@@ -347,16 +339,18 @@ class SpotifyNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.addNewTimeItem(
-                noteId = noteId!!,
-                timeItem = TimeItem(startAt = startAt, endAt = endAt)
-            )) {
+            when (val result = noteId?.let {
+                repository.addNewTimeItem(
+                    noteId = it,
+                    timeItem = TimeItem(startAt = startAt, endAt = endAt)
+                )
+            }) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
                     result.data
-                    Timber.d("liveNoteData.value?.lastTimestamp = ${liveNoteData.value?.lastTimestamp}")
-                    liveNoteData.value?.let { noteFromDb ->
+                    Timber.d("liveNoteData.value?.lastTimestamp = ${liveNote.value?.lastTimestamp}")
+                    liveNote.value?.let { noteFromDb ->
                         if (noteFromDb.lastTimestamp < startAt) {
                             if (null != endAt && noteFromDb.lastTimestamp < endAt) {
                                 noteToBeUpdated?.lastTimestamp = endAt
@@ -380,7 +374,7 @@ class SpotifyNoteViewModel(
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -389,7 +383,7 @@ class SpotifyNoteViewModel(
 
     private fun updateTimeItem(timeItem: TimeItem) {
         coroutineScope.launch {
-            when (val result = repository.updateTimeItem(noteId!!, timeItem)) {
+            when (val result = noteId?.let { repository.updateTimeItem(it, timeItem) }) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -403,7 +397,7 @@ class SpotifyNoteViewModel(
                     _status.value = LoadApiStatus.ERROR
                 }
                 else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
+                    _error.value = getString(R.string.unknown_error)
                     _status.value = LoadApiStatus.ERROR
                 }
             }
@@ -412,27 +406,33 @@ class SpotifyNoteViewModel(
     }
 
     fun deleteTimeItem(timeItemIndex: Int) {
+
         coroutineScope.launch {
+
             val timeItemToDelete = liveTimeItemList.value?.get(timeItemIndex)
 
-            when (val result = repository.deleteTimeItem(noteId!!, timeItemToDelete!!)) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                }
-                else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
+            timeItemToDelete?.let {
+                when (val result =
+                    noteId?.let { repository.deleteTimeItem(it, timeItemToDelete) }) {
+                    is Result.Success -> {
+                        _error.value = null
+                        _status.value = LoadApiStatus.DONE
+                    }
+                    is Result.Fail -> {
+                        _error.value = result.error
+                        _status.value = LoadApiStatus.ERROR
+                    }
+                    is Result.Error -> {
+                        _error.value = result.exception.toString()
+                        _status.value = LoadApiStatus.ERROR
+                    }
+                    else -> {
+                        _error.value = getString(R.string.unknown_error)
+                        _status.value = LoadApiStatus.ERROR
+                    }
                 }
             }
+
         }
 
     }
@@ -453,22 +453,26 @@ class SpotifyNoteViewModel(
 
     fun updateNote() {
         coroutineScope.launch {
-            when (val result = repository.updateNote(noteId!!, noteToBeUpdated!!)) {
-                is Result.Success -> {
-                    _error.value = null
-                    _status.value = LoadApiStatus.DONE
-                }
-                is Result.Fail -> {
-                    _error.value = result.error
-                    _status.value = LoadApiStatus.ERROR
-                }
-                is Result.Error -> {
-                    _error.value = result.exception.toString()
-                    _status.value = LoadApiStatus.ERROR
-                }
-                else -> {
-                    _error.value = MyApplication.instance.getString(R.string.unknown_error)
-                    _status.value = LoadApiStatus.ERROR
+
+            noteToBeUpdated?.let { noteToBeUpdated ->
+
+                when (val result = repository.updateNote(noteToBeUpdated.id, noteToBeUpdated)) {
+                    is Result.Success -> {
+                        _error.value = null
+                        _status.value = LoadApiStatus.DONE
+                    }
+                    is Result.Fail -> {
+                        _error.value = result.error
+                        _status.value = LoadApiStatus.ERROR
+                    }
+                    is Result.Error -> {
+                        _error.value = result.exception.toString()
+                        _status.value = LoadApiStatus.ERROR
+                    }
+                    else -> {
+                        _error.value = getString(R.string.unknown_error)
+                        _status.value = LoadApiStatus.ERROR
+                    }
                 }
             }
         }
@@ -480,11 +484,6 @@ class SpotifyNoteViewModel(
 
     fun notifyDisplayChange() {
         _liveTimeItemList.value = _liveTimeItemList.value
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
     }
 
     /**
@@ -521,6 +520,10 @@ class SpotifyNoteViewModel(
         _connectErrorMsg.value = null
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
 }
 
 data class SpotifyNoteUiState(

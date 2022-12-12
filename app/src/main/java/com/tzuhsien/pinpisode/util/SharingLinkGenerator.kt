@@ -6,10 +6,12 @@ import com.google.firebase.dynamiclinks.DynamicLink
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.dynamiclinks.ktx.androidParameters
 
-object SharingLinkGenerator {
+const val DYNAMIC_LINK_PREFIX = "https://pinpisode.page.link"
+const val DEEPLINK_PATH_YOUTUBE_NOTE = "/youtube_note/"
+const val DEEPLINK_PATH_SPOTIFY_NOTE = "/spotify_note/"
+const val PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.tzuhsien.pinpisode"
 
-    const val PREFIX = "https://pinpisode.page.link"
-    const val PLAY_STORE_LINK = "https://play.google.com/store/apps/details?id=com.tzuhsien.pinpisode"
+object SharingLinkGenerator {
 
     fun generateSharingLink(
         deepLink: Uri,
@@ -22,7 +24,7 @@ object SharingLinkGenerator {
 
             // [domainUriPrefix] will be the domain name you added when setting up Dynamic Links at Firebase Console.
             // You can find it in the Dynamic Links dashboard.
-            domainUriPrefix = PREFIX
+            domainUriPrefix = DYNAMIC_LINK_PREFIX
 
             // Pass your preview Image Link here;
             previewImageLink?.let {
@@ -35,7 +37,7 @@ object SharingLinkGenerator {
 
             // Required
             androidParameters {
-                fallbackUrl = PLAY_STORE_LINK.toUri()
+                fallbackUrl = PLAY_STORE_URL.toUri()
                 build()
             }
 
@@ -50,7 +52,6 @@ object SharingLinkGenerator {
     }
 }
 
-
 fun generateLongSharingLink(
     deepLink: Uri,
     previewImageLink: Uri?,
@@ -62,7 +63,7 @@ fun generateLongSharingLink(
 
         // [domainUriPrefix] will be the domain name you added when setting up Dynamic Links at Firebase Console.
         // You can find it in the Dynamic Links dashboard.
-        domainUriPrefix = SharingLinkGenerator.PREFIX
+        domainUriPrefix = DYNAMIC_LINK_PREFIX
 
         // Pass your preview Image Link here;
         previewImageLink?.let {
@@ -75,8 +76,7 @@ fun generateLongSharingLink(
 
         // Required
         androidParameters {
-            fallbackUrl =
-                "https://play.google.com/store/apps/details?id=com.tzuhsien.pinpisode".toUri()
+            fallbackUrl = PLAY_STORE_URL.toUri()
             build()
         }
         buildDynamicLink()

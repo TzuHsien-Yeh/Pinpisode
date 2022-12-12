@@ -22,16 +22,18 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.tzuhsien.pinpisode.MyApplication
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
-import com.tzuhsien.pinpisode.coauthor.CoauthorDialogFragmentDirections
 import com.tzuhsien.pinpisode.data.model.TimeItemDisplay
 import com.tzuhsien.pinpisode.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.parseDuration
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteService
-import com.tzuhsien.pinpisode.tag.TagDialogFragmentDirections
+import com.tzuhsien.pinpisode.util.DEEPLINK_PATH_YOUTUBE_NOTE
+import com.tzuhsien.pinpisode.util.DYNAMIC_LINK_PREFIX
 import com.tzuhsien.pinpisode.util.SharingLinkGenerator
 import com.tzuhsien.pinpisode.util.SwipeHelper
 import timber.log.Timber
@@ -135,9 +137,9 @@ class YouTubeNoteFragment : Fragment() {
          * */
         binding.editDigest.setBackgroundColor(Color.TRANSPARENT)
 
-        viewModel.liveNoteDataReassigned.observe(viewLifecycleOwner) {
+        viewModel.isLiveNoteReady.observe(viewLifecycleOwner) {
             if (it) {
-                viewModel.liveNoteData.observe(viewLifecycleOwner) { note ->
+                viewModel.liveNote.observe(viewLifecycleOwner) { note ->
                     note?.let {
                         binding.editDigest.setText(note.digest)
                         viewModel.noteToBeUpdated = note
@@ -174,11 +176,10 @@ class YouTubeNoteFragment : Fragment() {
                 return listOf(deleteButton)
             }
         })
-//        itemTouchHelper.attachToRecyclerView(binding.recyclerViewTimeItems)
 
         val adapter = TimeItemAdapter(uiState = viewModel.uiState)
         binding.recyclerViewTimeItems.adapter = adapter
-        viewModel.timeItemLiveDataReassigned.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
+        viewModel.isLiveTimeItemListReady.observe(viewLifecycleOwner) { timeItemLiveDataAssigned ->
             if (timeItemLiveDataAssigned == true) {
                 viewModel.liveTimeItemList.observe(viewLifecycleOwner, Observer { list ->
                     list?.let {
@@ -244,7 +245,7 @@ class YouTubeNoteFragment : Fragment() {
          * */
         binding.icAddTag.setOnClickListener {
             viewModel.noteToBeUpdated?.let {
-                findNavController().navigate(TagDialogFragmentDirections.actionGlobalTagDialogFragment(it))
+                findNavController().navigate(NavGraphDirections.actionGlobalTagDialogFragment(it))
             }
         }
 
@@ -252,11 +253,11 @@ class YouTubeNoteFragment : Fragment() {
          *  Buttons on the bottom of the page: Coauthoring
          * */
         binding.icCoauthoring.setOnClickListener {
-            findNavController().navigate(
-                (CoauthorDialogFragmentDirections.actionGlobalCoauthorDialogFragment(
-                    viewModel.noteToBeUpdated!!
-                ))
-            )
+            viewModel.noteToBeUpdated?.let {
+                findNavController().navigate(
+                    (NavGraphDirections.actionGlobalCoauthorDialogFragment(it))
+                )
+            }
         }
 
         /**
@@ -264,7 +265,6 @@ class YouTubeNoteFragment : Fragment() {
          * */
         binding.icShare.setOnClickListener {
             shareNoteLink()
-
         }
 
         /** Loading status **/
@@ -272,16 +272,16 @@ class YouTubeNoteFragment : Fragment() {
             when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }
@@ -290,16 +290,20 @@ class YouTubeNoteFragment : Fragment() {
     }
 
     private fun shareNoteLink() {
+
+        val deepLink =
+            DYNAMIC_LINK_PREFIX + DEEPLINK_PATH_YOUTUBE_NOTE + viewModel.noteId + "/" + viewModel.videoId
+
         SharingLinkGenerator.generateSharingLink(
-                deepLink = "${SharingLinkGenerator.PREFIX}/youtube_note/${viewModel.noteId}/${viewModel.videoId}".toUri(),
+                deepLink = deepLink.toUri(),
                 previewImageLink = viewModel.noteToBeUpdated?.thumbnail?.toUri()
             ) { generatedLink ->
             Timber.d("generatedLink = $generatedLink")
-                shareDeepLink(generatedLink)
+                shareDynamicLink(generatedLink)
             }
     }
 
-    private fun shareDeepLink(deepLink: String) {
+    private fun shareDynamicLink(dynamicLink: String) {
         val intent = Intent().apply {
             action = Intent.ACTION_SEND
             type = "text/plain"
@@ -309,7 +313,7 @@ class YouTubeNoteFragment : Fragment() {
                     "YouTube video",
                     viewModel.noteToBeUpdated?.title)
             )
-            putExtra(Intent.EXTRA_TEXT, deepLink)
+            putExtra(Intent.EXTRA_TEXT, dynamicLink)
         }
 
         startActivity(Intent.createChooser(intent, null))

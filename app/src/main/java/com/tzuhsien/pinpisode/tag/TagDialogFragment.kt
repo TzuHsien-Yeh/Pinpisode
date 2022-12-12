@@ -14,17 +14,21 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.chip.Chip
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.DialogTagBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import timber.log.Timber
 
 
 class TagDialogFragment : AppCompatDialogFragment() {
 
-    private val viewModel by viewModels<TagViewModel> { getVmFactory(TagDialogFragmentArgs.fromBundle(requireArguments()).noteKey) }
+    private val viewModel by viewModels<TagViewModel> {
+        getVmFactory(TagDialogFragmentArgs.fromBundle(requireArguments()).noteKey)
+    }
     private lateinit var binding: DialogTagBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,34 +42,46 @@ class TagDialogFragment : AppCompatDialogFragment() {
     ): ConstraintLayout {
 
         binding = DialogTagBinding.inflate(inflater, container, false)
-        binding.layoutTags.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_slide_up))
+        binding.layoutTags.startAnimation(AnimationUtils.loadAnimation(context,
+            R.anim.anim_slide_up))
 
-        for (t in viewModel.allTags) {
-            val chip = inflater.inflate(R.layout.chip_tag, binding.chipGroupTags, false) as Chip
-            chip.isClickable = true
-            chip.isCheckable = true
-            chip.isChecked = viewModel.tagsOfCurrentNote.contains(t)
-            chip.setOnCheckedChangeListener { _, isChecked ->
-                viewModel.updateTagSet(t, isChecked)
+        viewModel.allTags.observe(viewLifecycleOwner) {
+            it?.let {
+                if (!viewModel.hasDrawnTags) {
+                    for (t in it) {
+                        val chip = inflater.inflate(R.layout.chip_tag,
+                            binding.chipGroupTags,
+                            false) as Chip
+                        chip.isClickable = true
+                        chip.isCheckable = true
+                        chip.isChecked = viewModel.tagsOfCurrentNote.contains(t)
+                        chip.setOnCheckedChangeListener { _, isChecked ->
+                            viewModel.updateTagSet(t, isChecked)
+                        }
+                        chip.text = (t)
+                        binding.chipGroupTags.addView(chip)
+                    }
+                    viewModel.doneDrawingTags()
+                }
             }
-            chip.text = (t)
-            binding.chipGroupTags.addView(chip)
         }
 
         binding.editAddNewTag.doAfterTextChanged {
             viewModel.inputNewTag = it.toString().trim()
         }
         binding.btnAddNewTag.setOnClickListener {
+            Timber.d("viewModel.isInputValid")
             if (!viewModel.inputNewTag.isNullOrEmpty()) {
 
                 viewModel.addNewTag()
 
-                val newChip = inflater.inflate(R.layout.chip_tag, binding.chipGroupTags, false) as Chip
+                val newChip =
+                    inflater.inflate(R.layout.chip_tag, binding.chipGroupTags, false) as Chip
                 newChip.isClickable = true
                 newChip.isCheckable = true
                 newChip.isChecked = true
                 newChip.setOnCheckedChangeListener { _, isChecked ->
-                    viewModel.updateTagSet(viewModel.inputNewTag!!, isChecked)
+                    viewModel.inputNewTag?.let { viewModel.updateTagSet(it, isChecked) }
                 }
                 newChip.text = (viewModel.inputNewTag)
                 binding.chipGroupTags.addView(newChip)
@@ -82,7 +98,7 @@ class TagDialogFragment : AppCompatDialogFragment() {
         }
 
         viewModel.leave.observe(viewLifecycleOwner, Observer {
-            if (it){
+            if (it) {
                 dismiss()
                 viewModel.onLeaveCompleted()
             }
@@ -90,19 +106,19 @@ class TagDialogFragment : AppCompatDialogFragment() {
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            when(it) {
+            when (it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }
@@ -111,8 +127,9 @@ class TagDialogFragment : AppCompatDialogFragment() {
     }
 
     override fun dismiss() {
-        binding.layoutTags.startAnimation(AnimationUtils.loadAnimation(context, R.anim.anim_slide_down))
-        Handler().postDelayed({ super.dismiss() }, 200)
+        binding.layoutTags.startAnimation(AnimationUtils.loadAnimation(context,
+            R.anim.anim_slide_down))
+        Handler().postDelayed({ super.dismiss() }, 100)
     }
 
 }

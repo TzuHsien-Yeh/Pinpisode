@@ -8,17 +8,14 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.tzuhsien.pinpisode.MyApplication.Companion.applicationContext
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentProfileBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.ext.glide
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
-import com.tzuhsien.pinpisode.signin.SignInFragmentDirections
 import timber.log.Timber
 
 class ProfileFragment : Fragment() {
@@ -31,37 +28,32 @@ class ProfileFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         binding = FragmentProfileBinding.inflate(layoutInflater)
-
-        viewModel.updateLocalUserId()
-        Timber.d("${UserManager.userId},${UserManager.userName},${UserManager.userEmail},${UserManager.userPic}")
-        binding.textUserName.text = UserManager.userName
-        binding.textUserEmail.text = UserManager.userEmail
-        Glide.with(binding.imgProfilePic)
-            .load(UserManager.userPic)
-            .into(binding.imgProfilePic)
+        binding.textUserName.text = viewModel.getCurrentUser()?.name
+        binding.textUserEmail.text = viewModel.getCurrentUser()?.email
+        binding.imgProfilePic.glide(viewModel.getCurrentUser()?.pic)
 
         binding.logOut.setOnClickListener {
-            GoogleSignIn.getClient(applicationContext(), GoogleSignInOptions.DEFAULT_SIGN_IN).signOut()
-            UserManager.userId = null
-            findNavController().navigate(SignInFragmentDirections.actionGlobalSignInFragment())
-            Timber.d("User logged out: ${UserManager.userId}")
+            viewModel.signOut()
+            viewModel.updateUser()
+            findNavController().navigate(NavGraphDirections.actionGlobalSignInFragment())
+            Timber.d("User logged out: ${viewModel.getCurrentUser()}")
         }
 
         /** Loading status **/
         viewModel.status.observe(viewLifecycleOwner) {
-            when(it) {
+            when (it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }

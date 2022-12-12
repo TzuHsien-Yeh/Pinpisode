@@ -11,6 +11,7 @@
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/dialog_loading.xml" value="0.24334600760456274" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/dialog_note_list_guide.xml" value="0.1" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/dialog_tag.xml" value="0.22083333333333333" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_coauthor_dialog.xml" value="0.1474164133738602" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_note_list.xml" value="0.19635416666666666" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_note_list_guide.xml" value="0.10833333333333334" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_note_list_tutorial.xml" value="0.19635416666666666" />
@@ -20,6 +21,7 @@
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/fragment_youtube_note.xml" value="0.17552083333333332" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/item_note.xml" value="0.3453125" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/item_spotify_latest_content.xml" value="0.1947463768115942" />
+        <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/item_spotify_search_result.xml" value="0.34193840579710144" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/item_tag.xml" value="0.42552083333333335" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/layout/item_yt_trending.xml" value="0.19519927536231885" />
         <entry key="..\:/AndroidProjects/Pinpisode/app/src/main/res/mipmap-anydpi-v26/launcher.xml" value="0.1" />

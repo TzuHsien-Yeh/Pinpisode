@@ -2,7 +2,6 @@ package com.tzuhsien.pinpisode.search
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,28 +10,29 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
 import com.google.android.material.tabs.TabLayoutMediator
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import com.tzuhsien.pinpisode.Constants
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Source
-import com.tzuhsien.pinpisode.data.source.local.UserManager
 import com.tzuhsien.pinpisode.databinding.FragmentSearchBinding
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.getVmFactory
+import com.tzuhsien.pinpisode.ext.glide
 import com.tzuhsien.pinpisode.ext.utcToLocalTime
-import com.tzuhsien.pinpisode.loading.LoadingDialogDirections
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
+import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
+import com.tzuhsien.pinpisode.search.result.SearchResultFragment.Companion.KEY_QUERY
+import com.tzuhsien.pinpisode.search.result.SearchResultFragment.Companion.REQUEST_KEYWORD_1
+import com.tzuhsien.pinpisode.search.result.SearchResultFragment.Companion.REQUEST_KEYWORD_2
 import com.tzuhsien.pinpisode.search.result.ViewPagerAdapter
-import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteFragmentDirections
-import com.tzuhsien.pinpisode.youtubenote.YouTubeNoteFragmentDirections
+import com.tzuhsien.pinpisode.util.Util
 import timber.log.Timber
-import java.security.MessageDigest
-import java.security.SecureRandom
 
 class SearchFragment : Fragment() {
 
@@ -63,7 +63,7 @@ class SearchFragment : Fragment() {
             }
         )
 
-        viewModel.showMsg.observe(viewLifecycleOwner, Observer {
+        viewModel.showMsg.observe(viewLifecycleOwner) {
             if (null != it) {
                 binding.textResourceNotFound.text = it
                 binding.textResourceNotFound.visibility = View.VISIBLE
@@ -72,15 +72,13 @@ class SearchFragment : Fragment() {
             } else {
                 binding.textResourceNotFound.visibility = View.GONE
             }
-        })
+        }
 
-        binding.cardSingleVideoResult.visibility = View.GONE
-        binding.textSearchResult.visibility = View.GONE
 
         /**
          * Search result of url (specified sourceId)
          * */
-        viewModel.ytVideoData.observe(viewLifecycleOwner, Observer {
+        viewModel.ytVideoData.observe(viewLifecycleOwner) {
             it?.let {
                 if (it.items.isNotEmpty()) {
 
@@ -89,9 +87,7 @@ class SearchFragment : Fragment() {
                     binding.textSearchResult.visibility = View.VISIBLE
                     binding.cardSingleVideoResult.visibility = View.VISIBLE
                     binding.textTitle.text = item.snippet.title
-                    Glide.with(this)
-                        .load(item.snippet.thumbnails.high.url)
-                        .into(binding.imgThumbnail)
+                    binding.imgThumbnail.glide(item.snippet.thumbnails.high.url)
                     binding.textChannelName.text = item.snippet.channelTitle
                     binding.textPublishedTime.text = item.snippet.publishedAt.utcToLocalTime()
                     viewModel.ytSingleResultId = item.id // video sourceId
@@ -104,9 +100,9 @@ class SearchFragment : Fragment() {
                     binding.cardSingleVideoResult.visibility = View.GONE
                 }
             }
-        })
+        }
         binding.cardSingleVideoResult.setOnClickListener {
-            viewModel.navigateToYoutubeNote(viewModel.ytSingleResultId!!)
+            viewModel.ytSingleResultId?.let { viewModel.navigateToYoutubeNote(it) }
         }
 
         // Spotify episode url search
@@ -117,21 +113,18 @@ class SearchFragment : Fragment() {
                 binding.textSpotifySourceTitle.text = it.name
                 binding.textSpotifyShow.text = it.show?.name
                 binding.textSpotifyPublisher.text = it.show?.publisher
-                Glide.with(binding.imgSpotifySource)
-                    .load(it.images[0].url)
-                    .into(binding.imgSpotifySource)
+                binding.imgSpotifySource.glide(it.images[0].url)
                 viewModel.spotifySingleResultId = it.uri.extractSpotifySourceId()
 
                 // Hide other views
                 hideRecommendationViews()
                 binding.cardSingleVideoResult.visibility = View.GONE
                 binding.tabLayoutSearchResults.visibility = View.GONE
-
             }
         }
 
         binding.cardSingleSpotifyResult.setOnClickListener {
-            viewModel.navigateToSpotifyNote(viewModel.spotifySingleResultId!!)
+            viewModel.spotifySingleResultId?.let { viewModel.navigateToSpotifyNote(it) }
         }
 
         /**
@@ -142,10 +135,10 @@ class SearchFragment : Fragment() {
         setUpTabLayout()
         viewModel.searchQuery.observe(viewLifecycleOwner) {
             Timber.d("query = $it, parentFragmentManager.setFragmentResult")
-            requireActivity().supportFragmentManager.setFragmentResult("requestKey1",
-                bundleOf("query" to it))
-            requireActivity().supportFragmentManager.setFragmentResult("requestKey2",
-                bundleOf("query" to it))
+            requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEYWORD_1,
+                bundleOf(KEY_QUERY to it))
+            requireActivity().supportFragmentManager.setFragmentResult(REQUEST_KEYWORD_2,
+                bundleOf(KEY_QUERY to it))
 
             if (null != it) {
                 hideRecommendationViews()
@@ -167,14 +160,14 @@ class SearchFragment : Fragment() {
 
         viewModel.showSpotifyAuthView.observe(viewLifecycleOwner) {
             binding.viewGroupSpNotAuthorized.visibility =
-                if (it) View.VISIBLE else if (UserManager.userSpotifyAuthToken.isEmpty()) View.VISIBLE else View.GONE
+                if (it) View.VISIBLE else if (viewModel.getSpotifyAuthToken().isNullOrEmpty()) View.VISIBLE else View.GONE
         }
 
         // Check if Spotify auth token available and if the user want to auth
         viewModel.isAuthRequired.observe(viewLifecycleOwner) {
             when (it) {
                 null -> {
-                    if (UserManager.userSpotifyAuthToken.isNotEmpty()) {
+                    if (!viewModel.getSpotifyAuthToken().isNullOrEmpty()) {
                         viewModel.getSpotifySavedShowLatestEpisodes()
                         binding.viewGroupSpNotAuthorized.visibility = View.GONE
                     }
@@ -210,21 +203,21 @@ class SearchFragment : Fragment() {
         /**
          *  Navigation
          * */
-        viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner, Observer {
+        viewModel.navigateToYoutubeNote.observe(viewLifecycleOwner) {
             it?.let {
                 findNavController().navigate(
-                    YouTubeNoteFragmentDirections.actionGlobalYouTubeNoteFragment(
+                    NavGraphDirections.actionGlobalYouTubeNoteFragment(
                         videoIdKey = it
                     )
                 )
                 viewModel.doneNavigation()
             }
-        })
+        }
 
         viewModel.navigateToSpotifyNote.observe(viewLifecycleOwner) {
             it?.let {
                 findNavController().navigate(
-                    SpotifyNoteFragmentDirections.actionGlobalSpotifyNoteFragment(
+                    NavGraphDirections.actionGlobalSpotifyNoteFragment(
                         sourceIdKey = it
                     )
                 )
@@ -237,16 +230,16 @@ class SearchFragment : Fragment() {
             when(it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
-                        findNavController().navigate(LoadingDialogDirections.actionGlobalLoadingDialog())
+                        findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to true))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to true))
                 }
                 LoadApiStatus.ERROR -> {
-                    requireActivity().supportFragmentManager.setFragmentResult("dismissRequest",
-                        bundleOf("doneLoading" to false))
+                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
+                        bundleOf(KEY_DONE_LOADING to false))
                 }
             }
         }
@@ -286,50 +279,21 @@ class SearchFragment : Fragment() {
     /**
      *  Spotify Auth flow
      * */
-    companion object {
-        const val CLIENT_ID = "f6095c97a1ab4a7fb88b5ac5f2ba606d"
-        const val REDIRECT_URI = "pinpisode://callback"
-
-        val CODE_VERIFIER = getCodeVerifier()
-
-        private fun getCodeVerifier(): String {
-            val secureRandom = SecureRandom()
-            val code = ByteArray(64)
-            secureRandom.nextBytes(code)
-            return Base64.encodeToString(
-                code,
-                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-            )
-        }
-
-        fun getCodeChallenge(verifier: String): String {
-            val bytes = verifier.toByteArray()
-            val messageDigest = MessageDigest.getInstance("SHA-256")
-            messageDigest.update(bytes, 0, bytes.size)
-            val digest = messageDigest.digest()
-            return Base64.encodeToString(
-                digest,
-                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-            )
-        }
-    }
-
     private fun getLoginActivityCodeIntent(): Intent =
         AuthorizationClient.createLoginActivityIntent(
             activity,
-            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
+            AuthorizationRequest.Builder(Constants.CLIENT_ID,
+                AuthorizationResponse.Type.CODE,
+                Constants.REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-//                    "user-read-playback-state",
-//                        "user-modify-playback-state",
-//                    "user-read-currently-playing",
-//                        "app-remote-control",
-                        "user-read-playback-position",
-                        "user-library-read"
+                        Constants.SCOPE_READ_PLAYBACK_POSITION,
+                        Constants.SCOPE_LIBRARY_READ,
                     )
                 )
-                .setCustomParam("code_challenge_method", "S256")
-                .setCustomParam("code_challenge", getCodeChallenge(CODE_VERIFIER))
+                .setCustomParam(Constants.PARAM_CODE_CHALLENGE_METHOD, Constants.S256)
+                .setCustomParam(Constants.PARAM_CODE_CHALLENGE,
+                    Util.getCodeChallenge(Util.CODE_VERIFIER))
                 .build()
         )
 
@@ -337,7 +301,8 @@ class SearchFragment : Fragment() {
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
 
-        val authorizationResponse = AuthorizationClient.getResponse(result.resultCode, result.data)
+        val authorizationResponse =
+            AuthorizationClient.getResponse(result.resultCode, result.data)
 
         when (authorizationResponse.type) {
             AuthorizationResponse.Type.CODE -> {
@@ -347,35 +312,27 @@ class SearchFragment : Fragment() {
                 showLoginActivityToken.launch(getLoginActivityTokenIntent(authorizationResponse.code))
             }
             AuthorizationResponse.Type.ERROR -> {
-                binding.viewGroupSpNotAuthorized.visibility = View.VISIBLE
                 Timber.d("AuthorizationResponse.Type.ERROR")
             }
-            // Handle the Error
 
-            else -> {
-                binding.viewGroupSpNotAuthorized.visibility = View.VISIBLE
-            }
-            // Probably interruption
+            else -> {} // Probably interruption
         }
     }
 
     private fun getLoginActivityTokenIntent(code: String): Intent =
         AuthorizationClient.createLoginActivityIntent(
             activity,
-            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
+            AuthorizationRequest.Builder(Constants.CLIENT_ID, AuthorizationResponse.Type.TOKEN,
+                Constants.REDIRECT_URI)
                 .setScopes(
                     arrayOf(
-//                    "user-read-playback-state",
-//                        "user-modify-playback-state",
-//                    "user-read-currently-playing",
-//                    "app-remote-control",
-                        "user-read-playback-position",
-                        "user-library-read"
+                        Constants.SCOPE_READ_PLAYBACK_POSITION,
+                        Constants.SCOPE_LIBRARY_READ,
                     )
                 )
-                .setCustomParam("grant_type", "authorization_code")
-                .setCustomParam("code", code)
-                .setCustomParam("code_verifier", CODE_VERIFIER)
+                .setCustomParam(Constants.PARAM_GRANT_TYPE, Constants.AUTH_CODE)
+                .setCustomParam(Constants.PARAM_CODE, code)
+                .setCustomParam(Constants.PARAM_CODE_VERIFIER, Util.CODE_VERIFIER)
                 .build()
         )
 
@@ -383,7 +340,8 @@ class SearchFragment : Fragment() {
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
 
-        val authorizationResponse = AuthorizationClient.getResponse(result.resultCode, result.data)
+        val authorizationResponse =
+            AuthorizationClient.getResponse(result.resultCode, result.data)
 
         when (authorizationResponse.type) {
             AuthorizationResponse.Type.TOKEN -> {
@@ -392,16 +350,12 @@ class SearchFragment : Fragment() {
 
                 Timber.d("showLoginActivityToken authorizationResponse.expiresIn: ${authorizationResponse.expiresIn}")
                 Timber.d("authorizationResponse.accessToken = ${authorizationResponse.accessToken}")
-                UserManager.userSpotifyAuthToken = authorizationResponse.accessToken
-                viewModel.getSpotifySavedShowLatestEpisodes()
+                viewModel.saveSpotifyAuthToken(authorizationResponse.accessToken)
             }
             AuthorizationResponse.Type.ERROR -> {
                 Timber.d("showLoginActivityToken : AuthorizationResponse.Type.ERROR")
             }
-            // Handle Error
-            else -> {}
-            // Probably interruption
+            else -> {} // Probably interruption
         }
     }
-
 }
