@@ -35,8 +35,7 @@ For those who want to review, make notes on, or share certain parts of a video/p
 ### Sign in with Google
 - Authenticated users with Firebase using their Google Accounts
 
-<img src="doc/sign in.png" alt="screenshot" width="200"/> 
-<img src="doc/profile_screenshot_light.png" alt="screenshot" width="200"/> 
+<img src="doc/sign in.png" alt="screenshot" width="200"/> <img src="doc/profile_screenshot_light.png" alt="screenshot" width="200"/> 
 
 <br/>
 
@@ -47,10 +46,7 @@ For those who want to review, make notes on, or share certain parts of a video/p
 - Entry points of [Profile](#sign-in-with-google), [In-App Search](#in-app-search), [Coauthor Invitations](#co-authoring)
 - Support dark mode
 
-<img src="doc/note_list_light.png" alt="screenshot" width="200"/>
-<img src="doc/note_list_dark.png" alt="screenshot" width="200"/>
-<img src="doc/note list guide_sharelist_light.png" alt="screenshot" width="200"/>
-<img src="doc/guide closure_dark.png" alt="screenshot" width="200"/>
+<img src="doc/note_list_light.png" alt="screenshot" width="200"/> <img src="doc/note_list_dark.png" alt="screenshot" width="200"/> <img src="doc/note list guide_sharelist_light.png" alt="screenshot" width="200"/> <img src="doc/guide closure_dark.png" alt="screenshot" width="200"/>
 
 <br/>
 
@@ -60,9 +56,7 @@ For those who want to review, make notes on, or share certain parts of a video/p
 - Search by pasting YouTube/Spotify share link
 - Search by keyword
 
-<img src="doc/search_light.png" alt="screenshot" width="200"/> 
-<img src="doc/search_url_light.png" alt="screenshot" width="200"/> 
-<img src="doc/search_keyword_light.png" alt="screenshot" width="200"/>
+<img src="doc/search_light.png" alt="screenshot" width="200"/> <img src="doc/search_url_light.png" alt="screenshot" width="200"/> <img src="doc/search_keyword_light.png" alt="screenshot" width="200"/>
 
 <br/>
 
@@ -78,9 +72,7 @@ For those who want to review, make notes on, or share certain parts of a video/p
   - Invite users to coauthor the note / quit coauthoring (if the user is not the note owner)
   - Share the note (read-only for non-authors)
   
-<img src="doc/youtube note_view_clips_light.png" alt="screenshot" width="200"/> 
-<img src="doc/tag_light.png" alt="screenshot" width="200"/> 
-<img src="doc/share note_light.png" alt="screenshot" width="200"/> 
+<img src="doc/youtube note_view_clips_light.png" alt="screenshot" width="200"/> <img src="doc/tag_light.png" alt="screenshot" width="200"/> <img src="doc/share note_light.png" alt="screenshot" width="200"/> 
 
 
 ##### YouTube Note
@@ -93,8 +85,7 @@ For those who want to review, make notes on, or share certain parts of a video/p
 ##### Spotify Note
 - Take timestamps and clip in Notification (available on lock screen)
 
-<img src="doc/spotify note_light.png" alt="screenshot" width="200"/> 
-<img src="doc/lock_screen_light.png" alt="screenshot" width="200"/>
+<img src="doc/spotify note_light.png" alt="screenshot" width="200"/> <img src="doc/lock_screen_light.png" alt="screenshot" width="200"/>
 
 
 <br/>
@@ -105,9 +96,7 @@ For those who want to review, make notes on, or share certain parts of a video/p
   - Accept or decline coauthor invitations
   - Quit coauthoring the note thereafter
 
-<img src="doc/coauthor find user.png" alt="screenshot" width="200"/> 
-<img src="doc/coauthor invitations_light.png" alt="screenshot" width="200"/> 
-<img src="doc/coauthor quit_light.png" alt="screenshot" width="200"/>
+<img src="doc/coauthor find user.png" alt="screenshot" width="200"/> <img src="doc/coauthor invitations_light.png" alt="screenshot" width="200"/> <img src="doc/coauthor quit_light.png" alt="screenshot" width="200"/>
   
 
 <br/>
