@@ -6,7 +6,7 @@
 For those who want to review, make notes on, or share certain parts of a video/podcast, Pinpisode realizes timestamps taking and clipping on YouTube/Spotify media, featuring co-authorship with other users.
 
 <div align="center"> 
-  <img src ="doc/pinpisode_logo_with_text.gif" alt="isolated" width="220" loop="infinite"/>
+  <img src ="doc/pinpisode_square.png" alt="isolated" width="200" loop="infinite"/>
   
 <br />
   <a href="https://play.google.com/store/apps/details?id=com.tzuhsien.pinpisode">
