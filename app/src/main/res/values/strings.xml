@@ -74,5 +74,6 @@
     <string name="sign_in_failed">Sign in failed</string>
     <string name="no_signed_in_firebase_user">No user signed in</string>
     <string name="no_signed_in_user">No signed in user</string>
+    <string name="note_not_available_anymore">This note is not available anymore</string>
 
 </resources>

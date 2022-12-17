@@ -8,6 +8,7 @@
     tools:context=".loading.LoadingDialog">
 
     <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottie_loading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
@@ -29,5 +30,35 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <ImageView
+        android:id="@+id/img_error"
+        android:layout_width="220dp"
+        android:layout_height="120dp"
+        android:visibility="gone"
+        app:layout_constraintVertical_bias="0.43"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@drawable/error_wide_beige"/>
+
+    <TextView
+        android:id="@+id/text_error_msg"
+        style="@style/yt_medium_16sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="@dimen/standard"
+        android:layout_marginEnd="@dimen/standard"
+        android:visibility="gone"
+        tools:text="error msg"
+        android:padding="16dp"
+        android:textColor="@color/brown_walnut"
+        android:background="@drawable/bg_rounded_snack_bar"
+        android:backgroundTint="@color/light_beige"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/img_error"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
