@@ -120,22 +120,7 @@ class SpotifyNoteFragment : Fragment() {
                     }
                 }
 
-
-                Timber.d("viewModel.isViewerCanEdit = ${viewModel.isViewerCanEdit}")
-                if (viewModel.isViewerCanEdit) {
-                    Intent(context, SpotifyNoteService::class.java).apply {
-                        action = SpotifyNoteService.ACTION_START
-                        context?.startService(this)
-                    }
-                    registerTimestampReceiver()
-                } else {
-
-                    Timber.d(" viewModel.isSpotifyConnected.observe, ACTION_STOP")
-                    Intent(context, SpotifyNoteService::class.java).apply {
-                        action = SpotifyNoteService.ACTION_STOP
-                        context?.startService(this)
-                    }
-                }
+                startSpotifyNoteServiceForAuthor()
             }
         }
 
@@ -455,6 +440,24 @@ class SpotifyNoteFragment : Fragment() {
                     viewModel.deleteTimeItem(position)
                 }
             })
+    }
+
+    private fun startSpotifyNoteServiceForAuthor() {
+        Timber.d("viewModel.isViewerCanEdit = ${viewModel.isViewerCanEdit}")
+        if (viewModel.isViewerCanEdit) {
+            Intent(context, SpotifyNoteService::class.java).apply {
+                action = SpotifyNoteService.ACTION_START
+                context?.startService(this)
+            }
+            registerTimestampReceiver()
+        } else {
+
+            Timber.d(" viewModel.isSpotifyConnected.observe, ACTION_STOP")
+            Intent(context, SpotifyNoteService::class.java).apply {
+                action = SpotifyNoteService.ACTION_STOP
+                context?.startService(this)
+            }
+        }
     }
 
     // Receive action on notification
