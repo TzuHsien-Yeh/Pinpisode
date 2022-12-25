@@ -10,10 +10,7 @@ import com.tzuhsien.pinpisode.data.model.UserInfo
 import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class NotificationViewModel(private val repository: Repository): ViewModel() {
 
@@ -78,8 +75,11 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
             _status.value = LoadApiStatus.LOADING
 
             for (list in listForOneQuery) {
+                val result = withContext(Dispatchers.IO) {
+                    repository.getUserInfoByIds(list)
+                }
 
-                when (val result = repository.getUserInfoByIds(list)) {
+                when (result) {
 
                     is Result.Success -> {
                         _error.value = null
@@ -129,7 +129,11 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.updateNoteAuthors(item.note.id, authorSet)) {
+            val result = withContext(Dispatchers.IO) {
+                repository.updateNoteAuthors(item.note.id, authorSet)
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -158,7 +162,11 @@ class NotificationViewModel(private val repository: Repository): ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.deleteInvitation(item.id)) {
+            val result = withContext(Dispatchers.IO) {
+                repository.deleteInvitation(item.id)
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE

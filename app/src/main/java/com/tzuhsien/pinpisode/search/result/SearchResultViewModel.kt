@@ -10,10 +10,7 @@ import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import timber.log.Timber
 
 class SearchResultViewModel(private val repository: Repository) : ViewModel() {
@@ -96,7 +93,13 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = query?.let { repository.searchOnYouTube(it) }) {
+            val result = query?.let {
+                withContext(Dispatchers.IO) {
+                    repository.searchOnYouTube(it)
+                }
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -143,10 +146,12 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
                 _status.value = LoadApiStatus.LOADING
 
                 val result = queryKeyword?.let { query ->
-                    repository.searchOnSpotify(
-                        query = query,
-                        authToken = getSpotifyAuthToken()!!
-                    )
+                    withContext(Dispatchers.IO) {
+                        repository.searchOnSpotify(
+                            query = query,
+                            authToken = getSpotifyAuthToken()!!
+                        )
+                    }
                 }
 
                 when (result) {

@@ -10,10 +10,7 @@ import com.tzuhsien.pinpisode.data.model.UserInfo
 import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util.getString
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class CoauthorViewModel(private val repository: Repository, val note: Note) : ViewModel() {
 
@@ -61,7 +58,9 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.getUserInfoById(note.ownerId)
+            val result = withContext(Dispatchers.IO) {
+                repository.getUserInfoById(note.ownerId)
+            }
 
             _noteOwner.value = when (result) {
                 is Result.Success -> {
@@ -96,7 +95,9 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
         coroutineScope.launch {
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.findUserByEmail(query)
+            val result = withContext(Dispatchers.IO) {
+                repository.findUserByEmail(query)
+            }
 
             _foundUser.value = when (result) {
                 is Result.Success -> {
@@ -133,9 +134,14 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
+            val result =
+                foundUser.value?.let {
+                    withContext(Dispatchers.IO) {
+                        repository.sendCoauthorInvitation(note, it.id)
+                    }
+                }
 
-            when (val result =
-                foundUser.value?.let { repository.sendCoauthorInvitation(note, it.id) }) {
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -170,12 +176,17 @@ class CoauthorViewModel(private val repository: Repository, val note: Note) : Vi
         newAuthorList.remove(repository.getCurrentUser()?.id)
 
         coroutineScope.launch {
+
             _status.value = LoadApiStatus.LOADING
 
-            _quitCoauthoringResult.value = when (val result = repository.deleteUserFromAuthors(
-                noteId = note.id,
-                authors = newAuthorList
-            )) {
+            val result = withContext(Dispatchers.IO){
+                repository.deleteUserFromAuthors(
+                    noteId = note.id,
+                    authors = newAuthorList
+                )
+            }
+
+            _quitCoauthoringResult.value = when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE

@@ -15,10 +15,7 @@ import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util
 import com.tzuhsien.pinpisode.util.Util.getString
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import timber.log.Timber
 
 const val SPOTIFY_URI = "spotify:"
@@ -137,6 +134,7 @@ class SpotifyNoteViewModel(
     }
 
     private fun connectToSpotify() {
+
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
@@ -170,7 +168,11 @@ class SpotifyNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = noteId?.let { repository.getNoteInfoById(noteId = it) }
+            val result = noteId?.let {
+                withContext(Dispatchers.IO) {
+                    repository.getNoteInfoById(noteId = it)
+                }
+            }
 
             noteToBeUpdated = when (result) {
                 is Result.Success -> {
@@ -224,8 +226,11 @@ class SpotifyNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result =
-                repository.checkIfNoteAlreadyExists(Source.SPOTIFY.source, sourceId)) {
+            val result = withContext(Dispatchers.IO) {
+                repository.checkIfNoteAlreadyExists(Source.SPOTIFY.source, sourceId)
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -272,11 +277,13 @@ class SpotifyNoteViewModel(
             if (!hasUploaded) {
                 coroutineScope.launch {
 
-                    val result = repository.createNote(
-                        source = Source.SPOTIFY.source,
-                        sourceId = sourceId,
-                        note = newSpotifyNote
-                    )
+                    val result = withContext(Dispatchers.IO) {
+                        repository.createNote(
+                            source = Source.SPOTIFY.source,
+                            sourceId = sourceId,
+                            note = newSpotifyNote
+                        )
+                    }
 
                     noteToBeUpdated = when (result) {
                         is Result.Success -> {
@@ -339,12 +346,16 @@ class SpotifyNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = noteId?.let {
-                repository.addNewTimeItem(
-                    noteId = it,
-                    timeItem = TimeItem(startAt = startAt, endAt = endAt)
-                )
-            }) {
+            val result = noteId?.let {
+                withContext(Dispatchers.IO) {
+                    repository.addNewTimeItem(
+                        noteId = it,
+                        timeItem = TimeItem(startAt = startAt, endAt = endAt)
+                    )
+                }
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -383,7 +394,12 @@ class SpotifyNoteViewModel(
 
     private fun updateTimeItem(timeItem: TimeItem) {
         coroutineScope.launch {
-            when (val result = noteId?.let { repository.updateTimeItem(it, timeItem) }) {
+
+            val result = noteId?.let { withContext(Dispatchers.IO) {
+                repository.updateTimeItem(it, timeItem)
+            } }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -412,8 +428,11 @@ class SpotifyNoteViewModel(
             val timeItemToDelete = liveTimeItemList.value?.get(timeItemIndex)
 
             timeItemToDelete?.let {
-                when (val result =
-                    noteId?.let { repository.deleteTimeItem(it, timeItemToDelete) }) {
+                val result = withContext(Dispatchers.IO) {
+                    noteId?.let { repository.deleteTimeItem(it, timeItemToDelete) }
+                }
+
+                when (result) {
                     is Result.Success -> {
                         _error.value = null
                         _status.value = LoadApiStatus.DONE
@@ -456,7 +475,11 @@ class SpotifyNoteViewModel(
 
             noteToBeUpdated?.let { noteToBeUpdated ->
 
-                when (val result = repository.updateNote(noteToBeUpdated.id, noteToBeUpdated)) {
+                val result = withContext(Dispatchers.IO) {
+                    repository.updateNote(noteToBeUpdated.id, noteToBeUpdated)
+                }
+
+                when (result) {
                     is Result.Success -> {
                         _error.value = null
                         _status.value = LoadApiStatus.DONE

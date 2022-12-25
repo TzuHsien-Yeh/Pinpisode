@@ -9,10 +9,7 @@ import com.tzuhsien.pinpisode.data.model.*
 import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import timber.log.Timber
 
 class YouTubeNoteViewModel(
@@ -106,7 +103,11 @@ class YouTubeNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = noteId?.let { repository.getNoteInfoById(noteId = it) }
+            val result = noteId?.let {
+                withContext(Dispatchers.IO) {
+                    repository.getNoteInfoById(noteId = it)
+                }
+            }
 
             noteToBeUpdated = when (result) {
                 is Result.Success -> {
@@ -159,8 +160,11 @@ class YouTubeNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result =
-                repository.checkIfNoteAlreadyExists(Source.YOUTUBE.source, videoId)) {
+            val result = withContext(Dispatchers.IO) {
+                repository.checkIfNoteAlreadyExists(Source.YOUTUBE.source, videoId)
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
 
@@ -195,7 +199,11 @@ class YouTubeNoteViewModel(
     private fun getYoutubeVideoInfoById(videoId: String) {
         coroutineScope.launch {
 
-            when (val result = repository.getYouTubeVideoInfoById(videoId)) {
+            val result = withContext(Dispatchers.IO) {
+                repository.getYouTubeVideoInfoById(videoId)
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
 
@@ -232,11 +240,13 @@ class YouTubeNoteViewModel(
 
             coroutineScope.launch {
 
-                val result = repository.createNote(
-                    source = Source.YOUTUBE.source,
-                    sourceId = video.id,
-                    note = newYtNote
-                )
+                val result = withContext(Dispatchers.IO) {
+                    repository.createNote(
+                        source = Source.YOUTUBE.source,
+                        sourceId = video.id,
+                        note = newYtNote
+                    )
+                }
 
                 noteToBeUpdated = when (result) {
                     is Result.Success -> {
@@ -282,16 +292,21 @@ class YouTubeNoteViewModel(
      * Deal with editing and updating
      * **/
     fun createTimeItem(startAt: Float, endAt: Float?) {
+
         coroutineScope.launch {
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = noteId?.let {
-                repository.addNewTimeItem(
-                    noteId = it,
-                    timeItem = TimeItem(startAt = startAt, endAt = endAt)
-                )
-            }) {
+            val result = noteId?.let {
+                withContext(Dispatchers.IO) {
+                    repository.addNewTimeItem(
+                        noteId = it,
+                        timeItem = TimeItem(startAt = startAt, endAt = endAt)
+                    )
+                }
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -329,8 +344,14 @@ class YouTubeNoteViewModel(
     }
 
     private fun updateTimeItem(timeItem: TimeItem) {
+
         coroutineScope.launch {
-            when (val result = noteId?.let { repository.updateTimeItem(it, timeItem) }) {
+
+            val result = noteId?.let { withContext(Dispatchers.IO) {
+                repository.updateTimeItem(it, timeItem)
+            } }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -360,8 +381,11 @@ class YouTubeNoteViewModel(
 
             coroutineScope.launch {
 
-                when (val result =
-                    noteId?.let { repository.deleteTimeItem(it, timeItemToDelete) }) {
+                val result = noteId?.let { withContext(Dispatchers.IO) {
+                    repository.deleteTimeItem(it, timeItemToDelete)
+                } }
+
+                when (result) {
                     is Result.Success -> {
                         _error.value = null
                         _status.value = LoadApiStatus.DONE
@@ -395,7 +419,11 @@ class YouTubeNoteViewModel(
 
             noteToBeUpdated?.let { noteToBeUpdated ->
 
-                when (val result = repository.updateNote(noteToBeUpdated.id, noteToBeUpdated)) {
+                val result = withContext(Dispatchers.IO) {
+                    repository.updateNote(noteToBeUpdated.id, noteToBeUpdated)
+                }
+
+                when (result) {
                     is Result.Success -> {
                         _error.value = null
                         _status.value = LoadApiStatus.DONE
@@ -438,7 +466,11 @@ class YouTubeNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.getYouTubeVideoInfoById(note.sourceId)) {
+            val result = withContext(Dispatchers.IO) {
+                repository.getYouTubeVideoInfoById(note.sourceId)
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -472,9 +504,13 @@ class YouTubeNoteViewModel(
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = noteId?.let {
-                repository.updateNoteInfoFromSourceApi(noteId = it, note = note)
-            }) {
+            val result = noteId?.let {
+                withContext(Dispatchers.IO) {
+                    repository.updateNoteInfoFromSourceApi(noteId = it, note = note)
+                }
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE

@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.fragment.findNavController
+import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.databinding.DialogLoadingBinding
 import timber.log.Timber
@@ -17,6 +19,8 @@ class LoadingDialog : AppCompatDialogFragment() {
     companion object {
         const val REQUEST_DISMISS = "dismissRequest"
         const val KEY_DONE_LOADING = "doneLoading"
+        const val REQUEST_ERROR = "errorRequest"
+        const val KEY_ERROR_MSG = "errorMsg"
     }
 
     private lateinit var binding: DialogLoadingBinding
@@ -43,9 +47,23 @@ class LoadingDialog : AppCompatDialogFragment() {
                     dismiss()
                 }
                 false -> {
+                    binding.imgLoading.visibility = View.GONE
+                    binding.lottieLoading.visibility = View.GONE
+                    binding.imgError.visibility = View.VISIBLE
                     Timber.d("ERROR")
+                    binding.root.setOnClickListener {
+                        findNavController().navigate(NavGraphDirections.actionGlobalNoteListFragment())
+                    }
                 }
             }
+        }
+
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            REQUEST_ERROR,
+            this,
+        ) { _, bundle ->
+            binding.textErrorMsg.visibility = View.VISIBLE
+            binding.textErrorMsg.text = bundle.getString(KEY_ERROR_MSG)
         }
 
         return binding.root

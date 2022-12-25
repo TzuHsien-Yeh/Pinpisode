@@ -12,10 +12,7 @@ import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.extractYoutubeVideoId
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util.getString
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import timber.log.Timber
 
 
@@ -109,7 +106,11 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.getTrendingVideosOnYouTube()) {
+            val result = withContext(Dispatchers.IO) {
+                repository.getTrendingVideosOnYouTube()
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -140,7 +141,11 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
             getSpotifyAuthToken()?.let { token ->
 
-                when (val result = repository.getUserSavedShows(token)) {
+                val result = withContext(Dispatchers.IO) {
+                    repository.getUserSavedShows(token)
+                }
+
+                when (result) {
                     is Result.Success -> {
                         _error.value = null
                         _status.value = LoadApiStatus.DONE
@@ -184,10 +189,12 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
             for (item in showItems) {
                 val episodeResult = getSpotifyAuthToken()?.let {
-                    repository.getShowEpisodes(
-                        showId = item.show.id,
-                        authToken = it
-                    )
+                    withContext(Dispatchers.IO) {
+                        repository.getShowEpisodes(
+                            showId = item.show.id,
+                            authToken = it
+                        )
+                    }
                 }
 
                 when (episodeResult) {
@@ -267,8 +274,9 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
                 _status.value = LoadApiStatus.LOADING
 
-                val result =
+                val result = withContext(Dispatchers.IO) {
                     repository.getSpotifyEpisodeInfo(id, token)
+                }
 
                 _spotifyEpisodeData.value = when (result) {
                     is Result.Success -> {
@@ -309,7 +317,9 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            val result = repository.getYouTubeVideoInfoById(videoId)
+            val result = withContext(Dispatchers.IO) {
+                repository.getYouTubeVideoInfoById(videoId)
+            }
 
             _ytVideoData.value = when (result) {
                 is Result.Success -> {

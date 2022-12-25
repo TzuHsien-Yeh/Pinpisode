@@ -27,6 +27,7 @@ import com.tzuhsien.pinpisode.ext.extractSpotifySourceId
 import com.tzuhsien.pinpisode.ext.formatDuration
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.parseSpotifyImageUri
+import com.tzuhsien.pinpisode.loading.LoadingDialog
 import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
 import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
@@ -69,8 +70,13 @@ class SpotifyNoteFragment : Fragment() {
             binding.btnTakeTimestamp.isEnabled = it
 
             if (it) {
-                SpotifyService.play(SPOTIFY_URI + viewModel.sourceId)
-                Timber.d("SpotifyService.play(${SPOTIFY_URI + viewModel.sourceId})")
+
+                viewModel.error.observe(viewLifecycleOwner) {
+
+                    if (null == it) SpotifyService.play(SPOTIFY_URI + viewModel.sourceId)
+
+                    Timber.d("SpotifyService.play(${SPOTIFY_URI + viewModel.sourceId})")
+                }
 
                 SpotifyService.subscribeToPlayerState { state ->
                     Timber.d("SpotifyService.subscribeToPlayerState:  $state ")
@@ -114,22 +120,7 @@ class SpotifyNoteFragment : Fragment() {
                     }
                 }
 
-
-                Timber.d("viewModel.isViewerCanEdit = ${viewModel.isViewerCanEdit}")
-                if (viewModel.isViewerCanEdit) {
-                    Intent(context, SpotifyNoteService::class.java).apply {
-                        action = SpotifyNoteService.ACTION_START
-                        context?.startService(this)
-                    }
-                    registerTimestampReceiver()
-                } else {
-
-                    Timber.d(" viewModel.isSpotifyConnected.observe, ACTION_STOP")
-                    Intent(context, SpotifyNoteService::class.java).apply {
-                        action = SpotifyNoteService.ACTION_STOP
-                        context?.startService(this)
-                    }
-                }
+                startSpotifyNoteServiceForAuthor()
             }
         }
 
@@ -150,7 +141,9 @@ class SpotifyNoteFragment : Fragment() {
             Timber.d("binding.playPauseButton.setOnClickListener, ${viewModel.playingState}")
             when (viewModel.playingState) {
 
-                PlayingState.STOPPED -> { viewModel.playingState = PlayingState.PLAYING }
+                PlayingState.STOPPED -> {
+                    viewModel.playingState = PlayingState.PLAYING
+                }
 
                 PlayingState.PLAYING -> pause()
 
@@ -347,17 +340,29 @@ class SpotifyNoteFragment : Fragment() {
             }
         }
 
-        /** Loading status **/
+        /** Loading status and error messages **/
+        viewModel.error.observe(viewLifecycleOwner) {
+            it?.let {
+                requireActivity().supportFragmentManager.setFragmentResult(LoadingDialog.REQUEST_ERROR,
+                    bundleOf(LoadingDialog.KEY_ERROR_MSG to it))
+            }
+        }
+
         viewModel.status.observe(viewLifecycleOwner) {
-            when(it) {
+            when (it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
                         findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
-                        bundleOf(KEY_DONE_LOADING to true))
+                    viewModel.error.observe(viewLifecycleOwner) { errorMsg ->
+                        if (errorMsg != getString(R.string.note_not_available_anymore)) {
+                            requireActivity().supportFragmentManager.setFragmentResult(
+                                REQUEST_DISMISS,
+                                bundleOf(KEY_DONE_LOADING to true))
+                        }
+                    }
                 }
                 LoadApiStatus.ERROR -> {
                     requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
@@ -437,6 +442,24 @@ class SpotifyNoteFragment : Fragment() {
             })
     }
 
+    private fun startSpotifyNoteServiceForAuthor() {
+        Timber.d("viewModel.isViewerCanEdit = ${viewModel.isViewerCanEdit}")
+        if (viewModel.isViewerCanEdit) {
+            Intent(context, SpotifyNoteService::class.java).apply {
+                action = SpotifyNoteService.ACTION_START
+                context?.startService(this)
+            }
+            registerTimestampReceiver()
+        } else {
+
+            Timber.d(" viewModel.isSpotifyConnected.observe, ACTION_STOP")
+            Intent(context, SpotifyNoteService::class.java).apply {
+                action = SpotifyNoteService.ACTION_STOP
+                context?.startService(this)
+            }
+        }
+    }
+
     // Receive action on notification
     private val timestampReceiver = TimestampReceiver(TimestampReceiver.OnActionListener {
         when (it) {
@@ -460,8 +483,8 @@ class SpotifyNoteFragment : Fragment() {
         SpotifyService.disconnect()
         Timber.d("onDestroy, ACTION_STOP")
         Intent(context, SpotifyNoteService::class.java).apply {
-                action = SpotifyNoteService.ACTION_STOP
-                context?.startService(this)
+            action = SpotifyNoteService.ACTION_STOP
+            context?.startService(this)
         }
 
         try {

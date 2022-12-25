@@ -14,10 +14,7 @@ import com.tzuhsien.pinpisode.data.model.UserInfo
 import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 
 class ProfileViewModel(private val repository: Repository) : ViewModel() {
@@ -41,7 +38,11 @@ class ProfileViewModel(private val repository: Repository) : ViewModel() {
         coroutineScope.launch {
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.updateCurrentUser()) {
+            val result = withContext(Dispatchers.IO) {
+                repository.updateCurrentUser()
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE

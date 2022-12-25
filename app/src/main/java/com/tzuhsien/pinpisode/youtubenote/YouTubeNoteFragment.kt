@@ -28,10 +28,12 @@ import com.tzuhsien.pinpisode.data.model.TimeItemDisplay
 import com.tzuhsien.pinpisode.databinding.FragmentYoutubeNoteBinding
 import com.tzuhsien.pinpisode.ext.getVmFactory
 import com.tzuhsien.pinpisode.ext.parseDuration
+import com.tzuhsien.pinpisode.loading.LoadingDialog
 import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.KEY_DONE_LOADING
 import com.tzuhsien.pinpisode.loading.LoadingDialog.Companion.REQUEST_DISMISS
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.spotifynote.SpotifyNoteService
+import com.tzuhsien.pinpisode.spotifynote.SpotifyService
 import com.tzuhsien.pinpisode.util.DEEPLINK_PATH_YOUTUBE_NOTE
 import com.tzuhsien.pinpisode.util.DYNAMIC_LINK_PREFIX
 import com.tzuhsien.pinpisode.util.SharingLinkGenerator
@@ -55,6 +57,7 @@ class YouTubeNoteFragment : Fragment() {
 
         binding = FragmentYoutubeNoteBinding.inflate(layoutInflater)
 
+        SpotifyService.pause()
         Intent(context, SpotifyNoteService::class.java).apply {
             action = SpotifyNoteService.ACTION_STOP
             context?.startService(this)
@@ -116,8 +119,10 @@ class YouTubeNoteFragment : Fragment() {
                             Timber.d("btnClip first time clicked, viewModel.startAt = ${viewModel.startAt}")
                         }
                         1 -> {
-                            if(second < viewModel.startAt) {
-                                Toast.makeText(context, getString(R.string.clip_end_before_start_warning), Toast.LENGTH_SHORT).show()
+                            if (second < viewModel.startAt) {
+                                Toast.makeText(context,
+                                    getString(R.string.clip_end_before_start_warning),
+                                    Toast.LENGTH_SHORT).show()
                             } else {
                                 viewModel.endAt = second
                                 binding.btnClip.animation = null
@@ -164,7 +169,8 @@ class YouTubeNoteFragment : Fragment() {
          *  RecyclerView views
          * */
         // Swipe to delete
-        binding.recyclerViewTimeItems.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        binding.recyclerViewTimeItems.addItemDecoration(DividerItemDecoration(context,
+            DividerItemDecoration.VERTICAL))
         val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(
             binding.recyclerViewTimeItems,
             swipeOutListener = OnSwipeOutListener {
@@ -267,17 +273,29 @@ class YouTubeNoteFragment : Fragment() {
             shareNoteLink()
         }
 
-        /** Loading status **/
+        /** Loading status and error messages **/
+        viewModel.error.observe(viewLifecycleOwner) {
+            it?.let {
+                requireActivity().supportFragmentManager.setFragmentResult(LoadingDialog.REQUEST_ERROR,
+                    bundleOf(LoadingDialog.KEY_ERROR_MSG to it))
+            }
+        }
+
         viewModel.status.observe(viewLifecycleOwner) {
-            when(it) {
+            when (it) {
                 LoadApiStatus.LOADING -> {
                     if (findNavController().currentDestination?.id != R.id.loadingDialog) {
                         findNavController().navigate(NavGraphDirections.actionGlobalLoadingDialog())
                     }
                 }
                 LoadApiStatus.DONE -> {
-                    requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
-                        bundleOf(KEY_DONE_LOADING to true))
+                    viewModel.error.observe(viewLifecycleOwner) { errorMsg ->
+                        if (errorMsg != getString(R.string.note_not_available_anymore)) {
+                            requireActivity().supportFragmentManager.setFragmentResult(
+                                REQUEST_DISMISS,
+                                bundleOf(KEY_DONE_LOADING to true))
+                        }
+                    }
                 }
                 LoadApiStatus.ERROR -> {
                     requireActivity().supportFragmentManager.setFragmentResult(REQUEST_DISMISS,
@@ -295,12 +313,12 @@ class YouTubeNoteFragment : Fragment() {
             DYNAMIC_LINK_PREFIX + DEEPLINK_PATH_YOUTUBE_NOTE + viewModel.noteId + "/" + viewModel.videoId
 
         SharingLinkGenerator.generateSharingLink(
-                deepLink = deepLink.toUri(),
-                previewImageLink = viewModel.noteToBeUpdated?.thumbnail?.toUri()
-            ) { generatedLink ->
+            deepLink = deepLink.toUri(),
+            previewImageLink = viewModel.noteToBeUpdated?.thumbnail?.toUri()
+        ) { generatedLink ->
             Timber.d("generatedLink = $generatedLink")
-                shareDynamicLink(generatedLink)
-            }
+            shareDynamicLink(generatedLink)
+        }
     }
 
     private fun shareDynamicLink(dynamicLink: String) {
@@ -335,7 +353,7 @@ class YouTubeNoteFragment : Fragment() {
         }
     }
 
-    fun deleteButton(position: Int) : SwipeHelper.UnderlayButton {
+    fun deleteButton(position: Int): SwipeHelper.UnderlayButton {
         return SwipeHelper.UnderlayButton(
             MyApplication.applicationContext(),
             getString(R.string.delete),

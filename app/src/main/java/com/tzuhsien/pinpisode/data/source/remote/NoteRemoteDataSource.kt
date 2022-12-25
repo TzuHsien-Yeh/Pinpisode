@@ -93,11 +93,11 @@ object NoteRemoteDataSource : NoteDataSource {
                         if (null != note) {
                             continuation.resume(Result.Success(note))
                         } else {
-                            continuation.resume(Result.Fail("This note is not available anymore"))
+                            continuation.resume(Result.Fail(getString(R.string.note_not_available_anymore)))
                         }
                     } else {
                         task.exception?.let {
-                            Timber.w("Error getting documents. ${it.message}\"")
+                            Timber.w("Error getting documents. ${it.message}")
                             continuation.resume(Result.Error(it))
                             return@addOnCompleteListener
                         }
