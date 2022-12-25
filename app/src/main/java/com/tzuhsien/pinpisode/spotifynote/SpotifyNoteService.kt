@@ -35,7 +35,6 @@ class SpotifyNoteService : Service() {
     }
 
     private fun start() {
-        NotificationBuilder().build(this, isClipping, channelId = NOTIFICATION_CHANNEL_ID, packageName = packageName)
         startForeground(NOTIFICATION_ID, buildNotification())
         Timber.d("start: startForeground")
     }

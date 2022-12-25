@@ -10,10 +10,7 @@ import com.tzuhsien.pinpisode.data.model.Note
 import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class TagViewModel(private val repository: Repository, val note: Note) : ViewModel() {
 
@@ -72,7 +69,12 @@ class TagViewModel(private val repository: Repository, val note: Note) : ViewMod
         }
 
         coroutineScope.launch {
-            when (val result = repository.updateTags(note.id, newNote)) {
+
+            val result = withContext(Dispatchers.IO) {
+                repository.updateTags(note.id, newNote)
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE

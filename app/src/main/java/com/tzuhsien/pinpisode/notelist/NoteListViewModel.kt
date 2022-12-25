@@ -13,10 +13,7 @@ import com.tzuhsien.pinpisode.data.source.Repository
 import com.tzuhsien.pinpisode.ext.parseDuration
 import com.tzuhsien.pinpisode.network.LoadApiStatus
 import com.tzuhsien.pinpisode.util.Util.getString
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import timber.log.Timber
 
 class NoteListViewModel(private val repository: Repository) : ViewModel() {
@@ -133,7 +130,12 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         _status.value = LoadApiStatus.LOADING
 
         coroutineScope.launch {
-            when(val result = repository.updateCurrentUser()) {
+
+            val result = withContext(Dispatchers.IO) {
+                repository.updateCurrentUser()
+            }
+
+            when(result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -175,7 +177,11 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
                 _status.value = LoadApiStatus.LOADING
 
-                when (val result = repository.getYouTubeVideoInfoById(note.sourceId)) {
+                val result = withContext(Dispatchers.IO) {
+                    repository.getYouTubeVideoInfoById(note.sourceId)
+                }
+
+                when (result) {
                     is Result.Success -> {
                         _error.value = null
 
@@ -213,10 +219,14 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.updateNoteInfoFromSourceApi(
-                noteId = noteId,
-                note = note
-            )) {
+            val result = withContext(Dispatchers.IO) {
+                repository.updateNoteInfoFromSourceApi(
+                    noteId = noteId,
+                    note = note
+                )
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -277,12 +287,17 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
         newAuthorList.remove(userId)
 
         coroutineScope.launch {
+
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.deleteUserFromAuthors(
-                noteId = noteToBeRemoved.id,
-                authors = newAuthorList
-            )) {
+            val result = withContext(Dispatchers.IO) {
+                repository.deleteUserFromAuthors(
+                    noteId = noteToBeRemoved.id,
+                    authors = newAuthorList
+                )
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
@@ -305,9 +320,14 @@ class NoteListViewModel(private val repository: Repository) : ViewModel() {
 
     private fun deleteNote(noteToBeRemoved: Note) {
         coroutineScope.launch {
+
             _status.value = LoadApiStatus.LOADING
 
-            when (val result = repository.deleteNote(noteId = noteToBeRemoved.id)) {
+            val result = withContext(Dispatchers.IO) {
+                repository.deleteNote(noteId = noteToBeRemoved.id)
+            }
+
+            when (result) {
                 is Result.Success -> {
                     _error.value = null
                     _status.value = LoadApiStatus.DONE
