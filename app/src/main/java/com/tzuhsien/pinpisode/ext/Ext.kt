@@ -7,13 +7,14 @@ import com.bumptech.glide.request.RequestOptions
 import com.tzuhsien.pinpisode.Constants
 import com.tzuhsien.pinpisode.R
 import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.time.Duration
 
 
 // Convert UTC to local time
 fun String.utcToLocalTime(): String {
-    val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-    return sdf.parse(this)?.toString() ?: ""
+    val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+    return sdf.parse(this)?.toLocaleString() ?: ""
 }
 
 fun Float.formatDuration(): String = DateUtils.formatElapsedTime(this.toLong())

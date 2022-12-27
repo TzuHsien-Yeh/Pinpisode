@@ -119,7 +119,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.youTubeNoteFragment -> {
                     setUpToolbarUi(
                         isToolbarVisible = true,
-                        toolbarText = getString(R.string.youtube_note),
+                        toolbarText = getString(R.string.spotify_note),
+                        platformLogo = R.drawable.logo_youtube,
                         onNavIconClick = {
                             controller.navigate(NavGraphDirections.actionGlobalNoteListFragment())
                         },
@@ -131,6 +132,7 @@ class MainActivity : AppCompatActivity() {
                     setUpToolbarUi(
                         isToolbarVisible = true,
                         toolbarText = getString(R.string.spotify_note),
+                        platformLogo = R.drawable.spotify_logo_rgb_black,
                         onNavIconClick = {
                             controller.navigate(NavGraphDirections.actionGlobalNoteListFragment())
                         },
@@ -155,6 +157,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpToolbarUi(
         isToolbarVisible: Boolean = false,
+        platformLogo: Int? = null,
         toolbarText: String? = null,
         isNavIconVisible: Boolean = true,
         onNavIconClick: View.OnClickListener = View.OnClickListener { onBackPressed() },
@@ -163,6 +166,16 @@ class MainActivity : AppCompatActivity() {
     ) {
         binding.toolbar.visibility = if (isToolbarVisible) View.VISIBLE else View.GONE
         binding.toolbarText.text = toolbarText
+        binding.logoPlatform.apply {
+            visibility = if (null != platformLogo) {
+                setImageResource(platformLogo)
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+        }
+
+
 
         if (isNavIconVisible) {
             binding.toolbar.setNavigationIcon(R.drawable.ic_back)

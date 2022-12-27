@@ -22,7 +22,7 @@
 
         <TextView
             android:id="@+id/text_add_tags"
-            style="@style/yt_bold_17sp"
+            style="@style/yt_bold_16sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"

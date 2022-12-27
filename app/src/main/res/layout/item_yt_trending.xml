@@ -35,15 +35,15 @@
 
             <TextView
                 android:id="@+id/text_title"
-                style="@style/yt_bold_17sp"
+                style="@style/yt_bold_16sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:maxLines="3"
+                android:maxLines="2"
                 android:ellipsize="end"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/img_thumbnail"
-                tools:text="aglifhevowrv;rvl" />
+                tools:text="aglifhevowrvsvvvvvdkfvhjakfhvfdkvabvajvahvhjmbhvnghjbmnj,bmvngj,nbnghjmbnvhjh,nmbkjbmvhj;rvl" />
 
             <TextView
                 android:id="@+id/text_channel_name"

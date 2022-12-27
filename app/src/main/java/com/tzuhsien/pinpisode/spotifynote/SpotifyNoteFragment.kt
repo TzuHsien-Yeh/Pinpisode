@@ -2,6 +2,7 @@ package com.tzuhsien.pinpisode.spotifynote
 
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -132,6 +133,15 @@ class SpotifyNoteFragment : Fragment() {
                     viewModel.hasUploaded = true
                 }
             }
+        }
+
+        /**
+         *  Link to Spotify
+         * **/
+        binding.imgCoverArt.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(SPOTIFY_URI + viewModel.sourceId)
+            this.startActivity(intent)
         }
 
         /**
