@@ -1,62 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".spotifynote.SpotifyNoteFragment">
 
-        <!-- Image cover art -->
-        <ImageView
-            android:id="@+id/img_cover_art"
-            android:layout_width="90dp"
-            android:layout_height="90dp"
-            android:layout_marginTop="@dimen/standard"
-            android:layout_marginStart="24dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.05"
-            android:src="@drawable/app_icon"/>
+    <!-- Image cover art -->
+    <ImageView
+        android:id="@+id/img_cover_art"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="@dimen/standard"
+        android:scaleType="centerCrop"
+        android:src="@drawable/app_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.05" />
 
     <TextView
         android:id="@+id/error_msg"
+        style="@style/yt_bold_16sp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        style="@style/yt_bold_17sp"
-        android:textAlignment="textStart"
         android:layout_marginHorizontal="@dimen/standard"
-        tools:text="faueaiohojahvjaev"
-        app:layout_constraintTop_toTopOf="@id/img_cover_art"
+        android:textAlignment="textStart"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/img_cover_art"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="@id/img_cover_art"
+        tools:text="faueaiohojahvjaev" />
 
     <TextView
         android:id="@+id/text_source_title"
+        style="@style/yt_bold_16sp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/standard"
-        style="@style/yt_bold_17sp"
-        android:maxLines="2"
         android:ellipsize="end"
-        app:layout_constraintTop_toTopOf="@id/img_cover_art"
-        app:layout_constraintStart_toEndOf="@+id/img_cover_art"
+        android:maxLines="2"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:text="avuiefvbqrevfghjhghfdsrtdygujlkhgfdstyughkjnmbvcxdffgkhjn,mbnvbfhbvncbxvdffjghkbnmnvbcxdgfjghkbn vbcxvdgtygkhjbmvcbxgavele"/>
+        app:layout_constraintStart_toEndOf="@+id/img_cover_art"
+        app:layout_constraintTop_toTopOf="@id/img_cover_art"
+        tools:text="avuiefvbqrevfghjhghfdsrtdygujlkhgfdstyughkjnmbvcxdffgkhjn,mbnvbfhbvncbxvdffjghkbnmnvbcxdgfjghkbn vbcxvdgtygkhjbmvcbxgavele" />
 
     <TextView
         android:id="@+id/text_publisher"
+        style="@style/yt_medium_15sp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="@dimen/standard"
-        tools:text="gfsvkvavhilfafdsoihgftyughkjgfyughjhgfdrtyuijhgfdrtyuijkhgfdgchjbvgfuyghkjbhgvfgugyhkjnbnvcfghv"
-        android:maxLines="2"
         android:ellipsize="end"
-        style="@style/yt_medium_15sp"
-        app:layout_constraintTop_toBottomOf="@+id/text_source_title"
+        android:maxLines="2"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/text_source_title"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/text_source_title"
+        tools:text="gfsvkvavhilfafdsoihgftyughkjgfyughjhgfdrtyuijhgfdrtyuijkhgfdgchjbvgfuyghkjbhgvfgugyhkjnbnvcfghv" />
 
     <!-- Playback controls -->
 
@@ -65,13 +65,13 @@
         android:layout_width="28dp"
         android:layout_height="36dp"
         android:background="@color/transparent"
-        app:tint="@color/text_color_to_theme"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="@id/play_pause_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.25"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/btn_seek_back" />
+        app:srcCompat="@drawable/btn_seek_back"
+        app:tint="@color/text_color_to_theme" />
 
 
     <ImageView
@@ -80,59 +80,59 @@
         android:layout_height="48dp"
         android:layout_marginTop="24dp"
         android:background="@color/transparent"
-        app:tint="@color/audio_player_color_to_theme"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/img_cover_art"
         app:layout_constraintVertical_bias="0.2"
-        app:srcCompat="@drawable/btn_play" />
+        app:srcCompat="@drawable/btn_play"
+        app:tint="@color/audio_player_color_to_theme" />
 
 
     <ImageView
         android:id="@+id/seek_forward_button"
         android:layout_width="28dp"
         android:layout_height="36dp"
-        android:scaleType="centerCrop"
-        app:tint="@color/audio_player_color_to_theme"
         android:background="@color/transparent"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="@id/play_pause_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.75"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintVertical_bias="0.2"
-        app:srcCompat="@drawable/btn_seek_forward" />
+        app:srcCompat="@drawable/btn_seek_forward"
+        app:tint="@color/audio_player_color_to_theme" />
 
     <!-- Seek controls -->
-        <androidx.appcompat.widget.AppCompatSeekBar
-            android:id="@+id/seek_to"
-            android:layout_width="0dp"
-            android:layout_height="24dp"
-            android:layout_marginTop="@dimen/standard"
-            android:layout_marginHorizontal="@dimen/standard"
-            android:progressTint="@color/color_primary_variant"
-            android:thumbTint="@color/color_primary_variant"
-            app:tint="@color/color_primary_variant"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/play_pause_button" />
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:id="@+id/seek_to"
+        android:layout_width="0dp"
+        android:layout_height="24dp"
+        android:layout_marginHorizontal="@dimen/standard"
+        android:layout_marginTop="@dimen/standard"
+        android:progressTint="@color/color_primary_variant"
+        android:thumbTint="@color/color_primary_variant"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/play_pause_button"
+        app:tint="@color/color_primary_variant" />
 
     <TextView
         android:id="@+id/text_current_second"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/standard"
-        tools:text="11:24"
+        app:layout_constraintStart_toStartOf="@id/seek_to"
         app:layout_constraintTop_toBottomOf="@id/seek_to"
-        app:layout_constraintStart_toStartOf="@id/seek_to"/>
+        tools:text="11:24" />
 
     <TextView
         android:id="@+id/text_total_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/standard"
-        tools:text="19:24"
+        app:layout_constraintEnd_toEndOf="@id/seek_to"
         app:layout_constraintTop_toBottomOf="@id/seek_to"
-        app:layout_constraintEnd_toEndOf="@id/seek_to"/>
+        tools:text="19:24" />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ic_decoration"
@@ -140,37 +140,37 @@
         android:layout_height="28dp"
         android:layout_marginStart="12dp"
         android:src="@drawable/app_icon"
-        app:shapeAppearanceOverlay="@style/circle"
-        app:layout_constraintTop_toTopOf="@+id/edit_digest"
         app:layout_constraintBottom_toBottomOf="@+id/edit_digest"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/edit_digest"
+        app:shapeAppearanceOverlay="@style/circle" />
 
     <EditText
         android:id="@+id/edit_digest"
+        style="@style/source_title_style"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
-        android:layout_marginBottom="@dimen/standard"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="14dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginBottom="@dimen/standard"
+        android:background="@color/transparent"
+        android:hint="@string/input_summary"
+        android:inputType="text"
         android:maxLength="35"
         android:maxLines="1"
-        android:inputType="text"
-        android:hint="@string/input_summary"
-        style="@style/source_title_style"
-        android:background="@color/transparent"
+        app:layout_constraintBottom_toTopOf="@+id/recycler_view_time_items"
         app:layout_constraintStart_toEndOf="@+id/ic_decoration"
-        app:layout_constraintTop_toBottomOf="@+id/text_total_time"
-        app:layout_constraintBottom_toTopOf="@+id/recycler_view_time_items"/>
+        app:layout_constraintTop_toBottomOf="@+id/text_total_time" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_time_items"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/note_page_bottom_options"
         app:layout_constraintTop_toBottomOf="@+id/edit_digest"
-        tools:listitem="@layout/item_time_card"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        tools:listitem="@layout/item_time_card" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_take_timestamp"
@@ -178,14 +178,14 @@
         android:layout_height="54dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="12dp"
-        app:borderWidth="0dp"
         android:backgroundTint="@color/bg_floating_action_btn_to_theme"
         android:src="@drawable/ic_pin"
-        app:maxImageSize="50dp"
-        app:tint="@color/ic_floating_action_btn_to_theme"
+        app:borderWidth="0dp"
         app:fabCustomSize="55dp"
         app:layout_constraintBottom_toTopOf="@id/note_page_bottom_options"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:maxImageSize="50dp"
+        app:tint="@color/ic_floating_action_btn_to_theme" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_clip"
@@ -193,43 +193,43 @@
         android:layout_height="54dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="12dp"
-        app:borderWidth="0dp"
         android:backgroundTint="@color/bg_floating_action_btn_to_theme"
         android:src="@drawable/ic_clip"
-        app:maxImageSize="50dp"
-        app:tint="@color/ic_floating_action_btn_to_theme"
+        app:borderWidth="0dp"
         app:fabCustomSize="54dp"
         app:layout_constraintBottom_toTopOf="@id/btn_take_timestamp"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:maxImageSize="50dp"
+        app:tint="@color/ic_floating_action_btn_to_theme" />
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/note_page_bottom_options"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:paddingVertical="4dp"
         android:background="@color/note_bottom_options_bg"
+        android:paddingVertical="4dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageView
             android:id="@+id/ic_share"
             android:layout_width="@dimen/note_bottom_ic_size"
             android:layout_height="@dimen/note_bottom_ic_size"
+            android:src="@drawable/icon_share"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ic_coauthoring"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:src="@drawable/icon_share"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/ic_coauthoring"
             android:layout_width="@dimen/note_bottom_ic_size"
             android:layout_height="@dimen/note_bottom_ic_size"
+            android:src="@drawable/ic_add_user"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ic_add_tag"
             app:layout_constraintHorizontal_bias="0.5"
-            android:src="@drawable/ic_add_user"
             app:layout_constraintStart_toEndOf="@+id/ic_share"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -237,12 +237,12 @@
             android:id="@+id/ic_add_tag"
             android:layout_width="@dimen/note_bottom_ic_size"
             android:layout_height="@dimen/note_bottom_ic_size"
+            android:src="@drawable/ic_tag"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ic_time_item_display_options"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/ic_coauthoring"
-            app:layout_constraintTop_toTopOf="parent"
-            android:src="@drawable/ic_tag"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/ic_time_item_display_options"
@@ -253,7 +253,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/ic_add_tag"
             app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/ic_view_all"/>
+            tools:src="@drawable/ic_view_all" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

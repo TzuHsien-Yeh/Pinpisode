@@ -34,7 +34,7 @@
 
             <TextView
                 android:id="@+id/text_title"
-                style="@style/yt_bold_17sp"
+                style="@style/yt_bold_16sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"

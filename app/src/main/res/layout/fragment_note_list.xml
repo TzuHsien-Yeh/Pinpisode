@@ -87,7 +87,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="6dp"
         tools:text="hahaha oo"
-        style="@style/yt_bold_17sp"
+        style="@style/yt_bold_16sp"
         app:layout_constraintTop_toTopOf="@+id/img_pic_to_profile"
         app:layout_constraintBottom_toBottomOf="@+id/img_pic_to_profile"
         app:layout_constraintStart_toEndOf="@+id/img_pic_to_profile"/>
