@@ -7,12 +7,20 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.SpotifyItem
+import com.tzuhsien.pinpisode.databinding.ItemOpenSpotifyBinding
+import com.tzuhsien.pinpisode.databinding.ItemSpotifyLogoBinding
 import com.tzuhsien.pinpisode.databinding.ItemSpotifySearchResultBinding
 import com.tzuhsien.pinpisode.ext.glide
 
+private const val TYPE_TOP : Int = 0x00
+private const val TYPE_END : Int = 0x01
+private const val TYPE_LIST : Int = 0x02
+
+
 class SpotifySearchResultAdapter(
     private val uiState: SearchResultUiState
-): ListAdapter<SpotifyItem, SpotifySearchResultAdapter.SpResultViewHolder>(DiffCallback) {
+): ListAdapter<SpotifyItem, RecyclerView.ViewHolder>(DiffCallback) {
+
     class SpResultViewHolder(private val binding: ItemSpotifySearchResultBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(resultItem: SpotifyItem){
 
@@ -32,7 +40,19 @@ class SpotifySearchResultAdapter(
                 }
                 artistList.toString()
             } else { "" }
+        }
+    }
 
+    class SpotifyLogoViewHolder(private val binding: ItemSpotifyLogoBinding): RecyclerView.ViewHolder(binding.root)
+    class SpotifyLinkViewHolder(private val binding: ItemOpenSpotifyBinding): RecyclerView.ViewHolder(binding.root) {
+        fun bind() {}
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (position) {
+            (itemCount - 1) -> TYPE_END
+            0 -> TYPE_TOP
+            else -> TYPE_LIST
         }
     }
 
@@ -48,17 +68,36 @@ class SpotifySearchResultAdapter(
 
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SpResultViewHolder {
-        return SpResultViewHolder(ItemSpotifySearchResultBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false)
-        )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType){
+            TYPE_TOP -> SpotifyLogoViewHolder(ItemSpotifyLogoBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            ))
+            TYPE_LIST -> SpResultViewHolder(ItemSpotifySearchResultBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false))
+
+            TYPE_END -> SpotifyLinkViewHolder(ItemOpenSpotifyBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false))
+            else -> SpResultViewHolder(ItemSpotifySearchResultBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false))
+        }
     }
 
-    override fun onBindViewHolder(holder: SpResultViewHolder, position: Int) {
-        val item = getItem(position)
-        holder.itemView.setOnClickListener {
-            uiState.onSpotifyItemClick(item)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        return when (holder) {
+            is SpResultViewHolder -> {
+                val item = getItem(position)
+                holder.itemView.setOnClickListener {
+                    uiState.onSpotifyItemClick(item)
+                }
+                holder.bind(item)
+            }
+            is SpotifyLinkViewHolder -> {
+                holder.itemView.setOnClickListener {
+                    uiState.openSpotify()
+                }
+            }
+            else -> {}
         }
-        holder.bind(item)
     }
 }

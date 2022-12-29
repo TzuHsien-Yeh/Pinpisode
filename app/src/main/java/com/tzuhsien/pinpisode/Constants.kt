@@ -8,6 +8,9 @@ object Constants {
     const val SPOTIFY_URI = "spotify:"
     const val SPOTIFY_URI_EPISODE = "episode:"
     const val SPOTIFY_SHARE_LINK = "https://open.spotify.com/"
+    const val SPOTIFY_PACKAGE_NAME = "com.spotify.music"
+
+    const val PATH_SEARCH = "search/"
 
     // Spotify Auth
     const val CLIENT_ID = "f6095c97a1ab4a7fb88b5ac5f2ba606d"

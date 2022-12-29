@@ -6,7 +6,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".search.result.SearchResultFragment">
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_sp_search_result"
         android:layout_width="match_parent"
@@ -24,7 +23,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/item_yt_search_result" />
-
 
     <androidx.cardview.widget.CardView
         android:id="@+id/btn_spotify_auth"
@@ -68,28 +66,10 @@
                 android:layout_marginStart="6dp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/ic_spotify"
-                />
+                app:layout_constraintStart_toEndOf="@id/ic_spotify"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>
-
-
-<!--    -->
-<!--    <TextView-->
-<!--        android:id="@+id/text_need_spotify_auth"-->
-<!--        android:layout_width="170dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:visibility="gone"-->
-<!--        android:text="Login and authorize to search on Spotify"-->
-<!--        android:textAlignment="center"-->
-<!--        android:textAllCaps="false"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintVertical_bias="0.4" />-->
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -36,6 +36,9 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
         },
         onSpotifyItemClick = { spotifyItem ->
             _navigateToSpotifyNote.value = spotifyItem.uri.extractSpotifySourceId()
+        },
+        openSpotify = {
+            _searchSpotify.value = queryKeyword
         }
     )
 
@@ -57,6 +60,10 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
     private val _navigateToSpotifyNote = MutableLiveData<String?>()
     val navigateToSpotifyNote: LiveData<String?>
         get() = _navigateToSpotifyNote
+
+    private val _searchSpotify = MutableLiveData<String?>(null)
+    val searchSpotify: LiveData<String?>
+        get() = _searchSpotify
 
     fun getSpotifyAuthToken(): String? {
         return repository.getSpotifyAuthToken()
@@ -224,4 +231,5 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
 data class SearchResultUiState(
     val onYoutubeItemClick: (ItemX) -> Unit,
     val onSpotifyItemClick: (SpotifyItem) -> Unit,
+    val openSpotify: () -> Unit
 )
