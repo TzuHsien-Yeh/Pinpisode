@@ -11,7 +11,7 @@
         android:id="@+id/img_cover_art"
         android:layout_width="90dp"
         android:layout_height="90dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="@dimen/standard"
         android:layout_marginTop="@dimen/standard"
         android:scaleType="centerCrop"
         android:src="@drawable/app_icon"
@@ -29,7 +29,45 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/img_cover_art"
         app:layout_constraintTop_toTopOf="@id/img_cover_art"
-        tools:text="faueaiohojahvjaev" />
+        tools:text="@string/error_msg_spotify_not_installed" />
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btn_get_or_login_spotify"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/standard"
+            app:layout_constraintBottom_toBottomOf="@id/img_cover_art"
+            app:layout_constraintStart_toEndOf="@id/img_cover_art">
+
+            <ImageView
+                android:id="@+id/ic_spotify"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:layout_marginEnd="4dp"
+                android:src="@drawable/ic_spotify"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/text_get_or_login_spotify"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/text_color_to_theme"/>
+
+            <TextView
+                android:id="@+id/text_get_or_login_spotify"
+                style="@style/yt_medium_17sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.1"
+                android:textColor="@color/text_color_to_theme"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/ic_spotify"
+                app:layout_constraintTop_toTopOf="parent"
+                android:text="@string/get_spotify_free" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:id="@+id/text_source_title"
@@ -58,6 +96,42 @@
         app:layout_constraintTop_toBottomOf="@+id/text_source_title"
         tools:text="gfsvkvavhilfafdsoihgftyughkjgfyughjhgfdrtyuijhgfdrtyuijkhgfdgchjbvgfuyghkjbhgvfgugyhkjnbnvcfghv" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/btn_open_spotify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/standard"
+        app:layout_constraintTop_toBottomOf="@id/img_cover_art"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="6dp">
+
+        <ImageView
+            android:id="@+id/ic_open_spotify"
+            android:layout_width="21dp"
+            android:layout_height="21dp"
+            android:layout_marginEnd="4dp"
+            android:src="@drawable/ic_spotify"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/text_open_spotify"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/text_color_to_theme" />
+
+        <TextView
+            android:id="@+id/text_open_spotify"
+            style="@style/yt_medium_16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:letterSpacing="0.1"
+            android:textColor="@color/text_color_to_theme"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/ic_open_spotify"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="@string/open_spotify" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <!-- Playback controls -->
 
     <ImageView
@@ -78,11 +152,11 @@
         android:id="@+id/play_pause_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="20dp"
         android:background="@color/transparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/img_cover_art"
+        app:layout_constraintTop_toBottomOf="@id/btn_open_spotify"
         app:layout_constraintVertical_bias="0.2"
         app:srcCompat="@drawable/btn_play"
         app:tint="@color/audio_player_color_to_theme" />

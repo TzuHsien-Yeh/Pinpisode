@@ -1,6 +1,7 @@
 package com.tzuhsien.pinpisode.search.result
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,10 +22,12 @@ import com.tzuhsien.pinpisode.Constants.PARAM_CODE_CHALLENGE
 import com.tzuhsien.pinpisode.Constants.PARAM_CODE_CHALLENGE_METHOD
 import com.tzuhsien.pinpisode.Constants.PARAM_CODE_VERIFIER
 import com.tzuhsien.pinpisode.Constants.PARAM_GRANT_TYPE
+import com.tzuhsien.pinpisode.Constants.PATH_SEARCH
 import com.tzuhsien.pinpisode.Constants.REDIRECT_URI
 import com.tzuhsien.pinpisode.Constants.S256
 import com.tzuhsien.pinpisode.Constants.SCOPE_LIBRARY_READ
 import com.tzuhsien.pinpisode.Constants.SCOPE_READ_PLAYBACK_POSITION
+import com.tzuhsien.pinpisode.Constants.SPOTIFY_SHARE_LINK
 import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Source
@@ -143,6 +146,15 @@ class SearchResultFragment : Fragment() {
                     )
                 )
                 viewModel.doneNavigation()
+            }
+        }
+
+        /** Open spotify search **/
+        viewModel.searchSpotify.observe(viewLifecycleOwner) {
+            it?.let {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse(SPOTIFY_SHARE_LINK + PATH_SEARCH + it)
+                this.startActivity(intent)
             }
         }
 

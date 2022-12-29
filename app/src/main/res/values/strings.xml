@@ -46,7 +46,7 @@
     <string name="take_timestamp">Take Timestamp</string>
     <string name="clip_end_before_start_warning">A clip should end later than its start</string>
     <string name="episode_not_found">Episode not found</string>
-    <string name="error_msg_spotify_not_installed">Error:\nPlease install Spotify app on this device to access Spotify related features</string>
+    <string name="error_msg_spotify_not_installed">Error:\nPlease install Spotify app on the device</string>
     <string name="error_msg_spotify_not_logged_in">Error:\nPlease log in to Spotify to access Spotify related features</string>
     <string name="error_connecting_to_spotify">Error connecting to Spotify</string>
     <string name="pisode_pin">Pisode Pin</string>
@@ -75,5 +75,8 @@
     <string name="no_signed_in_firebase_user">No user signed in</string>
     <string name="no_signed_in_user">No signed in user</string>
     <string name="note_not_available_anymore">This note is not available anymore</string>
+    <string name="get_spotify_free">GET SPOTIFY FREE</string>
+    <string name="login_spotify">LOG IN TO SPOTIFY</string>
+    <string name="open_spotify">OPEN SPOTIFY</string>
 
 </resources>

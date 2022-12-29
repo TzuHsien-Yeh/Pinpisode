@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.spotify.protocol.types.PlayerState
+import com.tzuhsien.pinpisode.Constants.SPOTIFY_PACKAGE_NAME
 import com.tzuhsien.pinpisode.MyApplication
 import com.tzuhsien.pinpisode.NavGraphDirections
 import com.tzuhsien.pinpisode.R
@@ -345,8 +346,48 @@ class SpotifyNoteFragment : Fragment() {
             if (null != it) {
                 binding.errorMsg.text = it
                 binding.errorMsg.visibility = View.VISIBLE
+                binding.btnOpenSpotify.visibility = View.GONE
+                binding.playPauseButton.visibility = View.GONE
+                binding.seekBackButton.visibility = View.GONE
+                binding.seekForwardButton.visibility = View.GONE
+                binding.seekTo.visibility = View.GONE
+
+                when (it) {
+                    ConnectState.NOT_INSTALLED.msg -> {
+                        binding.imgCoverArt.isEnabled = false
+                        binding.textGetOrLoginSpotify.text = getString(R.string.get_spotify_free)
+                        binding.btnGetOrLoginSpotify.apply {
+                            visibility = View.VISIBLE
+                            setOnClickListener {
+                                startActivity(Intent(Intent.ACTION_VIEW,
+                                    Uri.parse("https://play.google.com/store/apps/details?id=$SPOTIFY_PACKAGE_NAME")))
+                            }
+                        }
+                    }
+
+                    ConnectState.NOT_LOGGED_IN.msg -> {
+                        binding.textGetOrLoginSpotify.text = getString(R.string.login_spotify)
+                        binding.btnGetOrLoginSpotify.apply {
+                            visibility = View.VISIBLE
+                            setOnClickListener {
+                                val intent = Intent(Intent.ACTION_VIEW)
+                                intent.data = Uri.parse(SPOTIFY_URI + viewModel.sourceId)
+                                startActivity(intent)
+                            }
+                        }
+                    }
+                }
             } else {
                 binding.errorMsg.visibility = View.GONE
+                binding.btnGetOrLoginSpotify.visibility = View.GONE
+                binding.btnOpenSpotify.apply {
+                    visibility = View.VISIBLE
+                    setOnClickListener {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.data = Uri.parse(SPOTIFY_URI + viewModel.sourceId)
+                        startActivity(intent)
+                    }
+                }
             }
         }
 

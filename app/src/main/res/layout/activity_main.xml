@@ -15,8 +15,8 @@
         <ImageView
             android:id="@+id/logo_platform"
             android:layout_width="98dp"
-            android:layout_height="30dp"
-            android:src="@drawable/logo_youtube"
+            android:layout_height="29dp"
+            android:src="@drawable/spotify_logo_rgb_black"
             app:tint="@color/text_color_to_theme"
             android:paddingEnd="7dp"
             android:scaleType="fitEnd"
@@ -28,6 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:textColor="@color/text_color_to_theme"
             tools:text="@string/spotify_note"/>
 
         <ImageView

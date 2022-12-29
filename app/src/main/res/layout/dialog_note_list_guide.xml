@@ -481,7 +481,7 @@
         android:textAlignment="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="146dp"
+        android:layout_marginBottom="140dp"
         android:layout_marginHorizontal="40dp"
         app:layout_constraintBottom_toBottomOf="parent"
         style="@style/guide_text_style"
