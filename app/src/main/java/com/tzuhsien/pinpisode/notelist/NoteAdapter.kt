@@ -4,11 +4,13 @@ import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.DrawableRes
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.tzuhsien.pinpisode.R
 import com.tzuhsien.pinpisode.data.model.Note
+import com.tzuhsien.pinpisode.data.model.Source
 import com.tzuhsien.pinpisode.databinding.ItemNoteBinding
 import com.tzuhsien.pinpisode.ext.glide
 
@@ -20,6 +22,8 @@ class NoteAdapter (
         fun bind(note: Note) {
             val context = binding.root.context
             binding.imgThumbnail.glide(note.thumbnail)
+            @DrawableRes val platformIcon = if (note.source == Source.SPOTIFY.source) R.drawable.ic_spotify else R.drawable.ic_youtube
+            binding.icPlatform.setImageResource(platformIcon)
             binding.textSourceTitle.text = note.title
             binding.textDigest.text = note.digest
             val timeAgo = DateUtils.getRelativeTimeSpanString(note.lastEditTime)
@@ -34,7 +38,6 @@ class NoteAdapter (
                     R.string.number_of_coauthors, (note.authors.size.minus(1))
                 )
             }
-
         }
     }
 

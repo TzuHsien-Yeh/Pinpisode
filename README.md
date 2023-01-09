@@ -1,7 +1,6 @@
 # Pinpisode—YouTube & Spotify Note
 <!-- Badges -->
-
-![](https://img.shields.io/badge/version-1.0.10-ff7171?style=flat)   ![](https://img.shields.io/badge/Kotlin-1.7.2-EDDBC0?style=flat)   ![](https://img.shields.io/badge/platform-Android-green?style=flat)
+![](https://img.shields.io/badge/version-1.1.0-ff7171?style=flat)   ![](https://img.shields.io/badge/Kotlin-1.7.2-EDDBC0?style=flat)   ![](https://img.shields.io/badge/platform-Android-green?style=flat)
 
 For those who want to review, make notes on, or share certain parts of a video/podcast, Pinpisode realizes timestamps taking and clipping on YouTube/Spotify media, featuring co-authorship with other users.
 
@@ -84,6 +83,7 @@ For those who want to review, make notes on, or share certain parts of a video/p
 
 ##### Spotify Note
 - Take timestamps and clip in Notification (available on lock screen)
+- Link back to Spotify
 
 <img src="doc/spotify note_light.png" alt="screenshot" width="200"/> <img src="doc/lock_screen_light.png" alt="screenshot" width="200"/>
 
@@ -211,6 +211,9 @@ Foreground Service
 - Android SDK 32
 
 #### Environment Variables
-To run this project, you will need to add the encrypted YouTube API key as `encodedYtApiKey` to your `local.properties` file
+To run this project, you will need to add the following code to your `local.properties` file:
 
-
+```
+encodedYtApiKey=YOUR_ENCRYPTED_YOUTUBE_API_KEY
+spotifyClientId=YOUR_ENCRYPTED_SPOTIFY_CLIENT_ID
+```

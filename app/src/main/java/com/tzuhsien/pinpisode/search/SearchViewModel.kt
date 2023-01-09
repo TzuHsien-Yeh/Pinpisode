@@ -164,6 +164,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                         Timber.d("getUserSavedShows is Result.Fail [msg]: ${result.error}")
                     }
                     is Result.SpotifyAuthError -> {
+                        _status.value = LoadApiStatus.DONE
                         _showSpotifyAuthView.value = true
                     }
                     is Result.Error -> {
@@ -210,6 +211,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                         Timber.d("getUserSavedShows is Result.Fail [msg]: ${episodeResult.error}")
                     }
                     is Result.SpotifyAuthError -> {
+                        _status.value = LoadApiStatus.DONE
                         _showSpotifyAuthView.value = true
                     }
                     is Result.Error -> {
@@ -294,6 +296,7 @@ class SearchViewModel(private val repository: Repository) : ViewModel() {
                         null
                     }
                     is Result.SpotifyAuthError -> {
+                        _status.value = LoadApiStatus.DONE
                         _isAuthRequired.value = result.expired
                         null
                     }

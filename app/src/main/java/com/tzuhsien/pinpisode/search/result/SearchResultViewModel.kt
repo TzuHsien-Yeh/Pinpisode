@@ -175,6 +175,7 @@ class SearchResultViewModel(private val repository: Repository) : ViewModel() {
                         _status.value = LoadApiStatus.ERROR
                     }
                     is Result.SpotifyAuthError -> {
+                        _status.value = LoadApiStatus.DONE
                         _needSpotifyAuth.value = result.expired
                     }
                     is Result.Error -> {

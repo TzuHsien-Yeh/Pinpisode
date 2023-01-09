@@ -31,17 +31,25 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:shapeAppearanceOverlay="@style/small_rounded_corner"/>
 
+            <ImageView
+                android:id="@+id/ic_platform"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:src="@drawable/ic_spotify" />
+
             <TextView
                 android:id="@+id/text_source_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:layout_marginEnd="4dp"
+                android:layout_marginEnd="1dp"
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:lineSpacingMultiplier="0.91"
                 style="@style/source_title_style"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/ic_platform"
                 app:layout_constraintStart_toEndOf="@id/img_thumbnail"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="xxxxxxxxdsvigdvasssshgdggggggggggggggggggggg" />

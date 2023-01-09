@@ -12,12 +12,15 @@ import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.PlayerContext
 import com.spotify.protocol.types.PlayerState
 import com.spotify.protocol.types.Repeat
+import com.tzuhsien.pinpisode.BuildConfig
 import timber.log.Timber
+import java.util.*
 
 private const val STEP_MS = 15000L
 
 object SpotifyService {
-    private const val CLIENT_ID = "f6095c97a1ab4a7fb88b5ac5f2ba606d"
+    private val decodedBytes: ByteArray = Base64.getDecoder().decode(BuildConfig.spotifyClientId)
+    private val CLIENT_ID = String(decodedBytes)
     private const val  REDIRECT_URI = "pinpisode://callback"
 
     private var spotifyAppRemote: SpotifyAppRemote? = null
