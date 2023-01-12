@@ -193,7 +193,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        navController.navigateUp()
+        if (navController.currentDestination?.id != R.id.spotifyNoteFragment) {
+            navController.navigateUp()
+        } else {
+            navController.navigate(NavGraphDirections.actionGlobalNoteListFragment())
+        }
     }
 
     /**
