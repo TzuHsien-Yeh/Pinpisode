@@ -394,7 +394,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintVertical_bias="0.4"
-        app:tint="@color/audio_player_color_to_theme"
+        app:tint="@color/color_to_theme_light_beige"
         android:src="@drawable/bird"/>
 
     <TextView

@@ -159,7 +159,7 @@
         app:layout_constraintTop_toBottomOf="@id/btn_open_spotify"
         app:layout_constraintVertical_bias="0.2"
         app:srcCompat="@drawable/btn_play"
-        app:tint="@color/audio_player_color_to_theme" />
+        app:tint="@color/text_color_to_theme" />
 
 
     <ImageView
@@ -174,7 +174,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintVertical_bias="0.2"
         app:srcCompat="@drawable/btn_seek_forward"
-        app:tint="@color/audio_player_color_to_theme" />
+        app:tint="@color/text_color_to_theme" />
 
     <!-- Seek controls -->
     <androidx.appcompat.widget.AppCompatSeekBar
@@ -282,12 +282,12 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:background="@color/note_bottom_options_bg"
-        android:paddingVertical="4dp"
+        android:padding="4dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageView
             android:id="@+id/ic_share"
-            android:layout_width="@dimen/note_bottom_ic_size"
+            android:layout_width="0dp"
             android:layout_height="@dimen/note_bottom_ic_size"
             android:src="@drawable/icon_share"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -298,7 +298,7 @@
 
         <ImageView
             android:id="@+id/ic_coauthoring"
-            android:layout_width="@dimen/note_bottom_ic_size"
+            android:layout_width="0dp"
             android:layout_height="@dimen/note_bottom_ic_size"
             android:src="@drawable/ic_add_user"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -309,7 +309,7 @@
 
         <ImageView
             android:id="@+id/ic_add_tag"
-            android:layout_width="@dimen/note_bottom_ic_size"
+            android:layout_width="0dp"
             android:layout_height="@dimen/note_bottom_ic_size"
             android:src="@drawable/ic_tag"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -320,7 +320,7 @@
 
         <ImageView
             android:id="@+id/ic_time_item_display_options"
-            android:layout_width="@dimen/note_bottom_ic_size"
+            android:layout_width="0dp"
             android:layout_height="@dimen/note_bottom_ic_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

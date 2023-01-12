@@ -40,7 +40,6 @@ class NotificationFragment : Fragment() {
         binding.recyclerviewInvitation.adapter = adapter
         viewModel.invitationsWithInviterInfo.observe(viewLifecycleOwner) {
             adapter.submitList(it)
-            adapter.notifyDataSetChanged()
         }
 
         /** Loading status **/
