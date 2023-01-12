@@ -75,7 +75,10 @@ class SpotifyNoteFragment : Fragment() {
 
                 viewModel.error.observe(viewLifecycleOwner) {
 
-                    if (null == it) SpotifyService.play(SPOTIFY_URI + viewModel.sourceId)
+                    if (null == it && viewModel.isFirstEntry) {
+                        SpotifyService.play(SPOTIFY_URI + viewModel.sourceId)
+                        viewModel.donePlayTheSource()
+                    }
 
                     Timber.d("SpotifyService.play(${SPOTIFY_URI + viewModel.sourceId})")
                 }

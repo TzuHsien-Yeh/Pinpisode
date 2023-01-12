@@ -24,7 +24,7 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
         android:textAlignment="center"
-        style="@style/yt_bold_16sp"
+        style="@style/yt_bold_20sp"
         app:layout_constraintTop_toBottomOf="@+id/img_profile_pic"
         tools:text="user name" />
 
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:textAlignment="center"
-        style="@style/yt_medium_14sp_text"
+        style="@style/yt_medium_19sp"
         app:layout_constraintTop_toBottomOf="@+id/text_user_name" />
 
     <TextView
@@ -42,7 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        style="@style/yt_medium_14sp_text"
+        style="@style/yt_medium_19sp"
         android:text="@string/log_out"
         app:layout_constraintTop_toBottomOf="@+id/text_user_email"
         app:layout_constraintStart_toStartOf="parent"

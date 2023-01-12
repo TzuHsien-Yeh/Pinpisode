@@ -34,7 +34,7 @@
     <color name="cover_color_to_theme">#66000000</color>
     <color name="bg_floating_action_btn_to_theme">#FF7171</color>
     <color name="ic_floating_action_btn_to_theme">#fff8e6</color>
-    <color name="audio_player_color_to_theme">#FF000000</color>
+    <color name="color_to_theme_light_beige">#FF000000</color>
     <color name="background_color_black_white">#FFFFFFFF</color>
     <color name="back_icon_color_to_theme">#3b3b3b</color>
 </resources>

@@ -1,6 +1,6 @@
 # Pinpisode—YouTube & Spotify Note
 <!-- Badges -->
-![](https://img.shields.io/badge/version-1.1.0-ff7171?style=flat)   ![](https://img.shields.io/badge/Kotlin-1.7.2-EDDBC0?style=flat)   ![](https://img.shields.io/badge/platform-Android-green?style=flat)
+![](https://img.shields.io/badge/version-1.1.1-ff7171?style=flat)   ![](https://img.shields.io/badge/Kotlin-1.7.2-EDDBC0?style=flat)   ![](https://img.shields.io/badge/platform-Android-green?style=flat)
 
 For those who want to review, make notes on, or share certain parts of a video/podcast, Pinpisode realizes timestamps taking and clipping on YouTube/Spotify media, featuring co-authorship with other users.
 

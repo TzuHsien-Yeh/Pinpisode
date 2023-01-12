@@ -25,6 +25,7 @@ class SpotifyNoteViewModel(
     var noteId: String?,
     var sourceId: String,
 ) : ViewModel() {
+
     var hasUploaded: Boolean = false
 
     var newSpotifyNote: Note = Note()
@@ -34,6 +35,8 @@ class SpotifyNoteViewModel(
     private val _isSpotifyConnected = MutableLiveData<Boolean>(false)
     val isSpotifyConnected: LiveData<Boolean>
         get() = _isSpotifyConnected
+
+    var isFirstEntry = true
 
     // initial value is the note info gotten once from firebase
     var noteToBeUpdated: Note? = null
@@ -161,6 +164,10 @@ class SpotifyNoteViewModel(
                 }
             }
         }
+    }
+
+    fun donePlayTheSource() {
+        isFirstEntry = false
     }
 
     private fun getNoteInfoById() {
